@@ -41,6 +41,7 @@ class ParserTests(unittest.TestCase):
     def test_command_registration(self):
         class Placeholder:pass
         bot=MechBot(Placeholder(),Placeholder());install_commands(bot)
+        self.assertFalse(bot.intents.message_content)
         commands={x.name for x in bot.tree.get_commands()}
         self.assertTrue({'worker_setup','worker_time','emergency_channel','emergency_dm','emergency_stop','emergency_stop_user'}<=commands)
         for name in ('emergency_channel','emergency_dm'):

@@ -55,7 +55,9 @@ def calculate(expr):
 
 class MechBot(commands.Bot):
     def __init__(self, catalog, store):
-        intents=discord.Intents.default();intents.message_content=True
+        # The bot only reads DMs and messages that explicitly mention it. Discord supplies
+        # content for those cases without the privileged Message Content intent.
+        intents=discord.Intents.default()
         super().__init__(command_prefix=commands.when_mentioned, intents=intents, allowed_mentions=discord.AllowedMentions.none())
         self.catalog=catalog;self.store=store;self.workers=WorkerStore(store);self.payouts=PayoutTracker(store);self.emergency=EmergencyManager();self.runner=None;self.worker_runner=None;self.payout_runner=None;self.command_sync_task=None;self.worker_setup_lock=asyncio.Lock()
 
@@ -429,7 +431,7 @@ def install_commands(bot):
                 if not role.mentionable and not cp.mention_everyone:
                     await i.followup.send(f'Role assigned to {len(added)} members; {len(already)} already had it. Failed: {", ".join(errors) or "none"}. I could not ping the existing role because it is not mentionable. A server manager can make it mentionable, then run setup again.',ephemeral=True);return
                 prompt=(f'{role.mention} Please choose a daily time to work on your assigned mech database task. '
-                        'Reply to this message with a time and IANA timezone, for example `8pm Asia/Kolkata`, or use `/worker_time`. '
+                        f'Reply to this message and mention <@{bot.user.id}> with a time and IANA timezone, for example `8pm Asia/Kolkata`, or use `/worker_time`. '
                         'I’ll remind you daily by DM and in this channel. You can say `@bot remind me again after 10 min` '
                         'or `@bot change my reminder time to 9pm`; the extra reminder does not change the daily schedule. '
                         f'Task reference: {REFERENCE_URL}')
