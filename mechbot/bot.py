@@ -57,24 +57,51 @@ class MechBot(commands.Bot):
     def __init__(self, catalog, store):
         intents=discord.Intents.default();intents.message_content=True
         super().__init__(command_prefix=commands.when_mentioned, intents=intents, allowed_mentions=discord.AllowedMentions.none())
-        self.catalog=catalog;self.store=store;self.workers=WorkerStore(store);self.payouts=PayoutTracker(store);self.emergency=EmergencyManager();self.runner=None;self.worker_runner=None;self.payout_runner=None;self.worker_setup_lock=asyncio.Lock()
+        self.catalog=catalog;self.store=store;self.workers=WorkerStore(store);self.payouts=PayoutTracker(store);self.emergency=EmergencyManager();self.runner=None;self.worker_runner=None;self.payout_runner=None;self.command_sync_task=None;self.worker_setup_lock=asyncio.Lock()
 
     async def setup_hook(self):
         guild=os.getenv('TEST_GUILD_ID','').strip()
         if guild:
-            target=discord.Object(id=int(guild));self.tree.copy_global_to(guild=target);await self.tree.sync(guild=target)
-            log.info('Synced slash commands to configured test guild.')
-        else:
-            await self.tree.sync();log.info('Synced global slash commands; propagation can take time.')
+            try:
+                target=discord.Object(id=int(guild))
+            except ValueError:
+                log.error('TEST_GUILD_ID is not a valid Discord snowflake; slash commands will sync globally.')
+                guild=''
+            else:
+                self.tree.copy_global_to(guild=target)
+        self.command_sync_task=asyncio.create_task(self.command_sync_loop(guild))
         self.runner=asyncio.create_task(self.delivery_loop())
         self.worker_runner=asyncio.create_task(self.worker_delivery_loop())
         self.payout_runner=asyncio.create_task(self.payout_loop())
 
+    async def command_sync_loop(self,guild_id):
+        await self.wait_until_ready()
+        target=discord.Object(id=int(guild_id)) if guild_id else None
+        missing_logged=False
+        while not self.is_closed():
+            try:
+                if target:
+                    if self.get_guild(target.id) is None:
+                        if not missing_logged:
+                            log.warning('Configured server %s is not accessible yet; invite this bot with bot and applications.commands scopes. Slash-command registration will retry.',target.id)
+                            missing_logged=True
+                        await asyncio.sleep(30)
+                        continue
+                    await self.tree.sync(guild=target)
+                    log.info('Synced slash commands to configured test guild.')
+                else:
+                    await self.tree.sync()
+                    log.info('Synced global slash commands; propagation can take time.')
+                return
+            except discord.HTTPException as e:
+                log.warning('Slash-command sync failed (%s); retrying in 60 seconds.',type(e).__name__)
+                await asyncio.sleep(60)
+
     async def close(self):
         await self.emergency.close()
-        for task in (self.runner,self.worker_runner,self.payout_runner):
+        for task in (self.command_sync_task,self.runner,self.worker_runner,self.payout_runner):
             if task:task.cancel()
-        for task in (self.runner,self.worker_runner,self.payout_runner):
+        for task in (self.command_sync_task,self.runner,self.worker_runner,self.payout_runner):
             if task:
                 try:await task
                 except asyncio.CancelledError:pass
