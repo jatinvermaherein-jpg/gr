@@ -9,6 +9,7 @@ from mechbot.workers import WORKERS, WorkerStore, assignment_text, parse_worker_
 from mechbot.payouts import PayoutTracker, parse_snapshot
 from mechbot.emergency import EmergencyManager, validate
 from mechbot.bot import MechBot, install_commands
+from mechbot.assistant import wants_invite_link
 from mechbot.timeparse import next_daily
 
 UID='1515232384159715364'
@@ -38,12 +39,17 @@ class ParserTests(unittest.TestCase):
         with self.assertRaises(ValueError):validate(4,100)
         with self.assertRaises(ValueError):validate(5,1505)  # 301 repeats
         with self.assertRaises(ValueError):validate(60,1801)
+    def test_invite_request_detection(self):
+        self.assertTrue(wants_invite_link('Can you send me the invite link?'))
+        self.assertTrue(wants_invite_link('I need to add the bot to my server'))
+        self.assertFalse(wants_invite_link('Add a reminder for 8pm'))
+
     def test_command_registration(self):
         class Placeholder:pass
         bot=MechBot(Placeholder(),Placeholder());install_commands(bot)
         self.assertFalse(bot.intents.message_content)
         commands={x.name for x in bot.tree.get_commands()}
-        self.assertTrue({'worker_setup','worker_time','emergency_channel','emergency_dm','emergency_stop','emergency_stop_user'}<=commands)
+        self.assertTrue({'invite','worker_setup','worker_time','emergency_channel','emergency_dm','emergency_stop','emergency_stop_user'}<=commands)
         for name in ('emergency_channel','emergency_dm'):
             params={x.name:x for x in bot.tree.get_command(name).parameters}
             self.assertEqual(params['interval_seconds'].min_value,5)

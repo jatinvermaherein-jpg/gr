@@ -14,13 +14,17 @@ from dotenv import load_dotenv
 from .catalog import Catalog, initialize_snapshot
 from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, tzinfo
-from .assistant import GAME_WORDS, find_mentions, weapon_response, mech_response, fetch_builds, builds_response, general_ai, safe_text
+from .assistant import GAME_WORDS, find_mentions, wants_invite_link, weapon_response, mech_response, fetch_builds, builds_response, general_ai, safe_text
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
 from .emergency import EmergencyManager, OPERATORS, validate as validate_emergency
 
 log=logging.getLogger('mechbot')
+# Fine-grained permissions: View Channels, Send Messages, Embed Links, Read History,
+# Manage Roles, Use Slash Commands, and Send Messages in Threads. No Administrator.
+INVITE_URL='https://discord.com/oauth2/authorize?client_id=1570061533898211408&permissions=277293911040&integration_type=0&scope=bot%20applications.commands'
 HELP='''**Mech Arena bot**
+• `/invite` — get the link to add me to a server.
 • `/weapon name rank level` — catalog identity and reviewed stats only.
 • `/mech name` — mech identity from the staged catalog.
 • `/builds` — builds from the public website, if available.
@@ -32,7 +36,7 @@ HELP='''**Mech Arena bot**
 • `/worker_setup` — server manager assigns the worker role and sends the initial prompt.
 • `/emergency_channel`, `/emergency_dm`, `/emergency_stop` and `/emergency_stop_user` — bounded emergency alerts.
 • `/calc` — simple arithmetic.
-You can also mention me: `@bot remind me in 10 minutes to check the event`, `@bot what is Dreadshot 10?`, or ask a general question if an AI provider is configured.
+You can also mention me: `@bot remind me in 10 minutes to check the event`, `@bot what is Dreadshot 10?`, or `@bot how do I invite you?`. General questions use AI only if an API key is configured.
 Screenshot stats are unverified and are never presented as verified facts.'''
 
 
@@ -251,6 +255,8 @@ class MechBot(commands.Bot):
         text=re.sub(r'<@!?'+str(self.user.id)+r'>','',message.content).strip()
         if not text:return
         try:
+            if wants_invite_link(text):
+                await message.reply(f'Invite **ARCHΛNGLE** to a server where you can add bots: {INVITE_URL}',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
             if re.fullmatch(r'(?:stop|cancel)\s+(?:my\s+)?emergency(?:\s+alerts?)?',text,re.I):
                 count=self.emergency.stop(message.author.id,message.author.id)
                 await self.private_reply(message,f'Stop requested for {count} emergency alert(s). An in-flight message may still arrive.');return
@@ -334,6 +340,10 @@ def install_commands(bot):
     tree=bot.tree
     @tree.command(name='help',description='Show bot features and examples')
     async def help_cmd(i:discord.Interaction):await i.response.send_message(HELP,ephemeral=True)
+
+    @tree.command(name='invite',description='Get the link to add this bot to a server')
+    async def invite(i:discord.Interaction):
+        await i.response.send_message(f'Invite **ARCHΛNGLE** to a server where you can add bots: {INVITE_URL}',ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
 
     @tree.command(name='emergency_channel',description='Start bounded emergency pings in this channel')
     @app_commands.describe(member='Member to alert',interval_seconds='At least 5 seconds',duration_seconds='Maximum 1800 seconds',reason='Short emergency message')

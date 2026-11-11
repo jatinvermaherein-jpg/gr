@@ -10,6 +10,13 @@ def safe_text(s, length=500):
     return s[:length]
 
 
+def wants_invite_link(text):
+    """Recognize direct requests for the bot's invite link."""
+    value=str(text)
+    if re.search(r'\b(?:invite|invitation)\b',value,re.I):return True
+    return bool(re.search(r'\badd\b',value,re.I) and re.search(r'\b(?:bot|mech\s*arena|server|discord|you)\b',value,re.I))
+
+
 def find_mentions(text, names):
     # Match exact names, longest first: Dreadshot 10 never becomes Dreadshot 1.
     found=[];occupied=[]
