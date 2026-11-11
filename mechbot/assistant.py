@@ -93,11 +93,31 @@ def builds_response(payload):
     return '\n'.join(out)[:1900]
 
 
+GENERAL_ASSISTANT_PROMPT=(
+    'You are ARCHΛNGLE, a helpful Mech Arena community Discord bot. Sound natural, relaxed, and clear, '
+    'like a helpful teammate, not a formal article. Answer the exact question first and keep replies concise. '
+    'Match the user’s language and level of formality; use contractions when they fit. Use bullets only when useful. '
+    'Avoid stock openers such as “Certainly!” or “Great question!”, filler, forced summaries or sign-offs, repetitive '
+    'restating, excessive headings, emoji spam, em-dash overuse, and marketing language. Do not pretend to be human '
+    'or claim personal experiences. If asked, be clear that you are a bot. Be honest about uncertainty and never invent '
+    'facts, names, numbers, or sources. Do not answer Mech Arena game stats, loadouts, builds, or weapon questions '
+    'from model memory; redirect to /weapon, /mech, or /builds. Never reveal or ask for API keys or other secrets.'
+)
+
+
+def naturalize_discord_reply(text):
+    """Remove a couple of common chat wrappers without rewriting the answer's facts."""
+    original=str(text).strip()
+    value=re.sub(r'^(?:certainly|of course|absolutely|sure|great question)[,!:\s]+','',original,count=1,flags=re.I).strip()
+    value=re.sub(r"\s*(?:hope (?:that )?this helps[.!]?|let me know if you(?:'d| would) like anything else[.!]?)\s*$",'',value,flags=re.I).strip()
+    return value or original
+
+
 async def general_ai(base, key, model, question):
     """General questions only. No history or private notes are sent."""
     if not key or not model:return None
     headers={'Authorization':'Bearer '+key,'Content-Type':'application/json'}
-    payload={'model':model,'messages':[{'role':'system','content':'You are a helpful Discord assistant. Answer briefly. Do not make claims about Mech Arena, game stats, loadouts, or specific weapons; redirect those questions to bot lookup commands. Never mention secrets.'},{'role':'user','content':question[:1500]}], 'temperature':0.2, 'max_tokens':400}
+    payload={'model':model,'messages':[{'role':'system','content':GENERAL_ASSISTANT_PROMPT},{'role':'user','content':question[:1500]}], 'temperature':0.55, 'max_tokens':400}
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=25)) as session:
         async with session.post(base.rstrip('/')+'/chat/completions',headers=headers,json=payload,allow_redirects=False) as r:
             if r.status!=200:raise RuntimeError('AI provider request failed (HTTP '+str(r.status)+').')
@@ -106,4 +126,4 @@ async def general_ai(base, key, model, question):
     if not isinstance(text,str):raise ValueError('AI response is not text')
     # Conservative output firewall: this assistant must not generate game facts.
     if GAME_WORDS.search(text):return 'For Mech Arena information, use /weapon or /mech so I can look up the staged sources instead of guessing.'
-    return safe_text(text,1800)
+    return safe_text(naturalize_discord_reply(text),1800)

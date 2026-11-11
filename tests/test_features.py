@@ -9,7 +9,7 @@ from mechbot.workers import WORKERS, WorkerStore, assignment_text, parse_worker_
 from mechbot.payouts import PayoutTracker, parse_snapshot
 from mechbot.emergency import EmergencyManager, validate
 from mechbot.bot import MechBot, install_commands
-from mechbot.assistant import wants_invite_link
+from mechbot.assistant import wants_invite_link, naturalize_discord_reply
 from mechbot.timeparse import next_daily
 
 UID='1515232384159715364'
@@ -39,6 +39,10 @@ class ParserTests(unittest.TestCase):
         with self.assertRaises(ValueError):validate(4,100)
         with self.assertRaises(ValueError):validate(5,1505)  # 301 repeats
         with self.assertRaises(ValueError):validate(60,1801)
+    def test_natural_discord_style_cleanup(self):
+        self.assertEqual(naturalize_discord_reply('Certainly! Here is the answer. Hope this helps.'),'Here is the answer.')
+        self.assertEqual(naturalize_discord_reply('The answer is 42.'),'The answer is 42.')
+
     def test_invite_request_detection(self):
         self.assertTrue(wants_invite_link('Can you send me the invite link?'))
         self.assertTrue(wants_invite_link('I need to add the bot to my server'))
