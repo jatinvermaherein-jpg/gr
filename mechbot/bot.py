@@ -26,8 +26,8 @@ INVITE_URL='https://discord.com/oauth2/authorize?client_id=1570061533898211408&p
 HELP='''**Mech Arena helper**
 Use `/help` anytime to see this command list.
 • `/invite` — get the link to add me to a server.
-• `/weapon name rank level` — weapon variants and confirmed stats.
-• `/mech name` — look up a mech and available details.
+• `/weapon name rank level` — a concise weapon review, key stats, perk and listed purchase price.
+• `/mech name` — a short mech review with key details and listed purchase price.
 • `/builds` — check builds listed by the public site.
 • `/recent` — read recent posts in a channel you can access.
 • `/timezone` — set your IANA timezone; default is UTC.
@@ -37,7 +37,7 @@ Use `/help` anytime to see this command list.
 • `/worker_setup` — set up the worker role and send the initial time request.
 • `/emergency_channel`, `/emergency_dm`, `/emergency_stop`, `/emergency_stop_user` — manage bounded emergency alerts.
 • `/calc` — calculate simple arithmetic.
-You can also mention me: `@bot remind me in 20 seconds to check the event`, `@bot what is Dreadshot 10?`, or `@bot how do I invite you?`. When AI is configured, it helps interpret questions and uses reviewed game facts when available. Missing game data is never guessed.'''
+You can also mention me: `@bot remind me in 20 seconds to check the event`, `@bot review EM Rifle 10`, `@bot how much to upgrade Redox from rank 4 to 5?`, or `@bot how do I invite you?`. Reviews and upgrade costs use confirmed game data; missing details are never guessed.'''
 
 
 def calculate(expr):
@@ -337,7 +337,7 @@ class MechBot(commands.Bot):
                 await message.reply(out[:1900],mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
             names=find_mentions(text,self.catalog.mech_names)
             if names:
-                out='\n\n'.join(mech_response(self.catalog.mech(n)) for n in names[:3])
+                out='\n\n'.join(mech_response(self.catalog.mech_profile(n)) for n in names[:3])
                 await message.reply(out[:1900],mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
             if GAME_WORDS.search(text):
                 await message.reply('I don’t have reviewed information for that game question yet, so I won’t guess. Try `/weapon`, `/mech`, or `/builds` for supported lookups.',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
@@ -499,7 +499,7 @@ def install_commands(bot):
         ok=await bot.workers.pause(i.user.id)
         await i.response.send_message('Daily task reminder paused. Existing one-off snoozes are not cancelled. Use /worker_time to resume.' if ok else 'No active daily task reminder found.',ephemeral=True)
 
-    @tree.command(name='weapon',description='Look up a weapon variant and reviewed stats')
+    @tree.command(name='weapon',description='Get a concise weapon review and key stats')
     @app_commands.describe(name='Exact name and energy variant, e.g. Dreadshot 10',rank='Rank 1–6',level='Level, if known')
     async def weapon(i:discord.Interaction,name:str,rank:app_commands.Range[int,1,6]=None,level:app_commands.Range[int,1,7]=None):
         await i.response.send_message(weapon_response(bot.catalog.weapon(name,rank,level),rank,level),ephemeral=True)
@@ -509,9 +509,9 @@ def install_commands(bot):
         choices=[n for n in bot.catalog.weapon_names if current.casefold() in n.casefold()][:25]
         return [app_commands.Choice(name=n,value=n) for n in choices]
 
-    @tree.command(name='mech',description='Look up a mech and available details')
+    @tree.command(name='mech',description='Get a short mech review and key details')
     async def mech(i:discord.Interaction,name:str):
-        await i.response.send_message(mech_response(bot.catalog.mech(name)),ephemeral=True)
+        await i.response.send_message(mech_response(bot.catalog.mech_profile(name)),ephemeral=True)
 
     @mech.autocomplete('name')
     async def mech_autocomplete(i:discord.Interaction,current:str):

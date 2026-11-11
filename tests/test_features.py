@@ -1,4 +1,7 @@
 import asyncio
+import gzip
+import os
+import shutil
 import sqlite3
 import tempfile
 import unittest
@@ -13,7 +16,8 @@ from mechbot.emergency import EmergencyManager, validate
 from mechbot.bot import MechBot, install_commands
 from mechbot.assistant import (wants_invite_link, naturalize_discord_reply, weapon_response, mech_response,
                                game_knowledge_context, answer_question_with_brain)
-from mechbot.catalog import _candidate_fingerprint, apply_user_confirmed_ocr_review
+from mechbot.catalog import (ARCHIVE, Catalog, _candidate_fingerprint, apply_user_confirmed_ocr_review,
+                             apply_user_confirmed_public_review, initialize_snapshot)
 from mechbot.timeparse import next_daily, parse_spec, parse_natural_reminder
 
 UID='1515232384159715364'
@@ -66,6 +70,25 @@ class ParserTests(unittest.TestCase):
         self.assertIn('**Redox**',mech)
         self.assertNotIn('calculator',mech.lower())
         self.assertNotIn('database',mech.lower())
+
+    def test_weapon_lookup_is_a_short_review_not_a_full_rank_dump(self):
+        response=weapon_response({
+            'matches':[{'name':'EM Rifle 10','variant_number':10,'database_category':'sniper'}],
+            'review':{'rarity':'Legendary','tier':'C','perk':'Power Shot',
+                'perkDesc':'This weapon is capable of Double Damage shots.',
+                'reasoning':'A high-skill sniper. Precise single shots can hit hard.',
+                'weaknesses':'A single-shot magazine punishes misses.'},
+            'verified_stats':[
+                {'stat_name':'Damage Per Shot','value':'6774','rank':1,'level':None},
+                {'stat_name':'Double Damage Chance','value':'5 %','rank':1,'level':None},
+                {'stat_name':'Fire Rate','value':'10 rpm','rank':1,'level':None},
+                {'stat_name':'Damage Per Shot','value':'14422','rank':2,'level':None}],
+            'listing':{'cost':{'amount':7125,'currency':'A-Coins'}}})
+        self.assertIn('**Quick review:**',response)
+        self.assertIn('6,774 damage/shot',response)
+        self.assertIn('7,125 A-Coins',response)
+        self.assertNotIn('rank 2',response.lower())
+        self.assertLess(response.count('\n'),8)
 
     def test_redox_upgrade_context_has_no_cost_evidence(self):
         class Catalog:
@@ -149,6 +172,21 @@ class AIQuestionTests(unittest.IsolatedAsyncioTestCase):
                 'How much does Redox cost to upgrade from rank 4 to 5?',Catalog())
         ai.assert_not_awaited()
         self.assertIn('I don’t have a confirmed upgrade price',answer)
+
+    async def test_confirmed_archive_cost_overrides_ai_guess(self):
+        with tempfile.TemporaryDirectory() as td:
+            snapshot=Path(td)/'runtime.sqlite3'
+            with patch.dict(os.environ,{'SNAPSHOT_PATH':str(snapshot)}):
+                runtime=initialize_snapshot()
+            catalog=Catalog(runtime)
+            question='How much to upgrade Redox from rank 4 to 5?'
+            with patch('mechbot.assistant.general_ai',new=AsyncMock(return_value='It costs 999 Credits.')) as ai:
+                answer=await answer_question_with_brain('https://gateway.invalid/v1','test-key','test-model',question,catalog)
+            ai.assert_awaited_once()
+            self.assertIn('2,825 A-Coins',answer)
+            self.assertIn('rank 4 L7',answer)
+            self.assertNotIn('999',answer)
+            catalog.close()
 
 
 class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
@@ -236,6 +274,48 @@ class CatalogReviewTests(unittest.TestCase):
             result=catalog.weapon('Railgun 8')
             self.assertEqual([x['value'] for x in result['verified_stats']],['100'])
             catalog.close()
+
+
+class PublicArchiveTests(unittest.TestCase):
+    def test_confirmed_archive_drives_weapon_review_costs_and_forum_retrieval(self):
+        with tempfile.TemporaryDirectory() as td:
+            snapshot=Path(td)/'runtime.sqlite3'
+            with patch.dict(os.environ,{'SNAPSHOT_PATH':str(snapshot)}):
+                runtime=initialize_snapshot()
+            db=sqlite3.connect(runtime)
+            counts=db.execute("SELECT source,review_status,trust,count(*) FROM archive_documents GROUP BY source,review_status,trust ORDER BY source").fetchall()
+            self.assertEqual(counts,[('mech_arena_database','verified','user_confirmed',52),
+                ('plarium_forum','verified','user_confirmed',59),
+                ('upgrade_calculator','verified','user_confirmed',36)])
+            self.assertEqual(db.execute("SELECT count(*) FROM archive_structured_rows").fetchone()[0],1338)
+            db.close()
+            catalog=Catalog(runtime)
+            weapon=catalog.weapon('EM Rifle 10')
+            self.assertEqual(weapon['review']['tier'],'C')
+            self.assertEqual(weapon['listing']['cost'],{'amount':7125,'currency':'A-Coins'})
+            response=weapon_response(weapon)
+            self.assertIn('**Quick review:**',response)
+            self.assertIn('6,774 damage/shot',response)
+            self.assertNotIn('rank 2',response.lower())
+            cost=catalog.upgrade_cost('Redox',4,5)
+            self.assertEqual(cost['cost']['acoins'],2825)
+            self.assertEqual((cost['from_level'],cost['to_level']),(7,1))
+            self.assertEqual(catalog.weapon('Dreadshot 8')['listing']['list'],'Dreadshot 8')
+            self.assertIsNone(catalog.weapon('Dreadshot 10')['listing'])
+            self.assertIsNone(catalog.upgrade_cost('Dreadshot 10',4,5))
+            hits=catalog.search_confirmed_archive('what happened to Voidghost?',['Voidghost'],limit=4)
+            self.assertTrue(any(x.get('title')=='Voidghost Update: Next Steps' for x in hits))
+            catalog.close()
+
+    def test_changed_archive_does_not_get_implicitly_promoted(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/'staging.sqlite3'
+            with gzip.open(ARCHIVE,'rb') as source,open(path,'wb') as target:
+                shutil.copyfileobj(source,target)
+            self.assertEqual(apply_user_confirmed_public_review(path,expected_fingerprint='not-the-reviewed-snapshot'),0)
+            db=sqlite3.connect(path)
+            self.assertEqual(db.execute("SELECT count(*) FROM archive_documents WHERE review_status='pending'").fetchone()[0],147)
+            db.close()
 
 
 class DataTests(unittest.IsolatedAsyncioTestCase):
