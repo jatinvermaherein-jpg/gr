@@ -1,6 +1,8 @@
 import asyncio
+import sqlite3
 import tempfile
 import unittest
+from types import SimpleNamespace
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
@@ -9,8 +11,10 @@ from mechbot.workers import WORKERS, WorkerStore, assignment_text, parse_worker_
 from mechbot.payouts import PayoutTracker, parse_snapshot
 from mechbot.emergency import EmergencyManager, validate
 from mechbot.bot import MechBot, install_commands
-from mechbot.assistant import wants_invite_link, naturalize_discord_reply
-from mechbot.timeparse import next_daily
+from mechbot.assistant import (wants_invite_link, naturalize_discord_reply, weapon_response, mech_response,
+                               game_knowledge_context, answer_question_with_brain)
+from mechbot.catalog import _candidate_fingerprint, apply_user_confirmed_ocr_review
+from mechbot.timeparse import next_daily, parse_spec, parse_natural_reminder
 
 UID='1515232384159715364'
 DAY='2026-11-11'
@@ -28,6 +32,13 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(parse_worker_snooze('remind me again in 10 minutes'),600)
         self.assertIsNone(parse_worker_time('what is 8pm?'))
         with self.assertRaises(ValueError):parse_worker_snooze('remind me again in 0 minutes')
+    def test_natural_language_short_reminders(self):
+        self.assertEqual(parse_natural_reminder('can you remind me in 20 sec to write notes'),('in 20 seconds','write notes'))
+        self.assertEqual(parse_natural_reminder('please remind me in 20s to write notes'),('in 20 seconds','write notes'))
+        self.assertEqual(parse_natural_reminder('could you please remind me in 2 minutes to check email'),('in 2 minutes','check email'))
+        self.assertEqual(parse_spec('20s','UTC',now=1000),(1020,'once',20,None,None))
+        with self.assertRaises(ValueError):parse_spec('every 20 sec','UTC',now=1000)
+
     def test_api(self):
         b={'as_of':DAY,'rules':{'timezone':'Asia/Kolkata'},'pilots':[{'discord_id':UID,'today':{'day':DAY,'builds':11}},{'discord_id':'123','today':{'day':DAY,'builds':10}}]}
         self.assertEqual(parse_snapshot(b),(DAY,{UID:11}))
@@ -43,6 +54,29 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(naturalize_discord_reply('Certainly! Here is the answer. Hope this helps.'),'Here is the answer.')
         self.assertEqual(naturalize_discord_reply('The answer is 42.'),'The answer is 42.')
 
+    def test_lookup_replies_are_professional(self):
+        weapon=weapon_response({'matches':[{'name':'Dreadshot 10','variant_number':10}],
+            'verified_stats':[{'stat_name':'Damage','value':'8,000','rank':4,'level':None}],
+            'candidate_count':91})
+        self.assertIn('**Dreadshot 10**',weapon)
+        self.assertIn('8,000',weapon)
+        for internal in ('identity source','calculator','database','source:','91 screenshot'):
+            self.assertNotIn(internal,weapon.lower())
+        mech=mech_response([{'name':'Redox','sources':'calculator + database'}])
+        self.assertIn('**Redox**',mech)
+        self.assertNotIn('calculator',mech.lower())
+        self.assertNotIn('database',mech.lower())
+
+    def test_redox_upgrade_context_has_no_cost_evidence(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=['Redox']
+        context=game_knowledge_context('How much will it cost to upgrade Redox from rank 4 to 5?',Catalog())
+        self.assertTrue(context['game_related'])
+        self.assertTrue(context['upgrade_cost_question'])
+        self.assertEqual(context['rank_change'],['4','5'])
+        self.assertFalse(context['enough_verified_facts'])
+
     def test_invite_request_detection(self):
         self.assertTrue(wants_invite_link('Can you send me the invite link?'))
         self.assertTrue(wants_invite_link('I need to add the bot to my server'))
@@ -53,7 +87,7 @@ class ParserTests(unittest.TestCase):
         bot=MechBot(Placeholder(),Placeholder());install_commands(bot)
         self.assertFalse(bot.intents.message_content)
         commands={x.name for x in bot.tree.get_commands()}
-        self.assertTrue({'invite','worker_setup','worker_time','emergency_channel','emergency_dm','emergency_stop','emergency_stop_user'}<=commands)
+        self.assertTrue({'help','invite','worker_setup','worker_time','emergency_channel','emergency_dm','emergency_stop','emergency_stop_user'}<=commands)
         for name in ('emergency_channel','emergency_dm'):
             params={x.name:x for x in bot.tree.get_command(name).parameters}
             self.assertEqual(params['interval_seconds'].min_value,5)
@@ -64,6 +98,145 @@ class ParserTests(unittest.TestCase):
         now=datetime(2026,3,8,5,0,tzinfo=timezone.utc).timestamp()
         result=datetime.fromtimestamp(next_daily(2,30,'America/New_York',now),timezone.utc)
         self.assertEqual(result.isoformat(),'2026-03-09T06:30:00+00:00')
+
+class AIQuestionTests(unittest.IsolatedAsyncioTestCase):
+    async def test_ai_is_first_but_unsupported_upgrade_cost_is_blocked(self):
+        from unittest.mock import AsyncMock, patch
+        class Catalog:
+            weapon_names=[]
+            mech_names=['Redox']
+        question='How much will it cost to upgrade Redox from rank 4 to 5?'
+        with patch('mechbot.assistant.general_ai',new=AsyncMock(return_value='It costs 12,000 A-Coins.')) as ai:
+            answer=await answer_question_with_brain('https://gateway.invalid/v1','test-key','test-model',question,Catalog())
+        ai.assert_awaited_once()
+        self.assertIn('Redox from rank 4 to 5',answer)
+        self.assertIn('won’t guess',answer)
+        self.assertNotIn('12,000',answer)
+        self.assertNotIn('calculator',answer.lower())
+        self.assertNotIn('database',answer.lower())
+
+    async def test_ai_can_answer_from_reviewed_facts(self):
+        from unittest.mock import AsyncMock, patch
+        class Catalog:
+            weapon_names=['Pulse Cannon 8']
+            mech_names=[]
+            def weapon(self,name,rank=None,level=None):
+                self.assertion=(name,rank,level)
+                return {'matches':[{'name':'Pulse Cannon 8','variant_number':8}],
+                    'verified_stats':[{'stat_name':'Damage','value':'1,250','rank':4,'level':None}],
+                    'candidate_count':0}
+        catalog=Catalog()
+        question='How much damage does Pulse Cannon 8 do at rank 4?'
+        with patch('mechbot.assistant.general_ai',new=AsyncMock(return_value='It deals 1,250 damage at rank 4.')) as ai:
+            answer=await answer_question_with_brain('https://gateway.invalid/v1','test-key','test-model',question,catalog)
+        ai.assert_awaited_once()
+        self.assertEqual(catalog.assertion,('Pulse Cannon 8',4,None))
+        context=ai.await_args.args[4]
+        self.assertEqual(context['intent'],'game_fact_question')
+        self.assertEqual(context['verified_game_facts'][0]['stats'][0]['value'],'1,250')
+        self.assertIn('1,250',answer)
+        with patch('mechbot.assistant.general_ai',new=AsyncMock(return_value='It deals 4 damage at rank 4.')):
+            unsupported=await answer_question_with_brain('https://gateway.invalid/v1','test-key','test-model',question,catalog)
+        self.assertIsNone(unsupported)
+
+    async def test_missing_ai_key_still_abstains_on_unknown_game_cost(self):
+        from unittest.mock import AsyncMock, patch
+        class Catalog:
+            weapon_names=[]
+            mech_names=['Redox']
+        with patch('mechbot.assistant.general_ai',new=AsyncMock()) as ai:
+            answer=await answer_question_with_brain('https://gateway.invalid/v1','','test-model',
+                'How much does Redox cost to upgrade from rank 4 to 5?',Catalog())
+        ai.assert_not_awaited()
+        self.assertIn('I don’t have a confirmed upgrade price',answer)
+
+
+class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
+    async def test_commands_are_published_globally_if_test_guild_is_missing(self):
+        bot=MechBot(object(),object())
+        with (
+            patch.object(bot.tree,'sync',new=AsyncMock()) as sync,
+            patch.object(bot,'get_guild',return_value=None),
+            patch.object(bot,'wait_until_ready',new=AsyncMock()),
+            patch.object(bot,'is_closed',side_effect=[False,False,True]),
+            patch('mechbot.bot.asyncio.sleep',new=AsyncMock()),
+        ):
+            await bot.command_sync_loop('1509560571563868160')
+        sync.assert_awaited_once_with()
+
+    async def test_polite_20_second_reminder_is_created_before_ai_fallback(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+        bot=MechBot(Catalog(),object())
+        bot_user=SimpleNamespace(id=987654321098765432)
+        bot._connection.user=bot_user
+        bot.create_reminder=AsyncMock(return_value='Reminder #1 set for shortly from now.')
+        bot.private_reply=AsyncMock()
+        author=SimpleNamespace(id=123456789012345678,bot=False,send=AsyncMock())
+        message=SimpleNamespace(author=author,channel=object(),guild=None,mentions=[bot_user],
+            content=f'<@{bot_user.id}> can you remind me in 20 sec to write notes',reference=None,reply=AsyncMock())
+        with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain:
+            await bot.on_message(message)
+        bot.create_reminder.assert_awaited_once_with(author.id,'in 20 seconds','write notes')
+        bot.private_reply.assert_awaited_once_with(message,'Reminder #1 set for shortly from now.')
+        author.send.assert_awaited_once()
+        brain.assert_not_awaited()
+
+    async def test_natural_game_question_hits_ai_before_mech_fallback(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=['Redox']
+            def mech(self,name):raise AssertionError('direct mech fallback ran before the AI brain')
+        bot=MechBot(Catalog(),object())
+        bot_user=SimpleNamespace(id=987654321098765432)
+        bot._connection.user=bot_user
+        author=SimpleNamespace(id=123456789012345678,bot=False,send=AsyncMock())
+        question='How much will it cost to upgrade Redox from rank 4 to 5?'
+        message=SimpleNamespace(author=author,channel=object(),guild=None,mentions=[bot_user],
+            content=f'<@{bot_user.id}> {question}',reference=None,reply=AsyncMock())
+        with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock(return_value='I don’t have a reviewed upgrade price yet.')) as brain:
+            await bot.on_message(message)
+        brain.assert_awaited_once()
+        self.assertEqual(brain.await_args.args[3],question)
+        message.reply.assert_awaited_once()
+        self.assertIn('I don’t have a reviewed upgrade price',message.reply.await_args.args[0])
+
+
+class CatalogReviewTests(unittest.TestCase):
+    def test_user_confirmation_promotes_only_matching_snapshot_and_keeps_identity_gate(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/'game.sqlite3'
+            db=sqlite3.connect(path)
+            db.executescript('''
+                CREATE TABLE metadata(key TEXT PRIMARY KEY,value TEXT NOT NULL);
+                CREATE TABLE weapons(id INTEGER PRIMARY KEY,name TEXT,family TEXT,variant_number INTEGER);
+                CREATE TABLE mechs(id INTEGER PRIMARY KEY,name TEXT);
+                CREATE TABLE screenshots(id INTEGER PRIMARY KEY,source_path TEXT,sha256 TEXT,weapon_id INTEGER,identity_status TEXT);
+                CREATE TABLE weapon_stat_candidates(id INTEGER PRIMARY KEY,screenshot_id INTEGER,stat_name TEXT,raw_label TEXT,source_row_number INTEGER,rank_column INTEGER,rank INTEGER,level INTEGER,star_color TEXT,candidate_value TEXT,status TEXT,reviewed_by TEXT,reviewed_at TEXT,review_note TEXT);
+                CREATE TABLE review_events(id INTEGER PRIMARY KEY,candidate_id INTEGER,action TEXT,reviewer TEXT,reviewed_at TEXT,note TEXT);
+            ''')
+            db.execute('INSERT INTO metadata VALUES(?,?)',('screenshot_zip_sha256','unit-test-archive'))
+            db.execute('INSERT INTO weapons VALUES(1,\'Railgun 8\',\'Railgun\',8)')
+            db.execute('INSERT INTO screenshots VALUES(1,\'reviewed.png\',\'sha-a\',1,\'exact_catalog_match\')')
+            db.execute('INSERT INTO screenshots VALUES(2,\'unresolved.png\',\'sha-b\',1,\'identity_review\')')
+            db.execute("INSERT INTO weapon_stat_candidates VALUES(1,1,'Damage','Damage',1,1,1,NULL,'yellow','100','unverified',NULL,NULL,NULL)")
+            db.execute("INSERT INTO weapon_stat_candidates VALUES(2,2,'Damage','Damage',1,1,1,NULL,'yellow','200','unverified',NULL,NULL,NULL)")
+            db.commit()
+            _,fingerprint=_candidate_fingerprint(db)
+            db.close()
+            self.assertEqual(apply_user_confirmed_ocr_review(path,archive_sha='unit-test-archive',values_sha='wrong',candidate_count=2),0)
+            count=apply_user_confirmed_ocr_review(path,archive_sha='unit-test-archive',values_sha=fingerprint,candidate_count=2,reviewed_at='2026-11-10')
+            self.assertEqual(count,2)
+            db=sqlite3.connect(path)
+            self.assertEqual(db.execute("SELECT status,count(*) FROM weapon_stat_candidates GROUP BY status").fetchall(),[('verified',2)])
+            self.assertEqual(db.execute('SELECT count(*) FROM review_events').fetchone()[0],2)
+            db.close()
+            catalog=__import__('mechbot.catalog',fromlist=['Catalog']).Catalog(path)
+            result=catalog.weapon('Railgun 8')
+            self.assertEqual([x['value'] for x in result['verified_stats']],['100'])
+            catalog.close()
+
 
 class DataTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):

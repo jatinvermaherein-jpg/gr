@@ -3,7 +3,16 @@ from datetime import datetime, timedelta, timezone
 import re
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-UNITS = {'second': 1, 'seconds': 1, 'minute': 60, 'minutes': 60, 'hour': 3600, 'hours': 3600, 'day': 86400, 'days': 86400, 'week': 604800, 'weeks': 604800}
+UNIT_SECONDS = {'seconds': 1, 'minutes': 60, 'hours': 3600, 'days': 86400, 'weeks': 604800}
+UNIT_CANONICAL = {
+    'second': 'seconds', 'seconds': 'seconds', 'sec': 'seconds', 'secs': 'seconds', 's': 'seconds',
+    'minute': 'minutes', 'minutes': 'minutes', 'min': 'minutes', 'mins': 'minutes', 'm': 'minutes',
+    'hour': 'hours', 'hours': 'hours', 'hr': 'hours', 'hrs': 'hours', 'h': 'hours',
+    'day': 'days', 'days': 'days', 'd': 'days',
+    'week': 'weeks', 'weeks': 'weeks', 'w': 'weeks',
+}
+_DURATION_ALIAS_RE = re.compile(r'(?<!\w)(\d+)\s*(seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w)(?!\w)',re.I)
+_DURATION_TEXT = r'\d+\s*(?:seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w)'
 
 
 def tzinfo(name):
@@ -58,16 +67,24 @@ def next_daily(hour, minute, zone_name, after):
     raise ValueError('Unable to schedule a future occurrence.')
 
 
+def normalize_duration_spec(spec):
+    s=re.sub(r'\s+',' ',str(spec).strip().lower())
+    s=_DURATION_ALIAS_RE.sub(lambda m:f"{m.group(1)} {UNIT_CANONICAL[m.group(2).lower()]}",s)
+    if re.fullmatch(r'\d+\s+(?:seconds|minutes|hours|days|weeks)',s):s='in '+s
+    return s
+
+
 def parse_spec(spec, zone_name, now=None):
-    """Supported forms: in 10 minutes, every 2 hours, daily at 8:30pm,
-    2026-12-25 14:00 (local IANA time)."""
+    """Supports short one-time delays, recurring intervals, local daily times and dates."""
     now = datetime.now(timezone.utc).timestamp() if now is None else now
-    s = re.sub(r'\s+', ' ', spec.strip().lower())
-    m = re.fullmatch(r'(in|every)\s+(\d+)\s+(seconds?|minutes?|hours?|days?|weeks?)', s)
+    s=normalize_duration_spec(spec)
+    m = re.fullmatch(r'(in|every)\s+(\d+)\s+(seconds|minutes|hours|days|weeks)', s)
     if m:
-        seconds = int(m[2]) * UNITS[m[3]]
-        if seconds < 60 or seconds > 366 * 86400:
-            raise ValueError('Use an interval between one minute and 366 days.')
+        seconds = int(m[2]) * UNIT_SECONDS[m[3]]
+        if seconds < 1 or seconds > 366 * 86400:
+            raise ValueError('Choose a delay between one second and 366 days.')
+        if m[1]=='every' and seconds<60:
+            raise ValueError('Recurring reminders must be at least one minute apart.')
         return int(now + seconds), ('interval' if m[1] == 'every' else 'once'), seconds, None, None
     m = re.fullmatch(r'(?:daily|every day)\s+at\s+(.+)', s)
     if m:
@@ -89,11 +106,12 @@ def parse_spec(spec, zone_name, now=None):
 
 
 def parse_natural_reminder(text):
-    """Return (spec, content) or None; do not guess missing information."""
-    m = re.fullmatch(r'\s*remind\s+me\s+(in\s+\d+\s+(?:seconds?|minutes?|hours?|days?|weeks?)|every\s+\d+\s+(?:seconds?|minutes?|hours?|days?|weeks?)|(?:every\s+day|daily|tomorrow)\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s+(?:to\s+|that\s+)?(.+?)\s*', text, re.I)
-    if not m:
-        return None
-    return m.group(1).strip(), m.group(2).strip()
+    """Return (spec, content) for a direct reminder request; do not guess missing information."""
+    when=r'(?:in\s+'+_DURATION_TEXT+r'|every\s+'+_DURATION_TEXT+r'|(?:every\s+day|daily|tomorrow)\s+at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)?)'
+    pattern=r'\s*(?:(?:hey|hi)[, ]+)?(?:please\s+)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?)?remind\s+me\s+('+when+r')\s+(?:to\s+|that\s+)?(.+?)\s*'
+    m=re.fullmatch(pattern,text,re.I)
+    if not m:return None
+    return normalize_duration_spec(m.group(1)),m.group(2).strip()
 
 
 def next_occurrence(kind, due, interval, hour, minute, zone_name, now):

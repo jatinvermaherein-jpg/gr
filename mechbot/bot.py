@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 from .catalog import Catalog, initialize_snapshot
 from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, tzinfo
-from .assistant import GAME_WORDS, find_mentions, wants_invite_link, weapon_response, mech_response, fetch_builds, builds_response, general_ai, safe_text
+from .assistant import GAME_WORDS, find_mentions, wants_invite_link, weapon_response, mech_response, fetch_builds, builds_response, answer_question_with_brain, safe_text
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
 from .emergency import EmergencyManager, OPERATORS, validate as validate_emergency
@@ -23,21 +23,21 @@ log=logging.getLogger('mechbot')
 # Fine-grained permissions: View Channels, Send Messages, Embed Links, Read History,
 # Manage Roles, Use Slash Commands, and Send Messages in Threads. No Administrator.
 INVITE_URL='https://discord.com/oauth2/authorize?client_id=1570061533898211408&permissions=277293911040&integration_type=0&scope=bot%20applications.commands'
-HELP='''**Mech Arena bot**
+HELP='''**Mech Arena helper**
+Use `/help` anytime to see this command list.
 • `/invite` — get the link to add me to a server.
-• `/weapon name rank level` — catalog identity and reviewed stats only.
-• `/mech name` — mech identity from the staged catalog.
-• `/builds` — builds from the public website, if available.
-• `/recent` — recent posts from a channel you can read.
+• `/weapon name rank level` — weapon variants and confirmed stats.
+• `/mech name` — look up a mech and available details.
+• `/builds` — check builds listed by the public site.
+• `/recent` — read recent posts in a channel you can access.
 • `/timezone` — set your IANA timezone; default is UTC.
-• `/remind`, `/reminders`, `/cancel` — private DM reminders; recurring supported.
-• `/note` — private notes, list or delete.
-• `/worker_time`, `/worker_status`, `/worker_snooze`, `/worker_pause` — assigned database worker reminders.
-• `/worker_setup` — server manager assigns the worker role and sends the initial prompt.
-• `/emergency_channel`, `/emergency_dm`, `/emergency_stop` and `/emergency_stop_user` — bounded emergency alerts.
-• `/calc` — simple arithmetic.
-You can also mention me: `@bot remind me in 10 minutes to check the event`, `@bot what is Dreadshot 10?`, or `@bot how do I invite you?`. General questions use AI only if an API key is configured.
-Screenshot stats are unverified and are never presented as verified facts.'''
+• `/remind`, `/reminders`, `/cancel` — private DM reminders; recurring reminders are supported.
+• `/note` — add, list or delete private notes.
+• `/worker_time`, `/worker_status`, `/worker_snooze`, `/worker_pause` — manage assigned database-task reminders.
+• `/worker_setup` — set up the worker role and send the initial time request.
+• `/emergency_channel`, `/emergency_dm`, `/emergency_stop`, `/emergency_stop_user` — manage bounded emergency alerts.
+• `/calc` — calculate simple arithmetic.
+You can also mention me: `@bot remind me in 20 seconds to check the event`, `@bot what is Dreadshot 10?`, or `@bot how do I invite you?`. When AI is configured, it helps interpret questions and uses reviewed game facts when available. Missing game data is never guessed.'''
 
 
 def calculate(expr):
@@ -84,6 +84,7 @@ class MechBot(commands.Bot):
         await self.wait_until_ready()
         target=discord.Object(id=int(guild_id)) if guild_id else None
         missing_logged=False
+        global_synced=False
         while not self.is_closed():
             try:
                 if target:
@@ -91,13 +92,23 @@ class MechBot(commands.Bot):
                         if not missing_logged:
                             log.warning('Configured server %s is not accessible yet; invite this bot with bot and applications.commands scopes. Slash-command registration will retry.',target.id)
                             missing_logged=True
+                        if not global_synced:
+                            await self.tree.sync()
+                            global_synced=True
+                            log.info('Published global slash commands while the configured test guild is unavailable; propagation can take time.')
                         await asyncio.sleep(30)
                         continue
+                    if not global_synced:
+                        await self.tree.sync()
+                        global_synced=True
+                        log.info('Published global slash commands; propagation can take time.')
                     await self.tree.sync(guild=target)
                     log.info('Synced slash commands to configured test guild.')
                 else:
-                    await self.tree.sync()
-                    log.info('Synced global slash commands; propagation can take time.')
+                    if not global_synced:
+                        await self.tree.sync()
+                        global_synced=True
+                        log.info('Synced global slash commands; propagation can take time.')
                 return
             except discord.HTTPException as e:
                 log.warning('Slash-command sync failed (%s); retrying in 60 seconds.',type(e).__name__)
@@ -279,8 +290,8 @@ class MechBot(commands.Bot):
                     await message.reply('Please enable DMs so I can deliver reminders.',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
                 out=await self.create_reminder(message.author.id,*parsed)
                 await self.private_reply(message,out);return
-            if re.match(r'^remind\s+me\b',text,re.I):
-                await self.private_reply(message,'Please use “remind me in 10 minutes to …”, “remind me every 2 hours to …”, or “remind me every day at 8pm to …”. Set /timezone first for local times.');return
+            if re.search(r'\bremind\s+me\b',text,re.I):
+                await self.private_reply(message,'I can set that. Include when and what, for example: `remind me in 20 seconds to write notes`.');return
             if text.lower() in ('help','commands','what can you do?'):
                 await self.private_reply(message,HELP);return
             if re.fullmatch(r'(?:show|list)\s+(?:my\s+)?reminders',text,re.I):
@@ -314,6 +325,10 @@ class MechBot(commands.Bot):
             if m:
                 tzinfo(m[1]);await self.store.set_timezone(message.author.id,m[1])
                 await self.private_reply(message,'Timezone set to '+safe_text(m[1])+'.');return
+            # Natural-language questions go through the AI brain before exact-name fallback.
+            reply=await answer_question_with_brain(os.getenv('AI_BASE_URL','https://api.openai.com/v1'),os.getenv('AI_API_KEY',''),os.getenv('AI_MODEL',''),text,self.catalog)
+            if reply:
+                await message.reply(reply[:1900],mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
             names=find_mentions(text,self.catalog.weapon_names)
             if names:
                 m=re.search(r'\brank\s*(\d+)\b',text,re.I);l=re.search(r'\blevel\s*(\d+)\b',text,re.I)
@@ -325,11 +340,8 @@ class MechBot(commands.Bot):
                 out='\n\n'.join(mech_response(self.catalog.mech(n)) for n in names[:3])
                 await message.reply(out[:1900],mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
             if GAME_WORDS.search(text):
-                await message.reply('For Mech Arena help, use `/weapon`, `/mech`, or `/builds`, and include an exact item name. I won’t invent stats or loadouts.',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
-            reply=await general_ai(os.getenv('AI_BASE_URL','https://api.openai.com/v1'),os.getenv('AI_API_KEY',''),os.getenv('AI_MODEL',''),text)
-            if reply and (find_mentions(reply,self.catalog.weapon_names) or find_mentions(reply,self.catalog.mech_names)):
-                reply='For Mech Arena facts, use /weapon or /mech so I can use sources rather than guessing.'
-            await message.reply(reply or 'General AI is not configured yet. Use /help for the bot’s available features.',mention_author=False,allowed_mentions=discord.AllowedMentions.none())
+                await message.reply('I don’t have reviewed information for that game question yet, so I won’t guess. Try `/weapon`, `/mech`, or `/builds` for supported lookups.',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
+            await message.reply('General AI is not configured yet. Use /help to see what I can do.',mention_author=False,allowed_mentions=discord.AllowedMentions.none())
         except ValueError as e:await self.private_reply(message,safe_text(e))
         except Exception:
             log.exception('Mention handling failed')
@@ -497,7 +509,7 @@ def install_commands(bot):
         choices=[n for n in bot.catalog.weapon_names if current.casefold() in n.casefold()][:25]
         return [app_commands.Choice(name=n,value=n) for n in choices]
 
-    @tree.command(name='mech',description='Look up a mech in the staged catalog')
+    @tree.command(name='mech',description='Look up a mech and available details')
     async def mech(i:discord.Interaction,name:str):
         await i.response.send_message(mech_response(bot.catalog.mech(name)),ephemeral=True)
 
@@ -513,7 +525,7 @@ def install_commands(bot):
         await i.response.send_message('Timezone set to '+safe_text(zone)+'.',ephemeral=True)
 
     @tree.command(name='remind',description='Create a private DM reminder')
-    @app_commands.describe(when='in 10 minutes; every 2 hours; daily at 8pm; or YYYY-MM-DD HH:MM',message='What to remind you about')
+    @app_commands.describe(when='in 20 seconds or 20s; every 2 hours; daily at 8pm; or YYYY-MM-DD HH:MM',message='What to remind you about')
     async def remind(i:discord.Interaction,when:str,message:str):
         await i.response.defer(ephemeral=True)
         try:
