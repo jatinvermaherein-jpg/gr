@@ -613,6 +613,26 @@ class AIQuestionTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn('10 Blueprints (BP)',followup_answer)
             catalog.close()
 
+    async def test_abbreviated_max_upgrade_query_calculates_blizzfrost_cost(self):
+        with tempfile.TemporaryDirectory() as td:
+            snapshot=Path(td)/'runtime.sqlite3'
+            with patch.dict(os.environ,{'SNAPSHOT_PATH':str(snapshot)}):runtime=initialize_snapshot()
+            catalog=Catalog(runtime)
+            question='Upgrade cost of Blizzfrost r5 lv7 to max'
+            context=game_knowledge_context(question,catalog)
+            self.assertEqual(context['rank_change'],['5','6'])
+            self.assertEqual((context['from_level'],context['to_level']),(7,7))
+            with patch('mechbot.assistant.general_ai',new=AsyncMock()) as ai:
+                answer=await answer_question_with_brain('https://gateway.invalid/v1','test-key','test-model',question,catalog)
+            ai.assert_not_awaited()
+            self.assertIn('rank 5 L7 → rank 6 L7',answer)
+            self.assertIn('2,825 A-Coins',answer)
+            self.assertIn('1,735,000 Credits',answer)
+            self.assertIn('75 Blueprints (BP)',answer)
+            self.assertIn('assuming “max” means rank 6, level 7',answer)
+            self.assertNotIn('won’t guess',answer)
+            catalog.close()
+
 
 class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
     async def test_guild_mirrors_include_restricted_commands_in_any_server(self):

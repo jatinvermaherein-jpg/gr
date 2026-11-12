@@ -8,9 +8,25 @@ from .announcements import wants_promo_codes, wants_ecr_info, wants_upcoming
 log=logging.getLogger('mechbot.assistant')
 GAME_WORDS = re.compile(r'\b(mech(?:s|\s*arena)?|weapon(?:s)?|builds?|loadouts?|hangar|gear\s*hub|pilots?|implants?|mods?|stats?|events?|tournaments?|seasons?|battle\s*pass|event\s*hub|a[- ]coins|credits?|battle\s*rating|dps)\b', re.I)
 _PAYMENT_TERMS=r'(?:cost|price|how\s+(?:much|many)|spend|need|credits?|a[- ]coins?)'
-_LEVEL_CHANGE=r'(?:upgrade(?:s|d|ing)?|rank\s*up|(?:rank|stars?)\s*\d+(?:\s*(?:level|lvl|l)\s*\d+)?\s*(?:to|→|->|-)\s*(?:(?:rank|stars?)\s*)?\d+(?:\s*(?:level|lvl|l)\s*\d+)?|level\s*\d+\s*(?:to|→|->|-)\s*\d+|r\s*\d+(?:\s*l\s*\d+)?\s*(?:to|→|->|-)\s*r?\s*\d+(?:\s*l\s*\d+)?)'
+_LEVEL_CHANGE=r'(?:upgrade(?:s|d|ing)?|rank\s*up|(?:rank|stars?)\s*\d+(?:\s*(?:level|lvl|lv|l)\s*\d+)?\s*(?:to|→|->|-)\s*(?:(?:rank|stars?)\s*)?\d+(?:\s*(?:level|lvl|lv|l)\s*\d+)?|level\s*\d+\s*(?:to|→|->|-)\s*\d+|r\s*\d+(?:\s*(?:level|lvl|lv|l)\s*\d+)?\s*(?:to|→|->|-)\s*r?\s*\d+(?:\s*(?:level|lvl|lv|l)\s*\d+)?|(?:rank|stars?|r)\s*\d+(?:\s*(?:level|lvl|lv|l)\s*\d+)?\s*(?:to|→|->|-)\s*max(?:imum)?)'
 _UPGRADE_COST=re.compile(r'\b'+_PAYMENT_TERMS+r'\b.{0,120}\b'+_LEVEL_CHANGE+r'\b|\b'+_LEVEL_CHANGE+r'\b.{0,120}\b'+_PAYMENT_TERMS+r'\b',re.I)
-_RANK_CHANGE=re.compile(r'\b(?:rank|star|stars|r)\s*(\d+)(?:\s*(?:level|lvl|l)\s*(\d+))?\s*(?:to|→|->|-)\s*(?:(?:rank|star|stars|r)\s*)?(\d+)(?:\s*(?:level|lvl|l)\s*(\d+))?\b',re.I)
+_RANK_CHANGE=re.compile(r'\b(?:rank|star|stars|r)\s*(\d+)(?:\s*(?:level|lvl|lv|l)\s*(\d+))?\s*(?:to|→|->|-)\s*(?:(?:rank|star|stars|r)\s*)?(\d+)(?:\s*(?:level|lvl|lv|l)\s*(\d+))?\b',re.I)
+_RANK_TO_MAX=re.compile(r'\b(?:rank|star|stars|r)\s*(\d+)(?:\s*(?:level|lvl|lv|l)\s*(\d+))?\s*(?:to|→|->|-)\s*max(?:imum)?\b',re.I)
+MAX_UPGRADE_RANK=6
+MAX_UPGRADE_LEVEL=7
+
+
+def _parse_rank_change(text):
+    """Parse numeric rank changes and explicit 'to max' as rank 6, level 7."""
+    value=str(text or '')
+    max_match=_RANK_TO_MAX.search(value)
+    if max_match:
+        from_level=int(max_match[2]) if max_match[2] is not None else None
+        return int(max_match[1]),from_level,MAX_UPGRADE_RANK,MAX_UPGRADE_LEVEL,True
+    match=_RANK_CHANGE.search(value)
+    if not match:return None
+    return (int(match[1]),int(match[2]) if match[2] is not None else None,
+            int(match[3]),int(match[4]) if match[4] is not None else None,False)
 _REVIEW_FIELDS=('rarity','tier','perk','perkDesc','fireRate','magazine','reloadSpeed','optimalRange','maxRange',
                 'dmgPerEnergy','strengths','weaknesses','reasoning','ability','abilityName','abilityStats','energyLevels')
 _EVENT_QUERY=re.compile(r'\b(?:events?|tournaments?|seasons?|battle\s*pass|event\s*hub)\b',re.I)
@@ -527,8 +543,8 @@ def game_knowledge_context(question,catalog,conversation_history=None):
     mech_names=find_mentions(question,mechs)
     entities=list(dict.fromkeys(weapon_names+mech_names))[:3]
     current_cost=bool(_UPGRADE_COST.search(question))
-    rank_match=_RANK_CHANGE.search(question)
-    level_note=re.search(r'\b(?:mine|my(?:\s+(?:item|weapon|mech))?)\b.{0,24}?\b(?:level|lvl|l)\s*(\d+)\b',question,re.I)
+    rank_details=_parse_rank_change(question)
+    level_note=re.search(r'\b(?:mine|my(?:\s+(?:item|weapon|mech))?)\b.{0,24}?\b(?:level|lvl|lv|l)\s*(\d+)\b',question,re.I)
     followup=bool(re.search(r'\b(?:what\s+about|and|same|mine|my|it|that|those|again|now|cost|price|credits?|a[- ]coins?|blueprints?|bp)\b',question,re.I) or level_note)
     explicit_non_cost=bool(re.search(r'\b(?:damage|dps|health|hp|speed|range|reload|build|stats?)\b',question,re.I))
     prior_cost=any(_UPGRADE_COST.search(text) for text in history_user)
@@ -542,36 +558,36 @@ def game_knowledge_context(question,catalog,conversation_history=None):
                 mech_names=old_mechs[:3]
                 entities=list(dict.fromkeys(weapon_names+mech_names))[:3]
                 break
-    if rank_match is None and history_user and (cost_question or followup):
+    if rank_details is None and history_user and (cost_question or followup):
         for previous in reversed(history_user):
-            candidate=_RANK_CHANGE.search(previous)
+            candidate=_parse_rank_change(previous)
             if candidate and _UPGRADE_COST.search(previous):
-                rank_match=candidate
+                rank_details=candidate
                 break
-    rank_change=[rank_match[1],rank_match[3]] if rank_match else None
-    if rank_match and rank_match[2] is not None and rank_match[4] is not None:
-        from_level,to_level=int(rank_match[2]),int(rank_match[4])
+    rank_change=[str(rank_details[0]),str(rank_details[2])] if rank_details else None
+    if rank_details:
+        from_level,to_level=rank_details[1],rank_details[3]
     else:
-        level_pair=re.search(r'\b(?:level|lvl|l)\s*(\d+)\s*(?:to|→|->|-)\s*(?:level|lvl|l)?\s*(\d+)\b',question,re.I)
+        level_pair=re.search(r'\b(?:level|lvl|lv|l)\s*(\d+)\s*(?:to|→|->|-)\s*(?:level|lvl|lv|l)?\s*(\d+)\b',question,re.I)
         from_level,to_level=(int(level_pair[1]),int(level_pair[2])) if level_pair else (None,None)
-        if rank_match and (cost_question or followup):
-            for previous in reversed(history_user):
-                old_rank=_RANK_CHANGE.search(previous)
-                if (old_rank and old_rank[2] is not None and old_rank[4] is not None
-                        and old_rank[1]==rank_match[1] and old_rank[3]==rank_match[3]):
-                    from_level,to_level=int(old_rank[2]),int(old_rank[4])
-                    break
-            if from_level is None:
-                noted=level_note
-                if noted is None:
-                    for previous in reversed(history_user):
-                        noted=re.search(r'\b(?:mine|my(?:\s+(?:item|weapon|mech))?)\b.{0,24}?\b(?:level|lvl|l)\s*(\d+)\b',previous,re.I)
-                        if noted:break
-                if noted and int(rank_match[1])<int(rank_match[3]):
-                    from_level,to_level=int(noted[1]),1
+    if rank_details and (cost_question or followup) and (from_level is None or to_level is None):
+        for previous in reversed(history_user):
+            old_rank=_parse_rank_change(previous)
+            if (old_rank and old_rank[1] is not None and old_rank[3] is not None
+                    and old_rank[0]==rank_details[0] and old_rank[2]==rank_details[2]):
+                from_level,to_level=old_rank[1],old_rank[3]
+                break
+        if from_level is None:
+            noted=level_note
+            if noted is None:
+                for previous in reversed(history_user):
+                    noted=re.search(r'\b(?:mine|my(?:\s+(?:item|weapon|mech))?)\b.{0,24}?\b(?:level|lvl|lv|l)\s*(\d+)\b',previous,re.I)
+                    if noted:break
+            if noted and rank_details[0]<rank_details[2] and to_level is None:
+                from_level,to_level=int(noted[1]),1
     related=bool(GAME_WORDS.search(question) or entities or cost_question)
     requested_rank=re.search(r'\brank\s*(\d+)\b',question,re.I)
-    requested_level=re.search(r'\b(?:level|lvl|l)\s*(\d+)\b',question,re.I)
+    requested_level=re.search(r'\b(?:level|lvl|lv|l)\s*(\d+)\b',question,re.I)
     facts=[]
     for name in weapon_names[:3]:
         lookup=catalog.weapon(name,int(requested_rank[1]) if requested_rank else None,
@@ -622,6 +638,7 @@ def game_knowledge_context(question,catalog,conversation_history=None):
                               'from_level':cost['from_level'],'to_rank':cost['to_rank'],
                               'to_level':cost['to_level'],'cost':cost['cost'],
                               'assumed_rank_transition':cost['assumed_rank_transition'],
+                              'assumed_max_target':bool(rank_details and rank_details[4]),
                               'no_op':cost.get('no_op',False)})
                 break
     archive_material=[]
@@ -690,10 +707,12 @@ def upgrade_cost_response(name,cost_fact,emoji_map=None,blueprints_owned=None):
                 f"rank {cost_fact['to_rank']} L{cost_fact['to_level']}")
     summary=' · '.join(parts)
     item_name=safe_text(name or cost_fact.get('item') or 'that item',80)
+    assumption=(f' (assuming “max” means rank {MAX_UPGRADE_RANK}, level {MAX_UPGRADE_LEVEL})'
+                if cost_fact.get('assumed_max_target') else '')
     if cost_fact.get('no_op'):
-        response=f"For **{item_name}**, {transition} is the same rank and level, so no upgrade is needed. Cost: **{summary}**."
+        response=f"For **{item_name}**, {transition} is the same rank and level, so no upgrade is needed. Cost: **{summary}**{assumption}."
     else:
-        response=f"For **{item_name}**, the {transition} upgrade costs **{summary}**."
+        response=f"For **{item_name}**, the {transition} upgrade costs **{summary}**{assumption}."
     # Purchase estimates are opt-in so natural-language answers do not assume how many BPs the user owns.
     if blueprints_owned is not None:
         try:
