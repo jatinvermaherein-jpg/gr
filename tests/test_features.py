@@ -19,7 +19,7 @@ from mechbot.payouts import PayoutTracker, parse_snapshot
 from mechbot.alerts import AlertManager, validate
 from mechbot.bot import MechBot, install_commands, OPERATORS, REPLY_MENTIONS, help_text
 from mechbot.assistant import (wants_invite_link, bot_identity_response, direct_item_lookup, should_answer_unmentioned,
-                               parse_natural_calculation, natural_builds_request, discord_text,
+                               parse_natural_calculation, natural_builds_request, builds_response, discord_text,
                                naturalize_discord_reply, weapon_response, mech_response,
                                game_knowledge_context, answer_question_with_brain, upgrade_cost_response, general_ai)
 from mechbot.announcements import (DEFAULT_ANNOUNCEMENT_CHANNELS, INITIAL_BACKFILL_LIMIT, wants_upcoming, message_text, upcoming_items,
@@ -131,10 +131,18 @@ class ParserTests(unittest.TestCase):
         self.assertIsNone(parse_natural_calculation('What is the best mech?'))
         self.assertTrue(should_answer_unmentioned('2+2'))
         self.assertEqual(natural_builds_request('Any builds for Redox?',['Redox']),
-                         {'mechs':['Redox'],'query':'Redox','ambiguous':False,'unresolved':False})
+                         {'mechs':['Redox'],'query':'Redox','mode':None,'best_requested':False,
+                          'list_requested':False,'ambiguous':False,'unresolved':False,'needs_mech':False})
         self.assertEqual(natural_builds_request('Show the latest builds',[]),
-                         {'mechs':[],'query':None,'ambiguous':False,'unresolved':False})
+                         {'mechs':[],'query':None,'mode':None,'best_requested':False,
+                          'list_requested':True,'ambiguous':False,'unresolved':False,'needs_mech':False})
         self.assertTrue(natural_builds_request('Show builds for an unknown mech',[])['unresolved'])
+        best=natural_builds_request('Best Surge build for 5v5?',['Surge'])
+        self.assertEqual((best['query'],best['mode'],best['needs_mech']),('Surge','5v5',False))
+        latest=natural_builds_request('Show recent builds for Surge?',['Surge'])
+        self.assertTrue(latest['list_requested'])
+        self.assertFalse(latest['best_requested'])
+        self.assertTrue(natural_builds_request('What is the best build?',[])['needs_mech'])
         self.assertIsNone(natural_builds_request('Redox is amazing',['Redox']))
 
     def test_api(self):
@@ -343,6 +351,53 @@ class ParserTests(unittest.TestCase):
         now=datetime(2026,3,8,5,0,tzinfo=timezone.utc).timestamp()
         result=datetime.fromtimestamp(next_daily(2,30,'America/New_York',now),timezone.utc)
         self.assertEqual(result.isoformat(),'2026-03-09T06:30:00+00:00')
+
+class BuildsTests(unittest.TestCase):
+    def setUp(self):
+        self.payload={'total':3,'builds':[
+            {'mech':'Surge','weapon_1':'Compound Beam 10','weapon_2':'Compound Beam 10',
+             'same_weapon':True,'sp_mode':'range','sp_min':6000,'sp_max':8000,
+             'label':'tournament opener','note':'best build for FFA & 5v5',
+             'author':{'display':'Pixel Predator'},'created_at':300},
+            {'mech':'Surge','weapon_1':'Revoker 8','weapon_2':'Revoker 10',
+             'same_weapon':False,'sp_mode':'range','sp_min':4000,'sp_max':6000,
+             'label':'','note':'best for FFA','created_at':200},
+            {'mech':'Surge','weapon_1':'Revoker 10','weapon_2':'Revoker 10',
+             'same_weapon':True,'sp_mode':'range','sp_min':6000,'sp_max':8000,
+             'label':'Midgame Meta','note':'good for beacons; top build for FFA','created_at':100},
+        ]}
+
+    def test_mech_lookup_returns_a_real_best_tagged_loadout(self):
+        result=builds_response(self.payload,mech='Surge',best=True)
+        self.assertIn('Compound Beam 10 ×2',result)
+        self.assertIn('SP 6,000–8,000',result)
+        self.assertIn('tournament opener',result)
+        self.assertIn('best build for FFA & 5v5',result)
+        self.assertIn('not a verified meta ranking',result)
+        self.assertEqual(result.count('Surge'),1)
+        self.assertNotIn('mech: Surge',result)
+
+    def test_mode_hint_selects_matching_build_and_reports_missing_mode(self):
+        matched=builds_response(self.payload,mech='Surge',mode='5v5',best=True)
+        self.assertIn('Compound Beam 10 ×2',matched)
+        self.assertNotIn('No post mentions 5v5',matched)
+        unmatched=builds_response(self.payload,mech='Surge',mode='CPC',best=True)
+        self.assertIn('No post mentions CPC',unmatched)
+        self.assertIn('Compound Beam 10 ×2',unmatched)
+
+    def test_unfiltered_feed_shows_weapon_slots_and_power_range(self):
+        result=builds_response(self.payload,best=False)
+        self.assertIn('Recent community build submissions (not ranked)',result)
+        self.assertIn('Compound Beam 10 ×2',result)
+        self.assertIn('Revoker 8 + Revoker 10',result)
+        self.assertIn('SP 4,000–6,000',result)
+        self.assertNotIn('mech: Surge',result)
+
+    def test_unknown_mech_does_not_reuse_another_mechs_build(self):
+        result=builds_response(self.payload,mech='Redox',best=True)
+        self.assertIn('no submitted builds for Redox',result)
+        self.assertNotIn('Compound Beam',result)
+
 
 class AIQuestionTests(unittest.IsolatedAsyncioTestCase):
     async def test_unsupported_upgrade_cost_skips_ai_and_is_blocked(self):
@@ -636,6 +691,36 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         fetch.assert_awaited_once()
         self.assertEqual(fetch.await_args.args[1],'Redox')
         self.assertIn('Redox setup',bot.reply_message.await_args.args[1])
+        self.assertFalse(bot.reply_message.await_args.kwargs['mention_author'])
+        brain.assert_not_awaited()
+
+    async def test_best_build_question_returns_weapons_and_sp_from_public_record(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=['Surge']
+        payload={'builds':[
+            {'mech':'Surge','weapon_1':'Compound Beam 10','weapon_2':'Compound Beam 10',
+             'same_weapon':True,'sp_min':6000,'sp_max':8000,'label':'tournament opener',
+             'note':'best build for FFA & 5v5','created_at':300},
+            {'mech':'Surge','weapon_1':'Revoker 8','weapon_2':'Revoker 10',
+             'same_weapon':False,'sp_min':4000,'sp_max':6000,'note':'best for FFA','created_at':200},
+        ]}
+        with patch.dict(os.environ,{'MESSAGE_CONTENT_ENABLED':'true','ANNOUNCEMENT_INGESTION_ENABLED':'false'}):
+            bot=MechBot(Catalog(),object())
+        bot._connection.user=SimpleNamespace(id=987654321098765432)
+        bot.reply_message=AsyncMock()
+        author=SimpleNamespace(id=123456789012345678,bot=False)
+        message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
+            mentions=[],content='Best Surge build for 5v5?',reference=None)
+        with (patch('mechbot.bot.fetch_builds',new=AsyncMock(return_value=payload)) as fetch,
+              patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain):
+            await bot.on_message(message)
+        fetch.assert_awaited_once()
+        self.assertEqual(fetch.await_args.args[1],'Surge')
+        result=bot.reply_message.await_args.args[1]
+        self.assertIn('Compound Beam 10 ×2',result)
+        self.assertIn('SP 6,000–8,000',result)
+        self.assertIn('best build for FFA & 5v5',result)
         self.assertFalse(bot.reply_message.await_args.kwargs['mention_author'])
         brain.assert_not_awaited()
 

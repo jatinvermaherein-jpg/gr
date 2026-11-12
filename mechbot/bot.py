@@ -57,7 +57,7 @@ Use `/help` anytime to see this command list.
 • `/weapon name rank level` — a concise weapon review, key stats, perk and listed purchase price.
 • `/upgrade_cost item from_rank to_rank [from_level to_level] [blueprints_owned]` — calculate upgrade costs and price missing Blueprints; defaults to 0 owned.
 • `/mech name` — a short mech review with key details and listed purchase price.
-• `/builds` — check builds listed by the public site.
+• `/builds [mech]` — get the best-tagged community loadout for a mech, or browse recent builds.
 • `/upcoming` — check dated and recent event posts from the configured announcement channels.
 • `/promo_codes` — check the latest saved, explicitly labeled ECR/promo-code posts; validity is not guaranteed.
 • `/recent` — read recent posts in a channel you can access.
@@ -615,8 +615,14 @@ class MechBot(commands.Bot):
                     out='Which mech do you mean? Please name one mech for the build lookup.'
                 elif build_request['unresolved']:
                     out='I couldn’t match that mech to the catalog. Please give me its exact name for a filtered build lookup.'
+                elif build_request['needs_mech']:
+                    out='Which mech do you want a build for? The best loadout depends on the mech and game mode; try “best Surge build for 5v5”.'
                 else:
-                    try:out=builds_response(await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),build_request['query']))
+                    try:
+                        query=build_request['query']
+                        payload=await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),query)
+                        best=bool(query) and (build_request['best_requested'] or not build_request['list_requested'])
+                        out=builds_response(payload,mech=query,mode=build_request['mode'],best=best)
                     except Exception:
                         log.exception('Natural-language public builds lookup failed')
                         out='The public builds API is unavailable or returned an unexpected response.'
@@ -971,10 +977,13 @@ def install_commands(bot):
         except (ValueError,SyntaxError) as e:out='Cannot calculate: '+safe_text(e,200)
         await i.response.send_message(out,ephemeral=True)
 
-    @tree.command(name='builds',description='Retrieve builds from the public website API')
+    @tree.command(name='builds',description='Get a community build recommendation for a mech')
+    @app_commands.describe(mech='Find the best-tagged community loadout for this mech; omit for recent builds')
     async def builds(i:discord.Interaction,mech:str=None):
         await i.response.defer(ephemeral=True)
-        try:out=builds_response(await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),mech))
+        try:
+            payload=await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),mech)
+            out=builds_response(payload,mech=mech,best=bool(mech))
         except Exception:log.exception('Public builds lookup failed');out='The public builds API is unavailable or returned an unexpected response.'
         await i.followup.send(out,ephemeral=True)
 

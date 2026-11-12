@@ -110,8 +110,20 @@ def parse_natural_calculation(text):
     return expression
 
 
+def _requested_build_mode(text):
+    """Return a recognized mode hint so a community submission can be matched to the request."""
+    value=str(text or '')
+    modes=(('5v5',r'\b5\s*(?:v|vs\.?)\s*5\b'),
+           ('FFA',r'\b(?:ffa|free[- ]for[- ]all)\b'),
+           ('CPC',r'\b(?:cpc|control[- ]point\s+clash)\b'),
+           ('tournament',r'\btournaments?\b'))
+    for name,pattern in modes:
+        if re.search(pattern,value,re.I):return name
+    return None
+
+
 def natural_builds_request(text, mech_names=()):
-    """Recognize an explicit request for the public builds feed; never forward free-form text as a query."""
+    """Recognize an explicit build lookup without forwarding free-form text as an API query."""
     value=str(text or '').strip()
     if not re.search(r'\b(?:builds?|loadouts?)\b',value,re.I):return None
     lookup_intent=bool('?' in value or re.search(
@@ -119,9 +131,15 @@ def natural_builds_request(text, mech_names=()):
         value,re.I))
     if not lookup_intent:return None
     names=find_mentions(value,mech_names)
+    mode=_requested_build_mode(value)
+    best_requested=bool(re.search(r'\b(?:best|top|recommend(?:ation)?)\b',value,re.I))
+    list_requested=bool(re.search(r'\b(?:latest|recent|list|all)\b',value,re.I))
     query_requested=bool(re.search(r'\bfor\b',value,re.I))
     return {'mechs':names,'query':names[0] if len(names)==1 else None,
-            'ambiguous':len(names)>1,'unresolved':query_requested and not names}
+            'mode':mode,'best_requested':best_requested,'list_requested':list_requested,
+            'ambiguous':len(names)>1,
+            'unresolved':query_requested and not names and not mode,
+            'needs_mech':best_requested and not names}
 
 
 def should_answer_unmentioned(text, known_names=()):
@@ -263,12 +281,15 @@ def mech_response(data):
 
 
 async def fetch_builds(base, query, session=None):
-    # Base is operator configuration, never derived from a chat message.
+    # Base is operator configuration, never derived from a chat message. Fetch all
+    # reasonably-sized matches so the recommendation is not limited to the newest ten.
     own=session is None
     if own:session=aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=12))
     try:
         url=base.rstrip('/')+'/api/mech-arena/public/builds'
-        async with session.get(url, params={'limit':10,'mech':query} if query else {'limit':10}, allow_redirects=False) as response:
+        params={'limit':100 if query else 10}
+        if query:params['mech']=query
+        async with session.get(url, params=params, allow_redirects=False) as response:
             if response.status!=200:raise RuntimeError(f'Public builds API returned HTTP {response.status}.')
             body=await response.json(content_type=None)
         return body
@@ -276,24 +297,197 @@ async def fetch_builds(base, query, session=None):
         if own:await session.close()
 
 
-def builds_response(payload):
+def _build_value(value, limit=220):
+    """Convert a public build field to short, mention-safe plain text."""
+    if value is None:return ''
+    if isinstance(value,dict):
+        for key in ('display','name','title','label','value','handle'):
+            if value.get(key) not in (None,''):
+                value=value[key];break
+        else:return ''
+    if isinstance(value,(list,tuple)):
+        value=' + '.join(str(item) for item in value if item not in (None,''))
+    return re.sub(r'\s+',' ',safe_text(value,limit)).strip()
+
+
+def _build_weapons(item):
+    first=_build_value(item.get('weapon_1') or item.get('weapon1') or item.get('primary_weapon'),100)
+    second=_build_value(item.get('weapon_2') or item.get('weapon2') or item.get('secondary_weapon'),100)
+    if first and second:
+        same=item.get('same_weapon') is True or str(item.get('same_weapon','')).casefold()=='true'
+        return f'{first} ×2' if same or first.casefold()==second.casefold() else f'{first} + {second}'
+    if first or second:return first or second
+    weapons=item.get('weapons')
+    if isinstance(weapons,(list,tuple)):
+        values=[_build_value(weapon,100) for weapon in weapons]
+        return ' + '.join(value for value in values if value)
+    return _build_value(weapons,180)
+
+
+def _build_sp(item):
+    low=item.get('sp_min',item.get('power_min'))
+    high=item.get('sp_max',item.get('power_max'))
+    def shown(value):
+        if value in (None,''):return ''
+        try:
+            number=float(value)
+            return f'{int(number):,}' if number.is_integer() else f'{number:,.1f}'
+        except (TypeError,ValueError):return _build_value(value,40)
+    low_text=shown(low);high_text=shown(high)
+    if low_text and high_text:
+        return f'SP {low_text}' if low_text==high_text else f'SP {low_text}–{high_text}'
+    if low_text or high_text:return 'SP '+(low_text or high_text)
+    return _build_value(item.get('sp'),60)
+
+
+def _build_note(item):
+    return _build_value(item.get('note') or item.get('description') or item.get('reasoning'),400)
+
+
+def _build_label(item):
+    return _build_value(item.get('label') or item.get('title'),100)
+
+
+def _build_author(item):
+    author=item.get('author')
+    if isinstance(author,dict):
+        for key in ('display','discord_display_name','name','handle','discord_username'):
+            if author.get(key) not in (None,''):
+                return _build_value(author[key],100)
+        return ''
+    return _build_value(author,100)
+
+
+def _build_mode_match(item, mode):
+    if not mode:return False
+    text=' '.join((_build_label(item),_build_note(item))).casefold()
+    requested=_requested_build_mode(mode) or str(mode).strip().casefold()
+    patterns={
+        '5v5':r'\b5\s*(?:v|vs\.?)\s*5\b',
+        'ffa':r'\b(?:ffa|free[- ]for[- ]all)\b',
+        'cpc':r'\b(?:cpc|control[- ]point\s+clash)\b',
+        'tournament':r'\btournaments?\b',
+    }
+    pattern=patterns.get(requested)
+    return bool(re.search(pattern,text,re.I)) if pattern else requested in text
+
+
+def _build_recommendation_score(item):
+    """Prefer explicit community best/top/meta labels; the public feed has no ratings."""
+    text=' '.join((_build_label(item),_build_note(item))).casefold()
+    score=0
+    if re.search(r'\bbest\s+(?:community\s+)?(?:build|loadout|setup)\b',text):score+=10
+    elif re.search(r'\bbest\b',text):score+=6
+    if re.search(r'\btop\s+(?:community\s+)?(?:build|loadout|pick|choice)\b',text):score+=4
+    elif re.search(r'\btop\b',text):score+=2
+    if re.search(r'\bmeta\b',text):score+=1
+    return score
+
+
+def _build_recommendation_claim(item):
+    text=' '.join((_build_label(item),_build_note(item))).casefold()
+    if re.search(r'\bbest\b',text):return 'Best-tagged'
+    if re.search(r'\btop\b',text):return 'Top-tagged'
+    if re.search(r'\bmeta\b',text):return 'Meta-labelled'
+    return ''
+
+
+def _build_timestamp(item):
+    for key in ('updated_at','created_at'):
+        try:
+            value=float(item.get(key))
+            if value>0:return value
+        except (TypeError,ValueError,AttributeError):
+            continue
+    return 0
+
+
+def _format_build_pick(item, mech=None, mode=None, mode_matched=True):
+    actual_mech=_build_value(item.get('mech'),100) if isinstance(item,dict) else ''
+    actual_mech=actual_mech or _build_value(mech,100)
+    label=_build_label(item) if isinstance(item,dict) else ''
+    note=_build_note(item) if isinstance(item,dict) else ''
+    author=_build_author(item) if isinstance(item,dict) else ''
+    weapons=_build_weapons(item) if isinstance(item,dict) else ''
+    sp=_build_sp(item) if isinstance(item,dict) else ''
+    score=_build_recommendation_score(item) if isinstance(item,dict) else 0
+    claim=_build_recommendation_claim(item) if isinstance(item,dict) else ''
+    title=(f'{claim} community build for {actual_mech}' if claim else
+           f'Latest community build for {actual_mech}') if actual_mech else 'Best available community build'
+    if mode:title+=f' · {safe_text(mode,40)}'
+    out=[f'**{title}**']
+    if mode and not mode_matched:
+        out.append(f'No post mentions {safe_text(mode,40)}; showing the strongest tagged match available.')
+    if weapons:out.append('**Weapons:** '+weapons)
+    elif isinstance(item,dict):
+        title_field=_build_value(item.get('title') or item.get('name'),120)
+        if title_field:out.append('**Build:** '+title_field)
+        else:out.append('**Weapons:** not listed in the public record.')
+    if sp:out.append('**Power range:** '+sp)
+    if label:out.append('**Label:** '+label)
+    if note:out.append('**Community note:** '+_short_sentences(note,240))
+    if author:out.append('**Submitted by:** '+author)
+    if score:
+        out.append('*The public feed has no ratings or votes; this follows the submission’s best/top/meta wording, not a verified meta ranking.*')
+    else:
+        out.append('*The public feed has no ratings or explicit best tag; this is the newest available submission, not an objectively ranked best.*')
+    return discord_text('\n'.join(out))
+
+
+def _format_build_list(items, payload):
+    total=payload.get('total') if isinstance(payload,dict) else None
+    shown=items[:5]
+    out=['**Recent community build submissions (not ranked):**']
+    for item in shown:
+        if not isinstance(item,dict):
+            out.append('• '+_build_value(item,180));continue
+        mech=_build_value(item.get('mech'),80) or _build_value(item.get('title') or item.get('name'),80) or 'Community build'
+        weapons=_build_weapons(item)
+        sp=_build_sp(item)
+        line=f'• **{mech}**'
+        if weapons:line+=' — '+weapons
+        if sp:line+=' · '+sp
+        out.append(line)
+        label=_build_label(item);note=_build_note(item)
+        if label or note:out.append('  '+'. '.join(value for value in (label,note) if value)[:300])
+    try:more=int(total)>len(shown)
+    except (TypeError,ValueError):more=len(items)>len(shown)
+    if more:out.append('More submissions are available on the public site.')
+    out.append('*The feed provides no ratings or votes, so these are recent posts—not a verified best-build ranking.*')
+    return discord_text('\n'.join(out))
+
+
+def builds_response(payload, mech=None, mode=None, best=None):
+    """Show actual weapon/SP fields and make one transparent community recommendation."""
     if isinstance(payload,list):items=payload
     elif isinstance(payload,dict):
-        items=payload.get('builds', payload.get('data', []))
+        items=payload.get('builds',payload.get('data',[]))
         if isinstance(items,dict):items=items.get('builds',[])
     else:raise ValueError('Unexpected public builds response.')
     if not isinstance(items,list):raise ValueError('Unexpected public builds response.')
-    if not items:return 'The public site returned no builds. I won’t make any up.'
-    out=['**Builds from the public site:**']
-    for x in items[:10]:
-        if isinstance(x,dict):
-            # Field names vary between APIs; show only the fields actually returned.
-            values=[]
-            for k in ('name','title','mech','weapon','weapons','sp'):
-                if k in x and x[k] is not None:values.append(k+': '+safe_text(x[k],150))
-            out.append('• '+('; '.join(values) if values else safe_text(str(x),250)))
-        else:out.append('• '+safe_text(x,250))
-    return discord_text('\n'.join(out))
+    if not items:return f'The public site has no submitted builds{(" for "+safe_text(mech,100)) if mech else ""}. I won’t make one up.'
+    if mech:
+        requested=str(mech).strip().casefold()
+        with_mech=[item for item in items if isinstance(item,dict) and _build_value(item.get('mech'),100)]
+        matching=[item for item in items if isinstance(item,dict) and _build_value(item.get('mech'),100).casefold()==requested]
+        if matching:items=matching
+        elif with_mech:return f'The public site has no submitted builds for {safe_text(mech,100)}. I won’t make one up.'
+        else:
+            named=[item for item in items if isinstance(item,dict) and _build_value(item.get('title') or item.get('name'),120)]
+            named_matches=[item for item in named if requested in _build_value(item.get('title') or item.get('name'),120).casefold()]
+            if named_matches:items=named_matches
+            elif named:return f'The public site has no submitted builds for {safe_text(mech,100)}. I won’t make one up.'
+            else:return f'The public results do not identify a mech, so I can’t safely recommend a build for {safe_text(mech,100)}.'
+    if best is None:best=bool(mech)
+    if not best:return _format_build_list(items,payload)
+    if not mech:return 'Which mech do you want a build for? The best loadout depends on the mech; try “best Surge build”.'
+    mode_matches=[item for item in items if isinstance(item,dict) and _build_mode_match(item,mode)] if mode else []
+    candidates=mode_matches or items
+    selected=max(enumerate(candidates),key=lambda pair:(
+        _build_recommendation_score(pair[1]) if isinstance(pair[1],dict) else 0,
+        _build_timestamp(pair[1]) if isinstance(pair[1],dict) else 0,
+        -pair[0]))[1]
+    return _format_build_pick(selected,mech,mode,not mode or bool(mode_matches))
 
 
 # The model interprets each question; the bot supplies only locally reviewed facts.

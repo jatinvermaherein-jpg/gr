@@ -15,7 +15,7 @@ ARCHΛNGLE is an unofficial Mech Arena community helper for weapon and mech revi
 - Public message replies ping only the reply author. Other user, role, `@everyone`, and `@here` mentions are disabled.
 - User-facing answers are kept concise and within Discord's 2,000-character limit. Exact catalog lookups and verified upgrade costs are resolved locally instead of waiting on AI; unsupported game questions abstain without an AI round trip.
 - `/upgrade_cost` keeps rank-up resources separate from the A-Coins needed to buy missing Blueprints. Its optional `blueprints_owned` parameter defaults to zero; the purchase estimate uses the pinned calculator's per-rarity schedule and is not a live shop offer.
-- Natural phrasing is supported for features such as `ANY ECR`, `what is 240 plus 60?`, `how much to upgrade Redox from rank 4 to 5?`, `any builds for Redox?`, and fully specified reminders. Slash commands remain available as an alternative.
+- Natural phrasing is supported for features such as `ANY ECR`, `what is 240 plus 60?`, `how much to upgrade Redox from rank 4 to 5?`, `best Surge build for 5v5`, `any builds for Redox?`, and fully specified reminders. A mech-specific best-build lookup fetches up to 100 public submissions and returns one best-tagged community loadout with its weapons, SP range, label, and note; explicit requests for recent builds remain an unranked list. The public feed has no ratings, so the bot discloses that this is community advice—not a verified meta ranking. A request for a best build without a mech asks for clarification. Slash commands remain available as an alternative.
 
 ## Bounded ping loops
 
