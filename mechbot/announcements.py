@@ -62,11 +62,19 @@ _ISO_DATE = re.compile(r'\b(?P<year>20\d{2})-(?P<month>0?[1-9]|1[0-2])-(?P<day>0
 _PARTIAL_DATE = re.compile(rf'\b(?:{_MONTH_PATTERN}\s+\d{{1,2}}|\d{{1,2}}\s+{_MONTH_PATTERN})\b', re.I)
 _ANNOUNCEMENT_LOOKUP = re.compile(
     r"\b(?:upcoming|coming\s+up|what(?:'s|\s+is)\s+next|next\s+(?:event|update|tournament|season)|"
-    r"events?\s+(?:soon|next|coming)|what\s+is\s+coming\s+up)\b", re.I)
+    r"events?\s+(?:soon|next|coming|today|tomorrow|this\s+week|this\s+month)|what\s+is\s+coming\s+up|"
+    r"(?:any|current|latest|recent)\s+(?:official\s+)?events?|"
+    r"(?:what|which)\s+(?:the\s+)?(?:(?:current|upcoming|recent|latest)\s+)?events?|"
+    r"are\s+there\s+(?:any\s+)?(?:(?:current|upcoming|recent|latest)\s+)?events?|"
+    r"(?:do\s+we\s+have|have\s+we\s+got)\s+(?:any\s+)?(?:(?:current|upcoming|recent|latest)\s+)?events?|"
+    r"(?:show|list|tell\s+me\s+about)\s+(?:the\s+|any\s+)?(?:(?:current|upcoming|recent|latest)\s+)?events?)\b", re.I)
 
 
 def wants_upcoming(text):
-    return bool(_ANNOUNCEMENT_LOOKUP.search(str(text or '').strip()))
+    """Recognize event-information requests to answer from saved announcements, not memory."""
+    value=str(text or '').strip()
+    if re.search(r'\b(?:remind(?:er)?|remember|note)\b',value,re.I):return False
+    return bool(_ANNOUNCEMENT_LOOKUP.search(value))
 
 
 def wants_promo_codes(text):

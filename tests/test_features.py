@@ -39,7 +39,12 @@ class AnnouncementTests(unittest.TestCase):
         now=datetime(2026,11,10,12,tzinfo=ZoneInfo('Asia/Kolkata')).timestamp()
         self.assertTrue(wants_upcoming("what's coming up next?"))
         self.assertTrue(wants_upcoming('next event'))
+        for query in ('any event','Any events?','What events are in Mech Arena?',
+                      'Do we have any events?','List upcoming events'):
+            with self.subTest(query=query):self.assertTrue(wants_upcoming(query))
+        self.assertFalse(wants_upcoming('What types of events are in Mech Arena?'))
         self.assertFalse(wants_upcoming('make me a reminder'))
+        self.assertFalse(wants_upcoming('set a reminder for any event'))
         rows=[
             {'content':'Tournament starts November 15, 2026','posted_at':int(now-1000),'channel_name':'news','guild_name':'Game Server','message_url':'https://discord.com/channels/1/2/3'},
             {'content':'Event coming soon; date to be announced','posted_at':int(now-1000),'channel_name':'events','guild_name':'Game Server','message_url':'https://discord.com/channels/1/4/5'},
@@ -216,11 +221,30 @@ class ParserTests(unittest.TestCase):
                 {'stat_name':'Fire Rate','value':'10 rpm','rank':1,'level':None},
                 {'stat_name':'Damage Per Shot','value':'14422','rank':2,'level':None}],
             'listing':{'cost':{'amount':7125,'currency':'A-Coins'}}})
-        self.assertIn('**Quick review:**',response)
-        self.assertIn('6,774 damage/shot',response)
+        self.assertIn('\n\n**Quick review:**\n',response)
+        self.assertIn('• 6,774 damage/shot',response)
         self.assertIn('7,125 A-Coins',response)
         self.assertNotIn('rank 2',response.lower())
-        self.assertLess(response.count('\n'),8)
+        self.assertLess(response.count('\n'),20)
+
+    def test_weapon_response_has_spaced_sections_and_keeps_long_perk_text(self):
+        perk_desc=('A compact first sentence. The explanation continues in a longer second sentence '
+                   'that should remain intact even when the combined text exceeds the previous display '
+                   'limit of one hundred and eighty characters, without getting clipped before its final phrase.')
+        self.assertGreater(len(perk_desc),180)
+        response=weapon_response({
+            'matches':[{'name':'Charge Rocket 10','variant_number':10,'database_category':'missile'}],
+            'review':{'rarity':'Legendary','tier':'S','reasoning':'Quick review text.',
+                'weaknesses':'A caution worth noting.','perk':'Whirlwind','perkDesc':perk_desc},
+            'verified_stats':[{'stat_name':'Damage Per Shot','value':'2364','rank':1,'level':None}],
+            'listing':{'cost':{'amount':650000,'currency':'Credits'}}})
+        self.assertIn('**Charge Rocket 10** — 10-energy Legendary missile · Tier S.',response)
+        self.assertIn('\n\n**Quick review:**\nQuick review text.',response)
+        self.assertIn('\n\n**Watch-out:**\nA caution worth noting.',response)
+        self.assertIn('\n\n**Perk: Whirlwind**\n'+perk_desc,response)
+        self.assertIn('\n\n**Key stats** · Rank 1 · Level not recorded\n• 2,364 damage/shot',response)
+        self.assertIn('\n\n**Listed purchase price:** 650,000 Credits *(not a rank-up cost)*',response)
+        self.assertLessEqual(len(response),1900)
 
     def test_redox_upgrade_context_has_no_cost_evidence(self):
         class Catalog:
@@ -249,12 +273,14 @@ class ParserTests(unittest.TestCase):
     def test_unmentioned_question_gate_and_side_effect_safety(self):
         for text in ('How much to upgrade Redox from rank 4 to 5?',
                      'Could you explain that setup?', 'What is the best mech?',
-                     'Redox stats', 'When is the next event?'):
+                     'Redox stats', 'When is the next event?', 'any event',
+                     'What types of events are in Mech Arena?'):
             with self.subTest(text=text):self.assertTrue(should_answer_unmentioned(text,['Redox']))
         for text in ('Redox is amazing', 'remind me in 20 seconds to write notes',
                      'Can you remind me in 20 seconds to write notes?',
                      'remember that I prefer long range builds', '/upgrade_cost Redox 4 5',
-                     'stop my loops', 'What do you think about <@123456789012345678>?'):
+                     'stop my loops', 'set a reminder for any event',
+                     'What do you think about <@123456789012345678>?'):
             with self.subTest(text=text):self.assertFalse(should_answer_unmentioned(text,['Redox']))
 
     def test_operator_command_help_is_personalized_in_any_server(self):
@@ -332,6 +358,34 @@ class AIQuestionTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn('12,000',answer)
         self.assertNotIn('calculator',answer.lower())
         self.assertNotIn('database',answer.lower())
+
+    async def test_unverified_event_questions_never_fall_through_to_ai(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+        question='What types of events are in Mech Arena?'
+        with patch('mechbot.assistant.general_ai',new=AsyncMock(return_value='Arena Blitz and Co-Op Assault happen every week.')) as ai:
+            answer=await answer_question_with_brain('https://gateway.invalid/v1','test-key','test-model',question,Catalog())
+        ai.assert_not_awaited()
+        self.assertIn('verified list of Mech Arena event types',answer)
+        self.assertIn('won’t invent',answer)
+        self.assertNotIn('Arena Blitz',answer)
+
+    async def test_event_archive_excerpt_is_returned_without_ai_rewrite(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+            def search_confirmed_archive(self,question,entities,limit):
+                return [{'kind':'public_document','title':'Official event note',
+                    'source':'plarium_forum','url':'https://forum.plarium.com/topic/123/',
+                    'excerpt':'The post says the event begins on its stated date.'}]
+        question='What does the event announcement say?'
+        with patch('mechbot.assistant.general_ai',new=AsyncMock(return_value='Arena Blitz starts every Monday.')) as ai:
+            answer=await answer_question_with_brain('https://gateway.invalid/v1','test-key','test-model',question,Catalog())
+        ai.assert_not_awaited()
+        self.assertIn('The post says the event begins on its stated date.',answer)
+        self.assertIn('[Official event note](https://forum.plarium.com/topic/123/)',answer)
+        self.assertNotIn('Arena Blitz',answer)
 
     async def test_ai_payload_receives_only_the_last_five_turn_pairs(self):
         class Response:
@@ -721,6 +775,24 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         store.add_note.assert_awaited_once_with(author.id,'I prefer long range builds')
         store.conversation_history.assert_not_awaited()
         store.add_conversation_turn.assert_not_awaited()
+
+    async def test_any_event_request_uses_announcement_lookup_not_ai(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+        bot=MechBot(Catalog(),object())
+        bot_user=SimpleNamespace(id=987654321098765432)
+        bot._connection.user=bot_user
+        bot.reply_message=AsyncMock()
+        bot.upcoming_response=AsyncMock(return_value='No verified event announcement is saved.')
+        author=SimpleNamespace(id=123456789012345678,bot=False)
+        message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
+            mentions=[bot_user],content=f'<@{bot_user.id}> any event',reference=None)
+        with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain:
+            await bot.on_message(message)
+        brain.assert_not_awaited()
+        bot.upcoming_response.assert_awaited_once_with()
+        bot.reply_message.assert_awaited_once_with(message,'No verified event announcement is saved.',mention_author=True)
 
     async def test_direct_replies_work_and_bystander_reply_chains_are_ignored_by_default(self):
         class Catalog:
