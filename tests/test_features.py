@@ -180,11 +180,11 @@ class ParserTests(unittest.TestCase):
         response=upgrade_cost_response('Redox',{
             'from_rank':5,'from_level':1,'to_rank':5,'to_level':1,'no_op':True,
             'cost':{'acoins':0,'credits':0,'blueprints':0}},
-            {'acoins':'<:archangle_a_coins_v1:101>','credits':'<:archangle_credits_v1:102>',
-             'blueprints':'<:archangle_blueprints_v1:103>'})
-        self.assertIn('<:archangle_a_coins_v1:101> 0 A-Coins',response)
-        self.assertIn('<:archangle_credits_v1:102> 0 Credits',response)
-        self.assertIn('<:archangle_blueprints_v1:103> 0 Blueprints (BP)',response)
+            {'acoins':'<:archangle_a_coins_v2:101>','credits':'<:archangle_credits_v2:102>',
+             'blueprints':'<:archangle_blueprints_v2:103>'})
+        self.assertIn('<:archangle_a_coins_v2:101> 0 A-Coins',response)
+        self.assertIn('<:archangle_credits_v2:102> 0 Credits',response)
+        self.assertIn('<:archangle_blueprints_v2:103> 0 Blueprints (BP)',response)
 
     def test_upgrade_cost_reply_prices_only_blueprints_still_missing(self):
         fact={'from_rank':4,'from_level':1,'to_rank':5,'to_level':1,
@@ -661,6 +661,8 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
               patch('mechbot.bot.aiohttp.ClientSession',return_value=session)):
             emojis=await bot.ensure_application_currency_emojis()
         self.assertEqual(set(emojis),{'acoins','credits','blueprints'})
+        self.assertEqual([payload['name'] for payload in session.posts],[
+            'archangle_a_coins_v2','archangle_credits_v2','archangle_blueprints_v2'])
         self.assertEqual(len(session.posts),3)
         self.assertTrue(all(payload['image'].startswith('data:image/png;base64,') for payload in session.posts))
         self.assertTrue(all(len(payload['image'])>1000 for payload in session.posts))

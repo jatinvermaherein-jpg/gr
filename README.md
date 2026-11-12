@@ -60,7 +60,7 @@ To enable ingestion, set `ANNOUNCEMENT_INGESTION_ENABLED=true`, enable the privi
 
 ## Currency emojis
 
-On startup, the bot tries to create or reuse three application-owned emojis (`A-Coins`, `Credits`, and `Blueprints`) from the transparent 128×128 assets in `data/emoji_*.png`. Cost replies use their custom emoji codes across guilds when registration succeeds; otherwise, the reply falls back to the PNG attachments. The supplied originals remain preserved separately in `data/currency_*.png`.
+On startup, the bot tries to create or reuse three application-owned emojis from the transparent 128×128 assets in `data/emoji_*.png`. The registered names are versioned (`archangle_a_coins_v2`, `archangle_credits_v2`, and `archangle_blueprints_v2`) so refreshed artwork is created instead of silently reusing older `v1` images. `/upgrade_cost` uses the custom emoji codes for A-Coins, Credits, and Blueprints; if registration is unavailable, the reply attaches the same PNG assets. The optimized transparent PNGs are the runtime assets; the original checkerboard-backed references remain separate from the deploy files.
 
 ## Supabase and deployment
 

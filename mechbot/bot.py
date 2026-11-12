@@ -50,7 +50,7 @@ ANNOUNCEMENT_CHANNELS=configured_announcement_channels()
 INVITE_URL='https://discord.com/oauth2/authorize?client_id=1570061533898211408&permissions=277293911040&integration_type=0&scope=bot%20applications.commands'
 BOT_ROOT=Path(__file__).resolve().parent.parent
 CURRENCY_ASSETS=(('A-Coins','emoji_a_coins.png'),('Credits','emoji_credits.png'),('Blueprints (BP)','emoji_blueprints.png'))
-APPLICATION_CURRENCY_EMOJIS=(('acoins','archangle_a_coins_v1','emoji_a_coins.png'),('credits','archangle_credits_v1','emoji_credits.png'),('blueprints','archangle_blueprints_v1','emoji_blueprints.png'))
+APPLICATION_CURRENCY_EMOJIS=(('acoins','archangle_a_coins_v2','emoji_a_coins.png'),('credits','archangle_credits_v2','emoji_credits.png'),('blueprints','archangle_blueprints_v2','emoji_blueprints.png'))
 HELP='''**Mech Arena helper**
 Use `/help` anytime to see this command list.
 • `/invite` — get the link to add me to a server.
