@@ -1,5 +1,23 @@
+# Local credentials and environment overrides
 .env
+.env.*
+!.env.example
+
+# Python artifacts
 __pycache__/
 *.py[cod]
 .venv/
+.pytest_cache/
+.coverage
+
+# Local runtime data (the checked-in staging snapshot remains intentional)
 data/local_users.sqlite3*
+
+# User-provided screenshot inputs and local OCR/review artifacts are not deploy assets
+data/source_archives/
+data/drive_ocr_review_cards/
+data/drive_ocr_stage/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

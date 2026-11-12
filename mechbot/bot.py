@@ -1,12 +1,15 @@
 """Discord bot entrypoint. Requires DISCORD_TOKEN and persistent PostgreSQL in production."""
 import asyncio
 import ast
+import base64
 import logging
 import operator
 import os
 import re
 import time
+import aiohttp
 from datetime import datetime, timezone
+from pathlib import Path
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -14,30 +17,69 @@ from dotenv import load_dotenv
 from .catalog import Catalog, initialize_snapshot
 from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, tzinfo
-from .assistant import GAME_WORDS, find_mentions, wants_invite_link, weapon_response, mech_response, fetch_builds, builds_response, answer_question_with_brain, safe_text
+from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, weapon_response, mech_response, fetch_builds, builds_response, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
+from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INITIAL_BACKFILL_LIMIT, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_promo_codes, format_promo_codes
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
-from .emergency import EmergencyManager, OPERATORS, validate as validate_emergency
+from .alerts import AlertManager, OPERATORS, validate as validate_alert
 
 log=logging.getLogger('mechbot')
+REPLY_MENTIONS=discord.AllowedMentions(everyone=False,users=False,roles=False,replied_user=True)
+AMBIENT_CHAT_COOLDOWN_SECONDS=8
+
+def env_enabled(name,default=False):
+    value=os.getenv(name)
+    if value is None:return default
+    return value.strip().casefold() in ('1','true','yes','on')
+
+def configured_announcement_channels():
+    raw=os.getenv('ANNOUNCEMENT_CHANNEL_IDS','').replace(';',',')
+    values=[]
+    for item in raw.split(','):
+        if not item.strip():continue
+        try:channel_id=int(item.strip())
+        except ValueError:
+            log.warning('Ignoring an invalid announcement channel ID; no value or secret was logged.')
+            continue
+        if channel_id>0 and channel_id not in values:values.append(channel_id)
+    return tuple(values) or DEFAULT_ANNOUNCEMENT_CHANNELS
+
+ANNOUNCEMENT_CHANNELS=configured_announcement_channels()
 # Fine-grained permissions: View Channels, Send Messages, Embed Links, Read History,
 # Manage Roles, Use Slash Commands, and Send Messages in Threads. No Administrator.
 INVITE_URL='https://discord.com/oauth2/authorize?client_id=1570061533898211408&permissions=277293911040&integration_type=0&scope=bot%20applications.commands'
+BOT_ROOT=Path(__file__).resolve().parent.parent
+CURRENCY_ASSETS=(('A-Coins','emoji_a_coins.png'),('Credits','emoji_credits.png'),('Blueprints (BP)','emoji_blueprints.png'))
+APPLICATION_CURRENCY_EMOJIS=(('acoins','archangle_a_coins_v1','emoji_a_coins.png'),('credits','archangle_credits_v1','emoji_credits.png'),('blueprints','archangle_blueprints_v1','emoji_blueprints.png'))
 HELP='''**Mech Arena helper**
 Use `/help` anytime to see this command list.
 • `/invite` — get the link to add me to a server.
 • `/weapon name rank level` — a concise weapon review, key stats, perk and listed purchase price.
+• `/upgrade_cost item from_rank to_rank [from_level to_level] [blueprints_owned]` — calculate upgrade costs and price missing Blueprints; defaults to 0 owned.
 • `/mech name` — a short mech review with key details and listed purchase price.
 • `/builds` — check builds listed by the public site.
+• `/upcoming` — check dated and recent event posts from the configured announcement channels.
+• `/promo_codes` — check the latest saved, explicitly labeled ECR/promo-code posts; validity is not guaranteed.
 • `/recent` — read recent posts in a channel you can access.
 • `/timezone` — set your IANA timezone; default is UTC.
 • `/remind`, `/reminders`, `/cancel` — private DM reminders; recurring reminders are supported.
 • `/note` — add, list or delete private notes.
 • `/worker_time`, `/worker_status`, `/worker_snooze`, `/worker_pause` — manage assigned database-task reminders.
 • `/worker_setup` — set up the worker role and send the initial time request.
-• `/emergency_channel`, `/emergency_dm`, `/emergency_stop`, `/emergency_stop_user` — manage bounded emergency alerts.
-• `/calc` — calculate simple arithmetic.
+• `/stop_loop` — stop your own active ping loops.
+• `/calc` — calculate simple arithmetic; you can also ask “what’s 240 plus 60?” or “calculate 240 / 60”.
+• Ask naturally for “ANY ECR”, upgrade costs, builds, event dates, or reminders such as “remind me in 20 minutes to check the event”—no slash command is needed. Reminder requests must include when and what; they are delivered privately by DM.
+• Channel questions — when the server has opted into natural chat, ask normally without a bot mention. Only apparent questions/lookups and explicit, fully specified reminder requests get a reply; ambient replies do not ping the author and have a short per-user cooldown.
 You can also mention me: `@bot remind me in 20 seconds to check the event`, `@bot review EM Rifle 10`, `@bot how much to upgrade Redox from rank 4 to 5?`, or `@bot how do I invite you?`. Reviews and upgrade costs use confirmed game data; missing details are never guessed.'''
+
+
+def help_text(user_id=None,guild_id=None):
+    if user_id in OPERATORS and guild_id is not None:
+        restricted=('• `/ping_loop member interval_seconds duration_seconds reason` — send an immediate, single-user ping, then bounded follow-up pings.\n'
+                    '• `/dm_loop member interval_seconds duration_seconds reason` — start a bounded DM loop.\n'
+                    '• `/stop_user_loops member` — stop that member’s channel and DM loops.\n')
+        return HELP.replace('• `/stop_loop`',restricted+'• `/stop_loop`')
+    return HELP
 
 
 def calculate(expr):
@@ -59,70 +101,255 @@ def calculate(expr):
 
 class MechBot(commands.Bot):
     def __init__(self, catalog, store):
-        # The bot only reads DMs and messages that explicitly mention it. Discord supplies
-        # content for those cases without the privileged Message Content intent.
+        # Ambient channel questions and announcement ingestion both require the privileged
+        # Message Content intent; ambient replies remain opt-in and are separately gated.
         intents=discord.Intents.default()
+        self.announcement_ingestion_enabled=env_enabled('ANNOUNCEMENT_INGESTION_ENABLED',False)
+        self.ambient_channel_chat_enabled=env_enabled('MESSAGE_CONTENT_ENABLED',False)
+        self.message_content_enabled=self.ambient_channel_chat_enabled or self.announcement_ingestion_enabled
+        intents.message_content=self.message_content_enabled
         super().__init__(command_prefix=commands.when_mentioned, intents=intents, allowed_mentions=discord.AllowedMentions.none())
-        self.catalog=catalog;self.store=store;self.workers=WorkerStore(store);self.payouts=PayoutTracker(store);self.emergency=EmergencyManager();self.runner=None;self.worker_runner=None;self.payout_runner=None;self.command_sync_task=None;self.worker_setup_lock=asyncio.Lock()
+        self.catalog=catalog;self.store=store;self.workers=WorkerStore(store);self.payouts=PayoutTracker(store);self.alerts=AlertManager()
+        self.runner=None;self.worker_runner=None;self.payout_runner=None;self.announcement_runner=None;self.conversation_runner=None
+        self.emoji_runner=None;self.command_sync_task=None;self.worker_setup_lock=asyncio.Lock();self.announcement_access={}
+        self.ai_session=None;self.currency_emojis={};self.ambient_last_reply={}
 
     async def setup_hook(self):
         guild=os.getenv('TEST_GUILD_ID','').strip()
-        if guild:
-            try:
-                target=discord.Object(id=int(guild))
-            except ValueError:
-                log.error('TEST_GUILD_ID is not a valid Discord snowflake; slash commands will sync globally.')
-                guild=''
-            else:
-                self.tree.copy_global_to(guild=target)
+        if guild and not guild.isdigit():
+            log.error('TEST_GUILD_ID is not a valid Discord snowflake; commands will sync to accessible servers and globally.')
+            guild=''
+        if os.getenv('AI_API_KEY','').strip() and os.getenv('AI_MODEL','').strip():
+            self.ai_session=aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10,connect=3,sock_read=8))
         self.command_sync_task=asyncio.create_task(self.command_sync_loop(guild))
         self.runner=asyncio.create_task(self.delivery_loop())
         self.worker_runner=asyncio.create_task(self.worker_delivery_loop())
         self.payout_runner=asyncio.create_task(self.payout_loop())
+        if self.announcement_ingestion_enabled:
+            if getattr(self.store,'supports_announcements',True):
+                self.announcement_runner=asyncio.create_task(self.announcement_ingestion_loop())
+            else:
+                log.warning('Announcement ingestion is enabled, but its private table is not installed; channel reads are paused until migration.')
+        if getattr(self.store,'supports_conversations',False):
+            self.conversation_runner=asyncio.create_task(self.conversation_cleanup_loop())
+        else:
+            log.warning('Short-lived conversation memory is disabled until its private Supabase table is installed.')
+        self.emoji_runner=asyncio.create_task(self.application_emoji_setup_loop())
+
+    async def sync_guild_commands(self,guild_id):
+        target=discord.Object(id=int(guild_id))
+        self.tree.clear_commands(guild=target)
+        self.tree.copy_global_to(guild=target)
+        await self.tree.sync(guild=target)
 
     async def command_sync_loop(self,guild_id):
         await self.wait_until_ready()
-        target=discord.Object(id=int(guild_id)) if guild_id else None
+        target_id=int(guild_id) if guild_id else None
         missing_logged=False
         global_synced=False
+        synced_guilds=set()
         while not self.is_closed():
             try:
-                if target:
-                    if self.get_guild(target.id) is None:
-                        if not missing_logged:
-                            log.warning('Configured server %s is not accessible yet; invite this bot with bot and applications.commands scopes. Slash-command registration will retry.',target.id)
-                            missing_logged=True
-                        if not global_synced:
-                            await self.tree.sync()
-                            global_synced=True
-                            log.info('Published global slash commands while the configured test guild is unavailable; propagation can take time.')
-                        await asyncio.sleep(30)
-                        continue
-                    if not global_synced:
-                        await self.tree.sync()
-                        global_synced=True
-                        log.info('Published global slash commands; propagation can take time.')
-                    await self.tree.sync(guild=target)
-                    log.info('Synced slash commands to configured test guild.')
-                else:
-                    if not global_synced:
-                        await self.tree.sync()
-                        global_synced=True
-                        log.info('Synced global slash commands; propagation can take time.')
+                if not global_synced:
+                    await self.tree.sync()
+                    global_synced=True
+                    log.info('Published global slash commands; per-server copies are synced for faster availability.')
+                for guild in list(self.guilds):
+                    if guild.id in synced_guilds:continue
+                    await self.sync_guild_commands(guild.id)
+                    synced_guilds.add(guild.id)
+                    log.info('Synced slash commands to accessible server %s.',guild.id)
+                if target_id and self.get_guild(target_id) is None:
+                    if not missing_logged:
+                        log.warning('Configured worker server %s is not accessible yet; worker commands need that server, while other accessible servers have been synced. Retrying.',target_id)
+                        missing_logged=True
+                    await asyncio.sleep(30)
+                    continue
                 return
             except discord.HTTPException as e:
                 log.warning('Slash-command sync failed (%s); retrying in 60 seconds.',type(e).__name__)
                 await asyncio.sleep(60)
 
+    async def on_guild_join(self,guild):
+        try:
+            await self.sync_guild_commands(guild.id)
+            log.info('Synced slash commands to newly accessible server %s.',guild.id)
+        except discord.HTTPException as e:
+            log.warning('Slash-command sync for newly accessible server failed (%s); restart or retry after permissions are fixed.',type(e).__name__)
+
+    async def application_emoji_setup_loop(self):
+        await self.wait_until_ready()
+        while not self.is_closed():
+            try:
+                emojis=await self.ensure_application_currency_emojis()
+                self.currency_emojis=emojis if len(emojis)==len(APPLICATION_CURRENCY_EMOJIS) else {}
+                if self.currency_emojis:
+                    return
+                log.warning('The complete application currency emoji set is not available; PNG attachments will be used while retrying.')
+            except Exception as exc:
+                self.currency_emojis={}
+                log.warning('Application currency emojis were unavailable (%s); PNG attachments will be used while retrying.',type(exc).__name__)
+            await asyncio.sleep(3600)
+
+    async def ensure_application_currency_emojis(self):
+        token=os.getenv('DISCORD_TOKEN','').strip()
+        app_id=self.application_id
+        if not token or not app_id:return {}
+        base=f'https://discord.com/api/v10/applications/{int(app_id)}/emojis'
+        headers={'Authorization':'Bot '+token}
+        timeout=aiohttp.ClientTimeout(total=20,connect=4,sock_read=12)
+        result={}
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(base,headers=headers,allow_redirects=False) as response:
+                if response.status!=200:
+                    log.warning('Could not list application emojis (HTTP %s); currency image attachments will be used.',response.status)
+                    return {}
+                body=await response.json(content_type=None)
+            existing={str(item.get('name')):item for item in body.get('items',[]) if item.get('name') and item.get('id')}
+            for key,name,filename in APPLICATION_CURRENCY_EMOJIS:
+                emoji=existing.get(name)
+                if emoji is None:
+                    path=BOT_ROOT/'data'/filename
+                    if not path.is_file():continue
+                    image_bytes=path.read_bytes()
+                    if len(image_bytes)>256*1024:
+                        log.warning('Currency emoji asset %s exceeds Discord’s 256 KiB limit.',filename)
+                        continue
+                    payload={'name':name,'image':'data:image/png;base64,'+base64.b64encode(image_bytes).decode('ascii')}
+                    async with session.post(base,headers=headers,json=payload,allow_redirects=False) as response:
+                        if response.status not in (200,201):
+                            log.warning('Could not create application currency emoji %s (HTTP %s); image attachments will be used.',name,response.status)
+                            continue
+                        emoji=await response.json(content_type=None)
+                if emoji.get('id'):
+                    result[key]=f"<:{name}:{emoji['id']}>"
+        if len(result)==len(APPLICATION_CURRENCY_EMOJIS):
+            log.info('Application currency emojis are ready for cost replies.')
+        return result
+
+    async def conversation_cleanup_loop(self):
+        await self.wait_until_ready()
+        while not self.is_closed():
+            try:await self.store.delete_expired_conversation_turns()
+            except Exception as exc:log.warning('Expired conversation-memory cleanup failed (%s); it will retry.',type(exc).__name__)
+            await asyncio.sleep(60)
+
     async def close(self):
-        await self.emergency.close()
-        for task in (self.command_sync_task,self.runner,self.worker_runner,self.payout_runner):
+        await self.alerts.close()
+        tasks=(self.command_sync_task,self.runner,self.worker_runner,self.payout_runner,self.announcement_runner,
+               self.conversation_runner,self.emoji_runner)
+        for task in tasks:
             if task:task.cancel()
-        for task in (self.command_sync_task,self.runner,self.worker_runner,self.payout_runner):
+        for task in tasks:
             if task:
                 try:await task
                 except asyncio.CancelledError:pass
+        if self.ai_session and not self.ai_session.closed:await self.ai_session.close()
         await self.store.close();self.catalog.close();await super().close()
+
+    def _set_announcement_access(self,channel_id,state):
+        previous=self.announcement_access.get(channel_id)
+        self.announcement_access[channel_id]=state
+        if state=='available' and previous!='available':
+            log.info('Announcement source %s is readable; ingestion is active.',channel_id)
+        elif state!='available' and previous!=state:
+            log.warning('Announcement source %s is not readable (%s); it will be retried.',channel_id,state)
+
+    async def ingest_announcement_channel(self,channel_id):
+        if not self.announcement_ingestion_enabled or not self.intents.message_content:
+            self._set_announcement_access(channel_id,'message_content_intent_disabled')
+            return 0
+        if not getattr(self.store,'supports_announcements',True):
+            self._set_announcement_access(channel_id,'private_table_not_installed')
+            return 0
+        try:
+            channel=self.get_channel(channel_id) or await self.fetch_channel(channel_id)
+            if not hasattr(channel,'history') or not getattr(channel,'guild',None):
+                self._set_announcement_access(channel_id,'not_a_server_message_channel')
+                return 0
+            member=getattr(channel.guild,'me',None)
+            if member and hasattr(channel,'permissions_for'):
+                permissions=channel.permissions_for(member)
+                if not permissions.view_channel or not permissions.read_message_history:
+                    self._set_announcement_access(channel_id,'view_channel_or_read_history_missing')
+                    return 0
+            cursor=await self.store.announcement_cursor(channel_id)
+            messages={}
+            if cursor:
+                async for message in channel.history(limit=INCREMENTAL_LIMIT,after=discord.Object(id=cursor),oldest_first=True):
+                    messages[int(message.id)]=message
+            else:
+                async for message in channel.history(limit=INITIAL_BACKFILL_LIMIT,oldest_first=False):
+                    messages[int(message.id)]=message
+            # Re-read a small tail each pass so edited announcements refresh without a full scan.
+            async for message in channel.history(limit=EDIT_REFRESH_LIMIT,oldest_first=False):
+                messages[int(message.id)]=message
+            now=int(time.time())
+            records=[]
+            for message in messages.values():
+                content=message_text(message)
+                if not content:continue
+                created=getattr(message,'created_at',None)
+                if not created:continue
+                edited=getattr(message,'edited_at',None)
+                records.append({
+                    'channel_id':str(channel.id),'message_id':str(message.id),
+                    'guild_id':str(channel.guild.id),'guild_name':safe_text(channel.guild.name,100),
+                    'channel_name':safe_text(channel.name,100),'content':content,
+                    'message_url':str(getattr(message,'jump_url',''))[:500],
+                    'posted_at':int(created.timestamp()),
+                    'edited_at':int(edited.timestamp()) if edited else None,'fetched_at':now,
+                })
+            await self.store.upsert_announcements(records)
+            self._set_announcement_access(channel_id,'available')
+            return len(records)
+        except discord.Forbidden:
+            self._set_announcement_access(channel_id,'permission_denied')
+        except discord.NotFound:
+            self._set_announcement_access(channel_id,'not_found_or_not_a_member')
+        except discord.HTTPException as exc:
+            self._set_announcement_access(channel_id,'discord_http_'+type(exc).__name__)
+        return 0
+
+    async def announcement_ingestion_loop(self):
+        await self.wait_until_ready()
+        if not self.intents.message_content:
+            for channel_id in ANNOUNCEMENT_CHANNELS:self._set_announcement_access(channel_id,'message_content_intent_disabled')
+            return
+        while not self.is_closed():
+            for channel_id in ANNOUNCEMENT_CHANNELS:
+                if self.is_closed():break
+                try:await self.ingest_announcement_channel(channel_id)
+                except Exception as exc:
+                    self._set_announcement_access(channel_id,'ingestion_error_'+type(exc).__name__)
+                    log.exception('Announcement ingestion failed for a configured channel; it will retry.')
+            await asyncio.sleep(ANNOUNCEMENT_SYNC_SECONDS)
+
+    async def upcoming_response(self):
+        enabled=(self.announcement_ingestion_enabled and self.intents.message_content
+                 and getattr(self.store,'supports_announcements',True))
+        if not getattr(self.store,'supports_announcements',True):
+            return 'Announcement storage is not installed yet. The private database migration is required before ingestion can be enabled.'
+        try:
+            rows=await self.store.recent_announcements(int(time.time())-365*86400,limit=1000)
+        except Exception as exc:
+            log.warning('Could not read saved announcement records (%s).',type(exc).__name__)
+            return 'I can’t read the saved announcements right now. I’ll retry when the private storage is available.'
+        return format_upcoming(rows,enabled=enabled,access_states=self.announcement_access)
+
+    async def promo_codes_response(self):
+        enabled=(self.announcement_ingestion_enabled and self.intents.message_content
+                 and getattr(self.store,'supports_announcements',True))
+        if not getattr(self.store,'supports_announcements',True):
+            return 'Promo-code lookup needs the private announcement-storage migration before it can read saved posts.'
+        try:
+            rows=await self.store.recent_announcements(0,limit=2000)
+            allowed={str(channel_id) for channel_id in ANNOUNCEMENT_CHANNELS}
+            rows=[row for row in rows if str(row.get('channel_id') or '') in allowed]
+        except Exception as exc:
+            log.warning('Could not read saved promo-code source posts (%s).',type(exc).__name__)
+            return 'I can’t read the saved announcement posts right now. I’ll retry when private storage is available.'
+        return format_promo_codes(rows,enabled=enabled,access_states=self.announcement_access)
 
     async def payout_loop(self):
         await self.wait_until_ready()
@@ -244,15 +471,76 @@ class MechBot(commands.Bot):
         rid=await self.store.create_reminder(user_id,content,parsed,zone)
         return f'Reminder #{rid} set for <t:{parsed[0]}:F> ({safe_text(zone)}). I will send a DM. Make sure your DMs are open.'
 
-    async def private_reply(self,message,text,saved=False):
+    def currency_icon_files(self):
+        files=[]
+        for label,filename in CURRENCY_ASSETS:
+            path=BOT_ROOT/'data'/filename
+            if path.is_file():files.append(discord.File(path,filename=filename,description=label+' icon'))
+        return files
+
+    async def reply_message(self,message,text,with_currency_icons=False,mention_author=True):
+        kwargs={}
+        if with_currency_icons and not self.currency_emojis:
+            files=self.currency_icon_files()
+            if files:kwargs['files']=files
+        allowed=REPLY_MENTIONS if mention_author else discord.AllowedMentions.none()
+        await message.reply(discord_text(text),mention_author=mention_author,allowed_mentions=allowed,**kwargs)
+
+    async def conversation_history_for(self,message):
+        if not getattr(self.store,'supports_conversations',False):return []
+        guild_id=str(message.guild.id) if message.guild else ''
+        try:
+            return await self.store.conversation_history(message.author.id,guild_id,message.channel.id)
+        except Exception as exc:
+            log.warning('Could not read short-lived conversation context (%s); continuing without it.',type(exc).__name__)
+            return []
+
+    async def conversation_turn_reply(self,message,user_text,assistant_text,with_currency_icons=False,ambient=False):
+        await self.reply_message(message,assistant_text,with_currency_icons=with_currency_icons,mention_author=not ambient)
+        if getattr(self.store,'supports_conversations',False):
+            guild_id=str(message.guild.id) if message.guild else ''
+            created=getattr(message,'created_at',None)
+            created_at=int(created.timestamp()) if created else None
+            try:
+                await self.store.add_conversation_turn(message.author.id,guild_id,message.channel.id,
+                                                       user_text,assistant_text,created_at=created_at)
+            except Exception as exc:
+                log.warning('Could not save short-lived conversation context (%s); the reply was still sent.',type(exc).__name__)
+
+    async def private_reply(self,message,text,saved=False,mention_author=True):
+        text=discord_text(text)
         if isinstance(message.channel,discord.DMChannel):
-            await message.channel.send(text,allowed_mentions=discord.AllowedMentions.none());return
+            await self.reply_message(message,text,mention_author=mention_author);return
         try:
             await message.author.send(text,allowed_mentions=discord.AllowedMentions.none())
-            await message.reply('I sent you a private DM.',mention_author=False,allowed_mentions=discord.AllowedMentions.none())
+            await self.reply_message(message,'I sent you a private DM.',mention_author=mention_author)
         except discord.Forbidden:
             reply='Saved, but I could not DM you. Please enable DMs; I will still try the task channel.' if saved else 'I could not DM you. Please enable DMs and try again.'
-            await message.reply(reply,mention_author=False,allowed_mentions=discord.AllowedMentions.none())
+            await self.reply_message(message,reply,mention_author=mention_author)
+
+    def ambient_chat_rate_limited(self,message):
+        guild=getattr(message,'guild',None)
+        key=(getattr(guild,'id',None),getattr(message.channel,'id',None),getattr(message.author,'id',None))
+        now=time.monotonic();previous=self.ambient_last_reply.get(key)
+        if previous is not None and now-previous<AMBIENT_CHAT_COOLDOWN_SECONDS:return True
+        self.ambient_last_reply[key]=now
+        if len(self.ambient_last_reply)>5000:
+            self.ambient_last_reply={scope:stamp for scope,stamp in self.ambient_last_reply.items() if now-stamp<3600}
+        return False
+
+    async def message_replies_to_bot(self,message):
+        reference=getattr(message,'reference',None)
+        if not reference or not getattr(reference,'message_id',None):return False
+        resolved=getattr(reference,'resolved',None)
+        author=getattr(resolved,'author',None)
+        if author is not None:return getattr(author,'id',None)==self.user.id
+        fetch=getattr(message.channel,'fetch_message',None)
+        if not fetch:return False
+        try:
+            referenced=await fetch(reference.message_id)
+            return getattr(getattr(referenced,'author',None),'id',None)==self.user.id
+        except (discord.NotFound,discord.Forbidden,discord.HTTPException):
+            return False
 
     async def on_message(self,message):
         if message.author.bot or not self.user:return
@@ -262,15 +550,36 @@ class MechBot(commands.Bot):
         prompt_reply=False
         if worker_context and not is_dm and message.channel.id==CHANNEL_ID and message.reference and message.reference.message_id:
             prompt_reply=str(message.reference.message_id)==await self.workers.get_config('prompt_message_id')
-        if not is_dm and self.user not in message.mentions and not prompt_reply:return
+        mentioned=self.user in message.mentions
+        reply_to_bot=False
+        if not is_dm and not mentioned and not prompt_reply:
+            reply_to_bot=await self.message_replies_to_bot(message)
         text=re.sub(r'<@!?'+str(self.user.id)+r'>','',message.content).strip()
+        ambient_question=False
+        parsed_reminder=parse_natural_reminder(text)
+        directed=is_dm or mentioned or prompt_reply or reply_to_bot
+        if not directed:
+            # Never jump into another member's reply chain or respond to a message aimed at a user.
+            reference=getattr(message,'reference',None)
+            if (not self.ambient_channel_chat_enabled or getattr(reference,'message_id',None)
+                    or getattr(message,'mentions',None)):
+                return
+            names=tuple(getattr(self.catalog,'weapon_names',()))+tuple(getattr(self.catalog,'mech_names',()))
+            # Only fully specified natural reminder requests may bypass the ambient question gate;
+            # the reminder itself is private and never pings the channel author.
+            if (not should_answer_unmentioned(text,names) and not parsed_reminder) or self.ambient_chat_rate_limited(message):return
+            ambient_question=True
         if not text:return
         try:
+            identity=bot_identity_response(text)
+            if identity:
+                await self.reply_message(message,identity,mention_author=not ambient_question);return
             if wants_invite_link(text):
-                await message.reply(f'Invite **ARCHΛNGLE** to a server where you can add bots: {INVITE_URL}',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
-            if re.fullmatch(r'(?:stop|cancel)\s+(?:my\s+)?emergency(?:\s+alerts?)?',text,re.I):
-                count=self.emergency.stop(message.author.id,message.author.id)
-                await self.private_reply(message,f'Stop requested for {count} emergency alert(s). An in-flight message may still arrive.');return
+                await self.reply_message(message,f'Invite **ARCHΛNGLE** to a server where you can add bots: {INVITE_URL}',mention_author=not ambient_question);return
+            if re.fullmatch(r'(?:stop|cancel)\s+(?:(?:my|the)\s+)?(?:(?:ping|dm|direct[- ]message)\s+)?loops?',text,re.I):
+                count=self.alerts.stop(message.author.id,message.author.id)
+                out=f'Stop requested for {count} of your active loop(s). An in-flight message may still arrive.' if count else 'You have no active ping loops.'
+                await self.private_reply(message,out);return
             if worker_context:
                 snooze_seconds=parse_worker_snooze(text)
                 if snooze_seconds is not None:
@@ -282,29 +591,56 @@ class MechBot(commands.Bot):
                     await self.private_reply(message,out,saved=True);return
                 if prompt_reply:
                     await self.private_reply(message,'Reply with a time and timezone, such as `8pm Asia/Kolkata`, or use /worker_time.');return
-            parsed=parse_natural_reminder(text)
-            if parsed:
+            if parsed_reminder:
                 # Check DM availability before creating, especially for private requests.
                 try:await message.author.send('I’ll send your reminder here.',allowed_mentions=discord.AllowedMentions.none())
                 except discord.Forbidden:
-                    await message.reply('Please enable DMs so I can deliver reminders.',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
-                out=await self.create_reminder(message.author.id,*parsed)
-                await self.private_reply(message,out);return
+                    await self.reply_message(message,'Please enable DMs so I can deliver reminders.',mention_author=not ambient_question);return
+                out=await self.create_reminder(message.author.id,*parsed_reminder)
+                await self.private_reply(message,out,mention_author=not ambient_question);return
             if re.search(r'\bremind\s+me\b',text,re.I):
                 await self.private_reply(message,'I can set that. Include when and what, for example: `remind me in 20 seconds to write notes`.');return
-            if text.lower() in ('help','commands','what can you do?'):
-                await self.private_reply(message,HELP);return
+            if re.fullmatch(r'(?:help|commands|show\s+help|what(?:\s+features)?\s+can\s+you\s+do|what\s+can\s+you\s+help\s+with)[?!.]*',text,re.I):
+                out=help_text(message.author.id,message.guild.id if message.guild else None)
+                if ambient_question:await self.reply_message(message,out,mention_author=False)
+                else:await self.private_reply(message,out)
+                return
+            if wants_promo_codes(text):
+                await self.reply_message(message,await self.promo_codes_response(),mention_author=not ambient_question);return
+            if wants_upcoming(text):
+                await self.reply_message(message,await self.upcoming_response(),mention_author=not ambient_question);return
+            build_request=natural_builds_request(text,self.catalog.mech_names)
+            if build_request:
+                if build_request['ambiguous']:
+                    out='Which mech do you mean? Please name one mech for the build lookup.'
+                elif build_request['unresolved']:
+                    out='I couldn’t match that mech to the catalog. Please give me its exact name for a filtered build lookup.'
+                else:
+                    try:out=builds_response(await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),build_request['query']))
+                    except Exception:
+                        log.exception('Natural-language public builds lookup failed')
+                        out='The public builds API is unavailable or returned an unexpected response.'
+                await self.reply_message(message,out,mention_author=not ambient_question);return
+            expression=parse_natural_calculation(text)
+            if expression:
+                try:out='Result: '+str(calculate(expression))
+                except (ValueError,SyntaxError) as exc:out='Cannot calculate: '+safe_text(exc,200)
+                await self.reply_message(message,out,mention_author=not ambient_question);return
+            level_note=re.fullmatch(r'(?:well\s+)?(?:mine|my\s+(?:item|weapon|mech))\s+(?:is\s+)?(?:level\s*|l)\s*(\d+)',text,re.I)
+            if level_note:
+                out=f'Got it: level {int(level_note[1])}. Which item and rank change should I calculate?'
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             if re.fullmatch(r'(?:show|list)\s+(?:my\s+)?reminders',text,re.I):
                 rows=await self.store.list_reminders(message.author.id)
                 lines=[f"#{r['id']} — <t:{r['due_at']}:F> ({r['status']}) — {safe_text(r['content'],120)}" for r in rows]
-                await self.private_reply(message,('Your reminders:\n'+'\n'.join(lines))[:1900] if lines else 'You have no active or failed reminders.');return
+                await self.private_reply(message,discord_text('**Your reminders**\n'+'\n'.join(lines)) if lines else 'You have no active or failed reminders.');return
             m=re.fullmatch(r'cancel\s+reminder\s+#?(\d+)',text,re.I)
             if m:
                 ok=await self.store.cancel_reminder(message.author.id,int(m[1]))
                 await self.private_reply(message,'Reminder cancelled; an in-flight DM may still arrive.' if ok else 'Reminder not found.');return
             if re.fullmatch(r'(?:show|list)\s+(?:my\s+)?notes',text,re.I):
                 rows=await self.store.list_notes(message.author.id)
-                await self.private_reply(message,('\n'.join(f"#{r['id']} — {safe_text(r['content'],150)}" for r in rows))[:1900] if rows else 'You have no notes.');return
+                await self.private_reply(message,discord_text('**Your notes**\n'+'\n'.join(f"#{r['id']} — {safe_text(r['content'],150)}" for r in rows)) if rows else 'You have no notes.');return
             m=re.fullmatch(r'(?:remember\s+that|note)\s+(.+)',text,re.I)
             if m:
                 content=m[1].strip()
@@ -314,7 +650,7 @@ class MechBot(commands.Bot):
                 if not is_dm:
                     try:await message.author.send('I can save your private note here.',allowed_mentions=discord.AllowedMentions.none())
                     except discord.Forbidden:
-                        await message.reply('Please enable DMs so I can confirm private notes.',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
+                        await self.reply_message(message,'Please enable DMs so I can confirm private notes.');return
                 noteid=await self.store.add_note(message.author.id,content)
                 await self.private_reply(message,f'Saved note #{noteid}.');return
             m=re.fullmatch(r'delete\s+note\s+#?(\d+)',text,re.I)
@@ -325,95 +661,138 @@ class MechBot(commands.Bot):
             if m:
                 tzinfo(m[1]);await self.store.set_timezone(message.author.id,m[1])
                 await self.private_reply(message,'Timezone set to '+safe_text(m[1])+'.');return
-            # Natural-language questions go through the AI brain before exact-name fallback.
-            reply=await answer_question_with_brain(os.getenv('AI_BASE_URL','https://api.openai.com/v1'),os.getenv('AI_API_KEY',''),os.getenv('AI_MODEL',''),text,self.catalog)
+            # Exact catalog lookups are local, so they avoid unnecessary provider round trips.
+            weapon_name=direct_item_lookup(text,self.catalog.weapon_names)
+            if weapon_name:
+                rank_match=re.search(r'\brank\s*(\d+)\b',text,re.I);level_match=re.search(r'\blevel\s*(\d+)\b',text,re.I)
+                rank=int(rank_match[1]) if rank_match else None;level=int(level_match[1]) if level_match else None
+                out=weapon_response(self.catalog.weapon(weapon_name,rank,level),rank,level)
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
+            mech_name=direct_item_lookup(text,self.catalog.mech_names)
+            if mech_name:
+                out=mech_response(self.catalog.mech_profile(mech_name))
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
+            conversation_history=await self.conversation_history_for(message)
+            reply=await answer_question_with_brain(os.getenv('AI_BASE_URL','https://api.openai.com/v1'),
+                os.getenv('AI_API_KEY',''),os.getenv('AI_MODEL',''),text,self.catalog,session=self.ai_session,
+                conversation_history=conversation_history,currency_emoji_map=self.currency_emojis)
             if reply:
-                await message.reply(reply[:1900],mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
+                has_costs=bool(re.search(r'\b(?:upgrade costs|cost:)\s+\*\*',reply,re.I))
+                await self.conversation_turn_reply(message,text,reply,with_currency_icons=has_costs,ambient=ambient_question);return
             names=find_mentions(text,self.catalog.weapon_names)
             if names:
                 m=re.search(r'\brank\s*(\d+)\b',text,re.I);l=re.search(r'\blevel\s*(\d+)\b',text,re.I)
                 rank=int(m[1]) if m else None;level=int(l[1]) if l else None
                 out='\n\n'.join(weapon_response(self.catalog.weapon(n,rank,level),rank,level) for n in names[:3])
-                await message.reply(out[:1900],mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             names=find_mentions(text,self.catalog.mech_names)
             if names:
                 out='\n\n'.join(mech_response(self.catalog.mech_profile(n)) for n in names[:3])
-                await message.reply(out[:1900],mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             if GAME_WORDS.search(text):
-                await message.reply('I don’t have reviewed information for that game question yet, so I won’t guess. Try `/weapon`, `/mech`, or `/builds` for supported lookups.',mention_author=False,allowed_mentions=discord.AllowedMentions.none());return
-            await message.reply('General AI is not configured yet. Use /help to see what I can do.',mention_author=False,allowed_mentions=discord.AllowedMentions.none())
-        except ValueError as e:await self.private_reply(message,safe_text(e))
+                out='I don’t have reviewed information for that game question yet, so I won’t guess. Try `/weapon`, `/mech`, `/builds`, or `/upcoming` for supported lookups.'
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
+            await self.reply_message(message,'General AI is not configured yet. Use /help to see what I can do.',mention_author=not ambient_question)
+        except ValueError as e:
+            if ambient_question:await self.reply_message(message,safe_text(e),mention_author=False)
+            else:await self.private_reply(message,safe_text(e))
         except Exception:
-            log.exception('Mention handling failed')
-            await self.private_reply(message,'Sorry, that request failed. Please try again or use /help.')
+            log.exception('Message handling failed')
+            if ambient_question:await self.reply_message(message,'Sorry, that question failed. Please try again or mention me for help.',mention_author=False)
+            else:await self.private_reply(message,'Sorry, that request failed. Please try again or use /help.')
 
 
 def install_commands(bot):
     tree=bot.tree
     @tree.command(name='help',description='Show bot features and examples')
-    async def help_cmd(i:discord.Interaction):await i.response.send_message(HELP,ephemeral=True)
+    async def help_cmd(i:discord.Interaction):await i.response.send_message(help_text(i.user.id,i.guild_id),ephemeral=True)
 
     @tree.command(name='invite',description='Get the link to add this bot to a server')
     async def invite(i:discord.Interaction):
         await i.response.send_message(f'Invite **ARCHΛNGLE** to a server where you can add bots: {INVITE_URL}',ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
 
-    @tree.command(name='emergency_channel',description='Start bounded emergency pings in this channel')
-    @app_commands.describe(member='Member to alert',interval_seconds='At least 5 seconds',duration_seconds='Maximum 1800 seconds',reason='Short emergency message')
-    async def emergency_channel(i:discord.Interaction,member:discord.Member,interval_seconds:app_commands.Range[int,5,1800],duration_seconds:app_commands.Range[int,5,1800],reason:str='Please check this emergency'):
-        if i.user.id not in OPERATORS or not i.guild or i.guild.id!=GUILD_ID:
-            await i.response.send_message('Only the two authorized IDs may start alerts in the configured server.',ephemeral=True);return
+    async def start_channel_alert(i,member,interval_seconds,duration_seconds,reason):
+        if not i.guild:
+            await i.response.send_message('Channel pings can only be started in a server.',ephemeral=True);return
+        if i.user.id not in OPERATORS:
+            await i.response.send_message('Only the two authorized operator IDs may start channel ping loops.',ephemeral=True);return
         if member.bot or not isinstance(i.channel,discord.TextChannel) or not i.guild.me:
             await i.response.send_message('Choose a human member and a server text channel.',ephemeral=True);return
         perms=i.channel.permissions_for(i.guild.me);targetperms=i.channel.permissions_for(member)
-        if not (perms.view_channel and perms.send_messages and perms.read_message_history and targetperms.view_channel):
-            await i.response.send_message('The bot needs channel access, Send Messages and Read History; the target must be able to view the channel.',ephemeral=True);return
-        try:validate_emergency(interval_seconds,duration_seconds)
+        if not (perms.view_channel and perms.send_messages and targetperms.view_channel):
+            await i.response.send_message('The bot needs View Channel and Send Messages; the target must be able to view the channel.',ephemeral=True);return
+        try:validate_alert(interval_seconds,duration_seconds)
         except ValueError as e:await i.response.send_message(str(e),ephemeral=True);return
-        if not bot.emergency.available(member.id,'channel'):
-            await i.response.send_message('An alert is already active for that member and mode, or the five-alert limit has been reached.',ephemeral=True);return
-        reason=safe_text(reason.strip() or 'Please check this emergency',180)
-        await i.response.send_message(f'🚨 Emergency alert queued for user `{member.id}`: every {interval_seconds}s for up to {duration_seconds}s. Stop with /emergency_stop.',allowed_mentions=discord.AllowedMentions.none())
-        try:
-            anchor=await i.original_response()
-            bot.emergency.start(member,'channel',anchor,interval_seconds,duration_seconds,i.user.id,reason)
-        except ValueError as e:await i.followup.send('Alert not started: '+str(e),ephemeral=True)
-
-    @tree.command(name='emergency_dm',description='Start bounded emergency alerts by direct message')
-    @app_commands.describe(member='Member to alert',interval_seconds='At least 5 seconds',duration_seconds='Maximum 1800 seconds',reason='Short emergency message')
-    async def emergency_dm(i:discord.Interaction,member:discord.Member,interval_seconds:app_commands.Range[int,5,1800],duration_seconds:app_commands.Range[int,5,1800],reason:str='Please check this emergency'):
-        if i.user.id not in OPERATORS or not i.guild or i.guild.id!=GUILD_ID:
-            await i.response.send_message('Only the two authorized IDs may start alerts in the configured server.',ephemeral=True);return
-        if member.bot:
-            await i.response.send_message('Choose a human member.',ephemeral=True);return
-        try:validate_emergency(interval_seconds,duration_seconds)
-        except ValueError as e:await i.response.send_message(str(e),ephemeral=True);return
-        if not bot.emergency.available(member.id,'dm'):
-            await i.response.send_message('An alert is already active for that member and mode, or the five-alert limit has been reached.',ephemeral=True);return
-        reason=safe_text(reason.strip() or 'Please check this emergency',180)
+        if not bot.alerts.available(member.id,'channel'):
+            await i.response.send_message('A loop is already active for that target and destination, or the five-loop limit has been reached.',ephemeral=True);return
+        reason=safe_text(reason.strip() or 'Please check this',180)
+        total_messages=1+(duration_seconds-1)//interval_seconds
+        allowed=discord.AllowedMentions(everyone=False,users=[discord.Object(id=member.id)],roles=False,replied_user=False)
         await i.response.defer(ephemeral=True)
         try:
-            anchor=await member.send(f'🚨 An emergency alert was started by a server operator: {reason}. Repeated replies will arrive every {interval_seconds}s for up to {duration_seconds}s. Send `stop emergency` in this DM or use /emergency_stop to stop.',allowed_mentions=discord.AllowedMentions.none())
-            key=bot.emergency.start(member,'dm',anchor,interval_seconds,duration_seconds,i.user.id,reason)
-            await i.followup.send(f'DM alert {key} started. The target or an authorized operator can use /emergency_stop.',ephemeral=True)
-        except discord.HTTPException:await i.followup.send('Could not send the initial DM. The alert was not started; the member may have DMs closed.',ephemeral=True)
-        except ValueError as e:await i.followup.send('Alert not started: '+str(e),ephemeral=True)
+            # The first notification is sent immediately. Each message contains exactly one
+            # explicit target mention; follow-ups are new channel messages, not silent replies.
+            destination=i.channel
+            await destination.send(f'{member.mention} 🔔 Ping loop (1/{total_messages}): {reason} — use `/stop_loop` to stop.',allowed_mentions=allowed)
+        except (discord.Forbidden,discord.HTTPException):
+            await i.followup.send('I could not send the first ping. Check the bot’s View Channel/Send Messages permissions and the target’s channel access; no loop was started.',ephemeral=True)
+            return
+        try:
+            key=bot.alerts.start(member,'channel',destination,interval_seconds,duration_seconds,i.user.id,reason)
+        except ValueError as e:
+            await i.followup.send('The first ping was sent, but follow-ups were not started: '+str(e),ephemeral=True);return
+        await i.followup.send(f'Ping loop `{key}` started. The first ping was sent immediately; up to {total_messages-1} more messages will contain one ping each, every {interval_seconds}s, for at most {duration_seconds}s. Stop with `/stop_loop`.',ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
 
-    @tree.command(name='emergency_stop',description='Stop your emergency alerts or, if authorized, alerts for a member')
-    @app_commands.describe(member='Optional member to stop; only the authorized operators may stop others')
-    async def emergency_stop(i:discord.Interaction,member:discord.User=None):
-        if member and member.id!=i.user.id and i.user.id not in OPERATORS:
-            await i.response.send_message('You can only stop alerts directed at yourself.',ephemeral=True);return
-        target=member.id if member else i.user.id
-        count=bot.emergency.stop(i.user.id,target)
-        await i.response.send_message(f'Stop requested for {count} active channel and DM alert(s) for user `{target}`. An in-flight message may still arrive.',ephemeral=True)
+    @tree.command(name='ping_loop',description='Send one immediate ping, then start a bounded channel ping loop')
+    @app_commands.guild_only()
+    @app_commands.describe(member='Member to ping',interval_seconds='At least 5 seconds',duration_seconds='Maximum 1800 seconds',reason='Short message')
+    async def ping_loop(i:discord.Interaction,member:discord.Member,interval_seconds:app_commands.Range[int,5,1800],duration_seconds:app_commands.Range[int,5,1800],reason:str='Please check this'):
+        await start_channel_alert(i,member,interval_seconds,duration_seconds,reason)
 
-    @tree.command(name='emergency_stop_user',description='Stop all channel and DM emergency alerts for one user')
-    @app_commands.describe(member='The user whose ongoing alerts should stop')
-    async def emergency_stop_user(i:discord.Interaction,member:discord.User):
+    @tree.command(name='dm_loop',description='Start a bounded direct-message loop')
+    @app_commands.guild_only()
+    @app_commands.describe(member='Member to message',interval_seconds='At least 5 seconds',duration_seconds='Maximum 1800 seconds',reason='Short message')
+    async def dm_loop(i:discord.Interaction,member:discord.Member,interval_seconds:app_commands.Range[int,5,1800],duration_seconds:app_commands.Range[int,5,1800],reason:str='Please check this'):
+        if not i.guild:
+            await i.response.send_message('DM loops must be started from a server.',ephemeral=True);return
         if i.user.id not in OPERATORS:
-            await i.response.send_message('Only the two authorized operators may stop alerts for another user. Use /emergency_stop for your own alerts.',ephemeral=True);return
-        count=bot.emergency.stop(i.user.id,member.id)
-        await i.response.send_message(f'Stop requested for {count} channel and DM alert(s) for user `{member.id}`. An in-flight message may still arrive.',ephemeral=True)
+            await i.response.send_message('Only the two authorized operator IDs may start DM loops.',ephemeral=True);return
+        if not i.guild or member.bot:
+            await i.response.send_message('Choose a human member from a server.',ephemeral=True);return
+        try:validate_alert(interval_seconds,duration_seconds)
+        except ValueError as e:await i.response.send_message(str(e),ephemeral=True);return
+        if not bot.alerts.available(member.id,'dm'):
+            await i.response.send_message('A loop is already active for that member and destination, or the five-loop limit has been reached.',ephemeral=True);return
+        reason=safe_text(reason.strip() or 'Please check this',180)
+        await i.response.defer(ephemeral=True)
+        try:
+            anchor=await member.send(f'🔔 A direct-message loop was started by an authorized operator: {reason}. Additional messages will arrive every {interval_seconds}s for up to {duration_seconds}s. Use `/stop_loop` to stop it.',allowed_mentions=discord.AllowedMentions.none())
+            key=bot.alerts.start(member,'dm',anchor,interval_seconds,duration_seconds,i.user.id,reason)
+            await i.followup.send(f'DM loop `{key}` started. You or an authorized operator can stop it with `/stop_loop`.',ephemeral=True)
+        except discord.HTTPException:await i.followup.send('Could not send the initial DM, so the loop did not start. The member may have DMs closed.',ephemeral=True)
+        except ValueError as e:await i.followup.send('Loop not started: '+str(e),ephemeral=True)
+
+    @tree.command(name='stop_loop',description='Stop your loops or, if authorized, loops for a member')
+    @app_commands.describe(member='Optional member; other users can only be selected by an authorized operator')
+    async def stop_loop(i:discord.Interaction,member:discord.User=None):
+        if member and member.id!=i.user.id and i.user.id not in OPERATORS:
+            await i.response.send_message('You can stop only your own loops.',ephemeral=True);return
+        target=member.id if member else i.user.id
+        count=bot.alerts.stop(i.user.id,target)
+        text=f'Stop requested for {count} channel and DM loop(s) for user `{target}`. An in-flight message may still arrive.' if count else f'No active loops found for user `{target}`.'
+        await i.response.send_message(discord_text(text),ephemeral=True)
+
+    @tree.command(name='stop_user_loops',description='Stop all channel and DM loops for one user')
+    @app_commands.guild_only()
+    @app_commands.describe(member='The user whose active loops should stop')
+    async def stop_user_loops(i:discord.Interaction,member:discord.User):
+        if not i.guild:
+            await i.response.send_message('This operator command must be used in a server.',ephemeral=True);return
+        if i.user.id not in OPERATORS:
+            await i.response.send_message('Only the two authorized operator IDs may stop loops for another user. Use `/stop_loop` for your own loops.',ephemeral=True);return
+        count=bot.alerts.stop(i.user.id,member.id)
+        text=f'Stop requested for {count} channel and DM loop(s) for user `{member.id}`. An in-flight message may still arrive.' if count else f'No active loops found for user `{member.id}`.'
+        await i.response.send_message(discord_text(text),ephemeral=True)
 
     @tree.command(name='worker_setup',description='Set up the database worker role and send the initial time request')
     async def worker_setup(i:discord.Interaction):
@@ -509,6 +888,31 @@ def install_commands(bot):
         choices=[n for n in bot.catalog.weapon_names if current.casefold() in n.casefold()][:25]
         return [app_commands.Choice(name=n,value=n) for n in choices]
 
+    @tree.command(name='upgrade_cost',description='Calculate upgrade costs and optional missing-Blueprint purchase cost')
+    @app_commands.describe(item='Exact weapon variant or mech name',from_rank='Current rank',to_rank='Target rank',from_level='Optional current level',to_level='Optional target level',blueprints_owned='Blueprints already owned for this item; defaults to 0')
+    async def upgrade_cost(i:discord.Interaction,item:str,from_rank:app_commands.Range[int,1,6],to_rank:app_commands.Range[int,1,6],from_level:app_commands.Range[int,1,7]=None,to_level:app_commands.Range[int,1,7]=None,blueprints_owned:app_commands.Range[int,0,1000000]=0):
+        if to_rank<from_rank:
+            await i.response.send_message('Target rank cannot be lower than the current rank.',ephemeral=True);return
+        if (from_level is None)!=(to_level is None):
+            await i.response.send_message('Provide both levels, or leave both blank for the calculator’s max-level-to-next-rank transition.',ephemeral=True);return
+        if to_rank==from_rank and from_level is None:
+            await i.response.send_message('For a same-rank calculation, provide both the current and target levels.',ephemeral=True);return
+        if to_rank==from_rank and to_level<from_level:
+            await i.response.send_message('The target level cannot be lower than the current level within the same rank.',ephemeral=True);return
+        result=bot.catalog.upgrade_cost(item.strip(),from_rank,to_rank,from_level,to_level)
+        if not result:
+            await i.response.send_message('I could not resolve a confirmed cost for that exact item, variant, and transition. I won’t substitute another variant or guess.',ephemeral=True);return
+        out=upgrade_cost_response(result['item'],result,bot.currency_emojis,blueprints_owned=blueprints_owned)
+        files=[] if bot.currency_emojis else bot.currency_icon_files()
+        kwargs={'ephemeral':True,'allowed_mentions':discord.AllowedMentions.none()}
+        if files:kwargs['files']=files
+        await i.response.send_message(discord_text(out),**kwargs)
+
+    @upgrade_cost.autocomplete('item')
+    async def upgrade_cost_autocomplete(i:discord.Interaction,current:str):
+        names=sorted(set(bot.catalog.weapon_names+bot.catalog.mech_names),key=str.casefold)
+        return [app_commands.Choice(name=n,value=n) for n in names if current.casefold() in n.casefold()][:25]
+
     @tree.command(name='mech',description='Get a short mech review and key details')
     async def mech(i:discord.Interaction,name:str):
         await i.response.send_message(mech_response(bot.catalog.mech_profile(name)),ephemeral=True)
@@ -573,6 +977,16 @@ def install_commands(bot):
         try:out=builds_response(await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),mech))
         except Exception:log.exception('Public builds lookup failed');out='The public builds API is unavailable or returned an unexpected response.'
         await i.followup.send(out,ephemeral=True)
+
+    @tree.command(name='upcoming',description='Show upcoming events in the configured announcement channels')
+    async def upcoming(i:discord.Interaction):
+        await i.response.defer(ephemeral=True)
+        await i.followup.send(discord_text(await bot.upcoming_response()),ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
+
+    @tree.command(name='promo_codes',description='Show recent ECR and promo-code mentions from announcement channels')
+    async def promo_codes(i:discord.Interaction):
+        await i.response.defer(ephemeral=True)
+        await i.followup.send(discord_text(await bot.promo_codes_response()),ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
 
     @tree.command(name='recent',description='Read recent posts in a channel you can access')
     @app_commands.describe(channel='A server text channel',limit='1 to 10 recent messages')

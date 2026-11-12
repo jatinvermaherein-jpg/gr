@@ -111,7 +111,9 @@ def parse_natural_reminder(text):
     pattern=r'\s*(?:(?:hey|hi)[, ]+)?(?:please\s+)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?)?remind\s+me\s+('+when+r')\s+(?:to\s+|that\s+)?(.+?)\s*'
     m=re.fullmatch(pattern,text,re.I)
     if not m:return None
-    return normalize_duration_spec(m.group(1)),m.group(2).strip()
+    content=re.sub(r'[?!.]+$','',m.group(2).strip()).strip()
+    if not content:return None
+    return normalize_duration_spec(m.group(1)),content
 
 
 def next_occurrence(kind, due, interval, hour, minute, zone_name, now):
