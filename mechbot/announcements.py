@@ -28,7 +28,8 @@ _PROMO_QUERY_START = re.compile(
 _PROMO_CODE_LABEL = re.compile(
     r'\b(?:ecr\s+promo(?:tional)?(?:[\s_-]+codes?)?|ecr\s+codes?|'
     r'event\s+crate\s+rush\s+(?:promo(?:tional)?[\s_-]+)?codes?|'
-    r'promo(?:tional)?(?:[\s_-]*codes?)?|redeem\s+codes?|ecr)\b', re.I)
+    r'promo(?:tional)?(?:[\s_-]*codes?)?|redeem\s+codes?)\b', re.I)
+_ECR_REFERENCE = re.compile(r'\b(?:ecr|event\s+crate\s+rush)\b', re.I)
 _PROMO_CODE_TOKEN = re.compile(r'(?<![A-Za-z0-9])([A-Za-z0-9][A-Za-z0-9_-]{2,31})(?![A-Za-z0-9])')
 _PROMO_CODE_STOPWORDS = {'CODE','CODES','PROMO','PROMOS','ECR','REDEEM','USE','HERE','BELOW','ABOVE',
                          'AVAILABLE','VALID','EXPIRED','INVALID','NONE','NULL','TBA','NOW','PLEASE'}
@@ -78,16 +79,28 @@ def wants_upcoming(text):
 
 
 def wants_promo_codes(text):
-    """Recognize explicit ECR/promo-code lookups, not ordinary mentions or statements."""
+    """Recognize explicit code requests; a bare ECR query is event information, not a code lookup."""
     value=str(text or '').strip()
     compact=re.sub(r'\s+',' ',value).strip(' .!?').casefold()
-    ecr_short_query=compact in {'any ecr','latest ecr','current ecr'}
-    if not _PROMO_CONTEXT.search(value) and not ecr_short_query:return False
+    if not _PROMO_CONTEXT.search(value):return False
     bare={'promo','promo code','promo codes','promocode','promocodes','promo-code','promo-codes',
           'ecr code','ecr codes','ecr promo','ecr promo code','ecr promo codes',
-          'event crate rush promo codes','any ecr','latest ecr','current ecr'}
+          'event crate rush promo codes'}
     return bool(compact in bare or '?' in value or _PROMO_QUERY_START.match(value)
                 or re.search(r'\bplease[.!]*$',value,re.I))
+
+
+def wants_ecr_info(text):
+    """Recognize Event Crate Rush questions separately from explicit promo-code requests."""
+    value=str(text or '').strip()
+    if not _ECR_REFERENCE.search(value):return False
+    if re.search(r'\b(?:promo(?:tional)?|redeem|codes?)\b',value,re.I):return False
+    compact=re.sub(r'\s+',' ',value).strip(' .!?').casefold()
+    bare={'ecr','any ecr','latest ecr','current ecr','recent ecr','upcoming ecr','event crate rush'}
+    if compact in bare:return True
+    return bool('?' in value or re.search(
+        r'\b(?:what|when|where|why|how|tell|show|latest|current|recent|upcoming|next|event|'
+        r'schedule|details?|guides?|updates?|status|rewards?|live|open|active)\b',value,re.I))
 
 
 def _looks_like_promo_code(value):
@@ -165,7 +178,7 @@ def format_promo_codes(rows,*,enabled,access_states=None,limit=MAX_PROMO_CODE_IT
         if rows:
             return 'I found no clearly labeled promo codes in the saved announcement posts. I won’t guess from unlabeled text.'
         return 'I haven’t saved announcement posts from the configured channels yet. I’ll keep retrying their initial backfill and updates.'
-    lines=['**Latest saved ECR/Promo-code mentions from configured channels**']
+    lines=['**Latest saved promo-code mentions from configured channels**']
     footer='Codes are not validated in-game; check the linked post before redeeming. Validity may have changed since posting.'
     if not enabled:footer+=' Announcement ingestion is off; these are cached mentions and may be stale.'
     for item in items:
@@ -336,3 +349,48 @@ def format_upcoming(rows, *, enabled, access_states=None, now=None):
             return 'I haven’t saved announcements yet. One or more configured channels are not readable right now; I’ll retry automatically when access is available.'
         return 'I haven’t saved announcements yet. I’ll keep retrying the configured channels as soon as the bot can read them.'
     return 'I found no future-dated event posts in the saved announcements. A recent post without an explicit year may still be worth checking in its source channel.'
+
+
+def ecr_event_items(rows,limit=5):
+    """Keep saved ECR event posts separate from explicitly labeled promo-code posts."""
+    limit=max(0,int(limit))
+    if not limit:return []
+    ordered=sorted(rows or [],key=lambda row:int(row.get('posted_at') or 0),reverse=True)
+    result=[]
+    for row in ordered:
+        text=str(row.get('content') or '').strip()
+        if not text or not _ECR_REFERENCE.search(text) or _PROMO_CODE_LABEL.search(text):continue
+        excerpt=re.sub(r'\s+',' ',_safe_announcement_text(text)).strip()
+        if len(excerpt)>480:
+            excerpt=excerpt[:479].rsplit(' ',1)[0].rstrip(' ,;:')+'…'
+        result.append({'excerpt':excerpt,'posted_at':int(row.get('posted_at') or 0),
+                       'source_label':_source_label(row),'url':str(row.get('message_url') or '')})
+        if len(result)>=max(0,int(limit)):break
+    return result
+
+
+def format_ecr_events(rows,*,enabled,access_states=None,limit=5):
+    """Present ECR event updates only; promo-code posts use their separate lookup."""
+    rows=list(rows or [])
+    items=ecr_event_items(rows,limit=limit)
+    if not items:
+        if not enabled:
+            return ('ECR means Event Crate Rush; it is separate from promo codes. Current ECR updates need '
+                    'announcement reading and channel access enabled.')
+        if access_states and any(state!='available' for state in access_states.values()):
+            return ('I don’t have a saved ECR event update yet because one or more configured channels are not readable. '
+                    'I’ll retry when access is available. ECR event updates and promo codes are separate lookups.')
+        if rows:
+            return 'I found no saved ECR event updates in the configured channels. Promo codes are looked up separately.'
+        return 'I haven’t saved an ECR event update from the configured channels yet. I’ll keep retrying; promo codes are looked up separately.'
+    lines=['**Saved Event Crate Rush updates** *(event information, not promo codes)*']
+    for item in items:
+        label=item['source_label'].replace('[','').replace(']','')
+        source=f"[#{label.lstrip('#')}]({item['url']})" if item['url'].startswith('https://discord.com/channels/') else label
+        posted=f" · posted <t:{item['posted_at']}:d>" if item['posted_at']>0 else ''
+        line=f"• {item['excerpt']}{posted} · {source}"
+        if len('\n'.join([*lines,line]))>1800:
+            lines.append('• More ECR updates omitted to fit Discord.')
+            break
+        lines.append(line)
+    return '\n'.join(lines)

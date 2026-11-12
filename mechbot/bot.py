@@ -18,7 +18,7 @@ from .catalog import Catalog, initialize_snapshot
 from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, tzinfo
 from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, weapon_response, mech_response, fetch_builds, builds_response, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
-from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INITIAL_BACKFILL_LIMIT, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_promo_codes, format_promo_codes
+from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INITIAL_BACKFILL_LIMIT, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes, format_promo_codes
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
 from .alerts import AlertManager, OPERATORS, validate as validate_alert
@@ -59,7 +59,8 @@ Use `/help` anytime to see this command list.
 • `/mech name` — a short mech review with key details and listed purchase price.
 • `/builds [mech]` — get the best-tagged community loadout for a mech, or browse recent builds.
 • `/upcoming` — check dated and recent event posts from the configured announcement channels.
-• `/promo_codes` — check the latest saved, explicitly labeled ECR/promo-code posts; validity is not guaranteed.
+• `/ecr` — check saved Event Crate Rush event updates; ECR event info is separate from promo codes.
+• `/promo_codes` — check the latest saved, explicitly labeled promo-code posts; validity is not guaranteed.
 • `/recent` — read recent posts in a channel you can access.
 • `/timezone` — set your IANA timezone; default is UTC.
 • `/remind`, `/reminders`, `/cancel` — private DM reminders; recurring reminders are supported.
@@ -68,7 +69,7 @@ Use `/help` anytime to see this command list.
 • `/worker_setup` — set up the worker role and send the initial time request.
 • `/stop_loop` — stop your own active ping loops.
 • `/calc` — calculate simple arithmetic; you can also ask “what’s 240 plus 60?” or “calculate 240 / 60”.
-• Ask naturally for “ANY ECR”, upgrade costs, builds, event dates, or reminders such as “remind me in 20 minutes to check the event”—no slash command is needed. Reminder requests must include when and what; they are delivered privately by DM.
+• Ask naturally for “latest ECR event” or “latest promo code”—these are separate lookups—plus upgrade costs, builds, event dates, or reminders such as “remind me in 20 minutes to check the event”. Reminder requests must include when and what; they are delivered privately by DM.
 • Channel questions — when the server has opted into natural chat, ask normally without a bot mention. Only apparent questions/lookups and explicit, fully specified reminder requests get a reply; ambient replies do not ping the author and have a short per-user cooldown.
 You can also mention me: `@bot remind me in 20 seconds to check the event`, `@bot review EM Rifle 10`, `@bot how much to upgrade Redox from rank 4 to 5?`, or `@bot how do I invite you?`. Reviews and upgrade costs use confirmed game data; missing details are never guessed.'''
 
@@ -336,6 +337,20 @@ class MechBot(commands.Bot):
             log.warning('Could not read saved announcement records (%s).',type(exc).__name__)
             return 'I can’t read the saved announcements right now. I’ll retry when the private storage is available.'
         return format_upcoming(rows,enabled=enabled,access_states=self.announcement_access)
+
+    async def ecr_response(self):
+        enabled=(self.announcement_ingestion_enabled and self.intents.message_content
+                 and getattr(self.store,'supports_announcements',True))
+        if not getattr(self.store,'supports_announcements',True):
+            return 'ECR event lookup needs the private announcement-storage migration before it can read saved posts.'
+        try:
+            rows=await self.store.recent_announcements(int(time.time())-365*86400,limit=2000)
+            allowed={str(channel_id) for channel_id in ANNOUNCEMENT_CHANNELS}
+            rows=[row for row in rows if str(row.get('channel_id') or '') in allowed]
+        except Exception as exc:
+            log.warning('Could not read saved ECR event posts (%s).',type(exc).__name__)
+            return 'I can’t read saved ECR event posts right now. I’ll retry when private storage is available.'
+        return format_ecr_events(rows,enabled=enabled,access_states=self.announcement_access)
 
     async def promo_codes_response(self):
         enabled=(self.announcement_ingestion_enabled and self.intents.message_content
@@ -607,6 +622,8 @@ class MechBot(commands.Bot):
                 return
             if wants_promo_codes(text):
                 await self.reply_message(message,await self.promo_codes_response(),mention_author=not ambient_question);return
+            if wants_ecr_info(text):
+                await self.reply_message(message,await self.ecr_response(),mention_author=not ambient_question);return
             if wants_upcoming(text):
                 await self.reply_message(message,await self.upcoming_response(),mention_author=not ambient_question);return
             build_request=natural_builds_request(text,self.catalog.mech_names)
@@ -992,7 +1009,12 @@ def install_commands(bot):
         await i.response.defer(ephemeral=True)
         await i.followup.send(discord_text(await bot.upcoming_response()),ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
 
-    @tree.command(name='promo_codes',description='Show recent ECR and promo-code mentions from announcement channels')
+    @tree.command(name='ecr',description='Show Event Crate Rush event updates, separate from promo codes')
+    async def ecr(i:discord.Interaction):
+        await i.response.defer(ephemeral=True)
+        await i.followup.send(discord_text(await bot.ecr_response()),ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
+
+    @tree.command(name='promo_codes',description='Show explicitly labeled promo-code mentions from announcements')
     async def promo_codes(i:discord.Interaction):
         await i.response.defer(ephemeral=True)
         await i.followup.send(discord_text(await bot.promo_codes_response()),ephemeral=True,allowed_mentions=discord.AllowedMentions.none())

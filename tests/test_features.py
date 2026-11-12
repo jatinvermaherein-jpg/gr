@@ -19,11 +19,13 @@ from mechbot.payouts import PayoutTracker, parse_snapshot
 from mechbot.alerts import AlertManager, validate
 from mechbot.bot import MechBot, install_commands, OPERATORS, REPLY_MENTIONS, help_text
 from mechbot.assistant import (wants_invite_link, bot_identity_response, direct_item_lookup, should_answer_unmentioned,
-                               parse_natural_calculation, natural_builds_request, builds_response, discord_text,
+                               parse_natural_calculation, natural_builds_request, builds_response, _archive_attribution,
+                               _archive_fallback, _supported_game_reply, discord_text,
                                naturalize_discord_reply, weapon_response, mech_response,
                                game_knowledge_context, answer_question_with_brain, upgrade_cost_response, general_ai)
-from mechbot.announcements import (DEFAULT_ANNOUNCEMENT_CHANNELS, INITIAL_BACKFILL_LIMIT, wants_upcoming, message_text, upcoming_items,
-                                   format_upcoming, wants_promo_codes, promo_code_items, format_promo_codes)
+from mechbot.announcements import (DEFAULT_ANNOUNCEMENT_CHANNELS, INITIAL_BACKFILL_LIMIT, wants_upcoming, wants_ecr_info,
+                                   message_text, upcoming_items, ecr_event_items, format_upcoming, format_ecr_events,
+                                   wants_promo_codes, promo_code_items, format_promo_codes)
 from mechbot.catalog import (ARCHIVE, Catalog, _candidate_fingerprint, apply_user_confirmed_ocr_review,
                              apply_user_confirmed_public_review, apply_user_confirmed_drive_ocr_review, initialize_snapshot)
 from mechbot.timeparse import next_daily, parse_spec, parse_natural_reminder
@@ -62,12 +64,20 @@ class AnnouncementTests(unittest.TestCase):
         self.assertTrue(wants_promo_codes('Any ECR promo codes?'))
         self.assertTrue(wants_promo_codes('latest ECR code'))
         self.assertTrue(wants_promo_codes('ECR promo codes'))
-        self.assertTrue(wants_promo_codes('ANY ECR'))
+        self.assertTrue(wants_promo_codes('latest ECR code?'))
         self.assertTrue(wants_promo_codes('PROMOCODE'))
         self.assertTrue(wants_promo_codes('promo code please'))
-        self.assertFalse(wants_promo_codes('ECR promo codes by MRX'))
+        self.assertFalse(wants_promo_codes('ANY ECR'))
+        self.assertFalse(wants_promo_codes('latest ECR'))
+        self.assertFalse(wants_promo_codes('current ECR'))
         self.assertFalse(wants_promo_codes('What is the next event?'))
         self.assertFalse(wants_promo_codes('What is ECR?'))
+        for query in ('ECR','ANY ECR','latest ECR','current ECR','What is ECR?',
+                      'Event Crate Rush schedule','ECR event details'):
+            with self.subTest(query=query):self.assertTrue(wants_ecr_info(query))
+        self.assertFalse(wants_ecr_info('latest ECR promo codes'))
+        self.assertTrue(should_answer_unmentioned('latest ECR'))
+        self.assertTrue(should_answer_unmentioned('ANY ECR'))
         self.assertTrue(should_answer_unmentioned('latest ECR code'))
         self.assertFalse(should_answer_unmentioned('ECR promo codes by MRX'))
         rows=[
@@ -94,6 +104,27 @@ class AnnouncementTests(unittest.TestCase):
         compact=promo_code_items([{'content':'PROMOCODE: NEW2026','posted_at':450}])
         self.assertEqual([item['code'] for item in compact],['NEW2026'])
         self.assertEqual(promo_code_items([{'content':'Try NEW2026 now','posted_at':500}]),[])
+
+    def test_ecr_event_updates_are_separate_from_promo_code_posts(self):
+        rows=[
+            {'content':'Event Crate Rush update: next event starts November 20. New crate rewards will be announced.',
+             'posted_at':200,'channel_id':'1','channel_name':'events','guild_name':'Game Server',
+             'message_url':'https://discord.com/channels/1/2/200'},
+            {'content':'ECR Promo codes: `SAVE2026`','posted_at':300,'channel_id':'1',
+             'channel_name':'events','guild_name':'Game Server',
+             'message_url':'https://discord.com/channels/1/2/300'},
+        ]
+        items=ecr_event_items(rows)
+        self.assertEqual(len(items),1)
+        self.assertIn('next event starts November 20',items[0]['excerpt'])
+        response=format_ecr_events(rows,enabled=True)
+        self.assertIn('Event Crate Rush updates',response)
+        self.assertIn('next event starts November 20',response)
+        self.assertNotIn('SAVE2026',response)
+        self.assertIn('[#events · Game Server](https://discord.com/channels/1/2/200)',response)
+        blocked=format_ecr_events([],enabled=True,access_states={1:'missing'})
+        self.assertIn('ECR event update',blocked)
+        self.assertNotIn('promo-code post',blocked)
 
     def test_announcement_message_text_reads_embeds_without_pinging(self):
         embed=SimpleNamespace(title='@everyone Event notice',description='Starts soon',fields=[])
@@ -167,7 +198,10 @@ class ParserTests(unittest.TestCase):
         self.assertIn('confirmed code-author',builder)
         self.assertNotIn('built by Nub',builder)
         self.assertIn('ᧁꪖꪶꪖ𝓽ꫀ𝘘',bot_identity_response('Who maintains the database?'))
-        self.assertIn('MRX',bot_identity_response('Who does the ECR event guides?'))
+        event_credits=bot_identity_response('Who does the ECR event guides?')
+        self.assertIn('MRX',event_credits)
+        self.assertIn('separate from ECR event information',event_credits)
+        self.assertNotIn('ECR promo codes',event_credits)
         self.assertEqual(direct_item_lookup('please review EM Rifle 10 rank 4 level 2',['EM Rifle 10']),'EM Rifle 10')
         self.assertIsNone(direct_item_lookup('compare EM Rifle 10 with Pulse Cannon 8',['EM Rifle 10']))
 
@@ -319,7 +353,7 @@ class ParserTests(unittest.TestCase):
             self.assertTrue(announcement_bot.intents.message_content)
             self.assertFalse(announcement_bot.ambient_channel_chat_enabled)
         commands={x.name for x in bot.tree.get_commands()}
-        expected={'help','invite','worker_setup','worker_time','ping_loop','dm_loop','stop_loop','stop_user_loops','upcoming','promo_codes','upgrade_cost'}
+        expected={'help','invite','worker_setup','worker_time','ping_loop','dm_loop','stop_loop','stop_user_loops','upcoming','ecr','promo_codes','upgrade_cost'}
         self.assertTrue(expected<=commands)
         self.assertFalse(any(name.startswith('emergency') for name in commands))
         guild=SimpleNamespace(id=1509560571563868160)
@@ -397,6 +431,44 @@ class BuildsTests(unittest.TestCase):
         result=builds_response(self.payload,mech='Redox',best=True)
         self.assertIn('no submitted builds for Redox',result)
         self.assertNotIn('Compound Beam',result)
+
+
+class ArchivePresentationTests(unittest.TestCase):
+    def test_raw_json_sources_and_ingestion_timestamps_are_not_shown(self):
+        machine={'kind':'public_document','source':'upgrade_calculator','title':'list.json',
+                 'date':'2026-11-10T06:47:01+00:00','url':'https://mecharena.infohubhq.in/list.json',
+                 'excerpt':'Revoker weapon data'}
+        self.assertEqual(_archive_attribution(machine),'')
+        fallback=_archive_fallback({'archive_material':[machine,{'kind':'structured_data',
+            'source':'upgrade_calculator','title':'list.json','data':{'name':'Revoker 12','energy':12,
+            'rarity':'legendary'}}]})
+        self.assertIn('Revoker 12',fallback)
+        self.assertNotIn('list.json',fallback)
+        self.assertNotIn('on_images',fallback)
+        self.assertNotIn('2026-11-10T06:47:01',fallback)
+
+    def test_human_page_sources_use_friendly_labels_without_ingestion_dates(self):
+        page={'source':'mech_arena_database','title':'MA Database',
+              'date':'2026-11-10T06:47:01+00:00',
+              'url':'https://database.mecharenadev.com/frontend/pages/general-tips.html'}
+        result=_archive_attribution(page)
+        self.assertIn('[Mech Arena Database](https://database.mecharenadev.com/frontend/pages/general-tips.html)',result)
+        self.assertNotIn('2026-11-10T06:47:01',result)
+        self.assertNotIn('MA Database',result)
+
+    def test_user_screenshot_attribution_hides_internal_archive_filename(self):
+        entry={'source':'google_drive_archive','title':'MA SS.zip — mech stats screenshots',
+               'url':'https://drive.google.com/file/d/abc/view','date':'2026-11-11T19:37:46.367Z'}
+        result=_archive_attribution(entry)
+        self.assertIn('user-provided screenshot text',result)
+        self.assertNotIn('MA SS.zip',result)
+        self.assertNotIn('2026-11-11T19:37:46',result)
+
+    def test_ai_answers_that_leak_raw_files_or_ingestion_timestamps_are_rejected(self):
+        context={'verified_game_facts':[{'type':'weapon','name':'Revoker 12','stats':[]}]}
+        self.assertTrue(_supported_game_reply('Revoker 12 pairs well with Surge.',context))
+        self.assertFalse(_supported_game_reply('Revoker 12 pairs well. list.json',context))
+        self.assertFalse(_supported_game_reply('Revoker 12 pairs well. 2026-11-10T06:47:01+00:00',context))
 
 
 class AIQuestionTests(unittest.IsolatedAsyncioTestCase):
@@ -609,6 +681,29 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         allowed=sent.kwargs['allowed_mentions']
         self.assertFalse(allowed.everyone or allowed.users or allowed.roles or allowed.replied_user)
 
+    async def test_ecr_response_reads_only_configured_event_posts(self):
+        posts=[
+            {'channel_id':str(DEFAULT_ANNOUNCEMENT_CHANNELS[0]),
+             'content':'Event Crate Rush update: next event opens soon.',
+             'posted_at':int(time.time()),'channel_name':'events','guild_name':'Game Server',
+             'message_url':'https://discord.com/channels/1/2/200'},
+            {'channel_id':str(DEFAULT_ANNOUNCEMENT_CHANNELS[0]),
+             'content':'ECR Promo codes: `SAVE2026`','posted_at':int(time.time()),
+             'channel_name':'events','guild_name':'Game Server',
+             'message_url':'https://discord.com/channels/1/2/201'},
+            {'channel_id':'999999999999999999','content':'ECR event in another server',
+             'posted_at':int(time.time()),'channel_name':'other','guild_name':'Other Server',
+             'message_url':'https://discord.com/channels/9/9/202'},
+        ]
+        store=SimpleNamespace(supports_announcements=True,recent_announcements=AsyncMock(return_value=posts))
+        with patch.dict(os.environ,{'ANNOUNCEMENT_INGESTION_ENABLED':'true'}):
+            bot=MechBot(object(),store)
+        result=await bot.ecr_response()
+        self.assertIn('Event Crate Rush update',result)
+        self.assertNotIn('SAVE2026',result)
+        self.assertNotIn('Other Server',result)
+        store.recent_announcements.assert_awaited_once()
+
     async def test_promo_response_reads_only_configured_cached_channels(self):
         posts=[
             {'channel_id':str(DEFAULT_ANNOUNCEMENT_CHANNELS[0]),'content':'ECR promo code: SAFE2026',
@@ -651,12 +746,32 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         bot.reply_message=AsyncMock()
         author=SimpleNamespace(id=123456789012345678,bot=False)
         message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
-            mentions=[],content='ANY ECR',reference=None)
+            mentions=[],content='latest promo code',reference=None)
         with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain:
             await bot.on_message(message)
         brain.assert_not_awaited()
         bot.promo_codes_response.assert_awaited_once()
         bot.reply_message.assert_awaited_once_with(message,'Recent codes',mention_author=False)
+
+    async def test_opted_in_ambient_ecr_query_uses_event_lookup_not_promo_codes(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+        with patch.dict(os.environ,{'MESSAGE_CONTENT_ENABLED':'true','ANNOUNCEMENT_INGESTION_ENABLED':'false'}):
+            bot=MechBot(Catalog(),object())
+        bot._connection.user=SimpleNamespace(id=987654321098765432)
+        bot.ecr_response=AsyncMock(return_value='Saved ECR event')
+        bot.promo_codes_response=AsyncMock(return_value='Promo codes')
+        bot.reply_message=AsyncMock()
+        author=SimpleNamespace(id=123456789012345678,bot=False)
+        message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
+            mentions=[],content='latest ECR',reference=None)
+        with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain:
+            await bot.on_message(message)
+        brain.assert_not_awaited()
+        bot.ecr_response.assert_awaited_once()
+        bot.promo_codes_response.assert_not_awaited()
+        bot.reply_message.assert_awaited_once_with(message,'Saved ECR event',mention_author=False)
 
     async def test_plain_language_calculation_is_local_and_unpinged(self):
         class Catalog:
