@@ -138,6 +138,53 @@ def _requested_build_mode(text):
     return None
 
 
+_SP_VALUE_TOKEN=r'\d[\d,]*(?:\.\d+)?\s*k?'
+_SP_RANGE_SEPARATOR=r'(?:-|–|—|to|through|and)'
+
+
+def _parse_sp_value(value):
+    match=re.fullmatch(r'\s*(\d[\d,]*(?:\.\d+)?)\s*(k)?\s*',str(value or ''),re.I)
+    if not match:return None,None
+    try:number=float(match[1].replace(',',''))
+    except ValueError:return None,None
+    has_k=bool(match[2])
+    if has_k:number*=1000
+    number=int(round(number))
+    if number<1 or number>100000:return None,has_k
+    return number,has_k
+
+
+def parse_build_sp_range(text,allow_bare=False):
+    """Parse an explicit SP value/range; bare numeric replies are allowed only after a prompt."""
+    value=str(text or '').strip()
+    if not value:return None
+    has_label=bool(re.search(r'\b(?:sp|squad\s*power)\b',value,re.I))
+    if not has_label and not allow_bare:return None
+    value=re.sub(r'\b5\s*(?:v|vs\.?)\s*5\b',' ',value,flags=re.I)
+    token=_SP_VALUE_TOKEN
+    separator=_SP_RANGE_SEPARATOR
+    match=None
+    if has_label:
+        match=re.search(rf'\b(?:sp|squad\s*power)\b[^\d]{{0,32}}(?P<low>{token})(?:\s*{separator}\s*(?P<high>{token}))?',value,re.I)
+        if not match:
+            match=re.search(rf'(?P<low>{token})(?:\s*{separator}\s*(?P<high>{token}))?\s*\b(?:sp|squad\s*power)\b',value,re.I)
+    else:
+        bare=re.sub(r"\b(?:about|around|roughly|my|sp|squad|power|is|at|have|got|i|am)\b|it['’]s",' ',value,flags=re.I)
+        match=re.fullmatch(rf'\s*(?P<low>{token})(?:\s*{separator}\s*(?P<high>{token}))?\s*[.!?]*\s*',bare,re.I)
+    if not match:return None
+    low,low_k=_parse_sp_value(match.group('low'))
+    high_value=match.groupdict().get('high')
+    if high_value:
+        high,high_k=_parse_sp_value(high_value)
+        if low is None or high is None:return None
+        if low_k and not high_k and high<1000:high*=1000
+        if high_k and not low_k and low<1000:low*=1000
+    else:
+        high=low
+    if low is None or high is None or min(low,high)<500:return None
+    return (min(low,high),max(low,high))
+
+
 def natural_builds_request(text, mech_names=()):
     """Recognize an explicit build lookup without forwarding free-form text as an API query."""
     value=str(text or '').strip()
@@ -149,10 +196,11 @@ def natural_builds_request(text, mech_names=()):
     names=find_mentions(value,mech_names)
     mode=_requested_build_mode(value)
     best_requested=bool(re.search(r'\b(?:best|top|recommend(?:ation)?)\b',value,re.I))
-    list_requested=bool(re.search(r'\b(?:latest|recent|list|all)\b',value,re.I))
+    list_requested=bool(re.search(r'\b(?:latest|recent|list)\b',value,re.I))
     query_requested=bool(re.search(r'\bfor\b',value,re.I))
     return {'mechs':names,'query':names[0] if len(names)==1 else None,
             'mode':mode,'best_requested':best_requested,'list_requested':list_requested,
+            'sp_range':parse_build_sp_range(value),
             'ambiguous':len(names)>1,
             'unresolved':query_requested and not names and not mode,
             'needs_mech':best_requested and not names}
@@ -356,6 +404,27 @@ def _build_sp(item):
     return _build_value(item.get('sp'),60)
 
 
+def _build_sp_bounds(item):
+    low_raw=item.get('sp_min',item.get('power_min'))
+    high_raw=item.get('sp_max',item.get('power_max'))
+    if low_raw in (None,'') and high_raw in (None,''):
+        exact=item.get('sp')
+        if exact in (None,''):return None
+        low,low_k=_parse_sp_value(exact)
+        high=low
+        high_k=low_k
+    else:
+        low,low_k=_parse_sp_value(low_raw) if low_raw not in (None,'') else (None,False)
+        high,high_k=_parse_sp_value(high_raw) if high_raw not in (None,'') else (None,False)
+        if low is None:low=high
+        if high is None:high=low
+        if low is not None and high is not None:
+            if low_k and not high_k and high<1000:high*=1000
+            if high_k and not low_k and low<1000:low*=1000
+    if low is None or high is None:return None
+    return (min(low,high),max(low,high))
+
+
 def _build_note(item):
     return _build_value(item.get('note') or item.get('description') or item.get('reasoning'),400)
 
@@ -504,6 +573,73 @@ def builds_response(payload, mech=None, mode=None, best=None):
         _build_timestamp(pair[1]) if isinstance(pair[1],dict) else 0,
         -pair[0]))[1]
     return _format_build_pick(selected,mech,mode,not mode or bool(mode_matches))
+
+
+def builds_response_parts(payload,mech=None,mode=None,best=None,sp_range=None):
+    """Return all submissions whose posted SP range overlaps the user's requested range."""
+    if sp_range is None:
+        return [builds_response(payload,mech=mech,mode=mode,best=best)]
+    if isinstance(payload,list):items=payload
+    elif isinstance(payload,dict):
+        items=payload.get('builds',payload.get('data',[]))
+        if isinstance(items,dict):items=items.get('builds',[])
+    else:raise ValueError('Unexpected public builds response.')
+    if not isinstance(items,list):raise ValueError('Unexpected public builds response.')
+    if not items:return [f'The public site has no submitted builds{(" for "+safe_text(mech,100)) if mech else ""}. I won’t make one up.']
+    if not mech:return ['Which mech should I filter for this SP range?']
+    requested=str(mech).strip().casefold()
+    with_mech=[item for item in items if isinstance(item,dict) and _build_value(item.get('mech'),100)]
+    matching=[item for item in items if isinstance(item,dict)
+              and _build_value(item.get('mech'),100).casefold()==requested]
+    if matching:items=matching
+    elif with_mech:return [f'The public site has no submitted builds for {safe_text(mech,100)}. I won’t make one up.']
+    else:
+        named=[item for item in items if isinstance(item,dict) and _build_value(item.get('title') or item.get('name'),120)]
+        named_matches=[item for item in named
+                       if requested in _build_value(item.get('title') or item.get('name'),120).casefold()]
+        if named_matches:items=named_matches
+        elif named:return [f'The public site has no submitted builds for {safe_text(mech,100)}. I won’t make one up.']
+        else:return [f'The public results do not identify a mech, so I can’t safely recommend a build for {safe_text(mech,100)}.']
+    try:requested_low,requested_high=(int(sp_range[0]),int(sp_range[1]))
+    except (TypeError,ValueError,IndexError):return ['Please give an SP value or range, such as `6,500` or `6,000–8,000`.']
+    if requested_low>requested_high:requested_low,requested_high=requested_high,requested_low
+    matched=[]
+    for item in items:
+        if not isinstance(item,dict):continue
+        bounds=_build_sp_bounds(item)
+        if bounds and bounds[0]<=requested_high and bounds[1]>=requested_low:
+            matched.append(item)
+    range_label=(f'{requested_low:,}' if requested_low==requested_high
+                 else f'{requested_low:,}–{requested_high:,}')
+    if mode:
+        matched=[item for item in matched if _build_mode_match(item,mode)]
+    if not matched:
+        mode_text=f' mentioning {safe_text(mode,40)}' if mode else ''
+        return [f'No {safe_text(mech,100)} community build has a posted SP range matching {range_label}{mode_text}. Try another SP value or range.']
+    heading=f'**{safe_text(mech,100)} community builds · SP {range_label}'
+    if mode:heading+=f' · {safe_text(mode,40)}'
+    heading+='**'
+    summaries=[]
+    for item in matched:
+        weapons=_build_weapons(item)
+        if not weapons:weapons=_build_value(item.get('title') or item.get('name'),120) or 'Loadout not listed'
+        details=[f'**{weapons}**',_build_sp(item)]
+        label=_build_label(item)
+        note=_short_sentences(_build_note(item),110)
+        if label:details.append(label)
+        if note:details.append(note)
+        summaries.append('• '+' — '.join(safe_text(part,160) for part in details if part))
+    disclaimer='*All listed matches are community submissions with posted SP ranges; the feed has no ratings or votes.*'
+    parts=[]
+    current=heading+f'\nFound {len(matched)} matching build(s):'
+    for summary in summaries:
+        if len(current)+len(summary)+1>1700 and current.count('\n')>0:
+            parts.append(current)
+            current=heading[:-2]+' (continued)**'
+        current+='\n'+summary
+    current+='\n\n'+disclaimer
+    parts.append(discord_text(current))
+    return parts
 
 
 # The model interprets each question; the bot supplies only locally reviewed facts.

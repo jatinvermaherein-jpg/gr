@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from .catalog import Catalog, initialize_snapshot
 from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, tzinfo
-from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, weapon_response, mech_response, fetch_builds, builds_response, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
+from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, weapon_response, mech_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
 from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INITIAL_BACKFILL_LIMIT, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes, format_promo_codes
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
@@ -26,6 +26,7 @@ from .alerts import AlertManager, OPERATORS, validate as validate_alert
 log=logging.getLogger('mechbot')
 REPLY_MENTIONS=discord.AllowedMentions(everyone=False,users=False,roles=False,replied_user=True)
 AMBIENT_CHAT_COOLDOWN_SECONDS=8
+BUILD_SP_PROMPT_TTL_SECONDS=600
 
 def env_enabled(name,default=False):
     value=os.getenv(name)
@@ -57,7 +58,7 @@ Use `/help` anytime to see this command list.
 • `/weapon name rank level` — a concise weapon review, key stats, perk and listed purchase price.
 • `/upgrade_cost item from_rank to_rank [from_level to_level] [blueprints_owned]` — calculate upgrade costs and price missing Blueprints; defaults to 0 owned.
 • `/mech name` — a short mech review with key details and listed purchase price.
-• `/builds [mech]` — get the best-tagged community loadout for a mech, or browse recent builds.
+• `/builds [mech] [sp_range]` — browse recent builds or filter all mech builds by your SP range.
 • `/upcoming` — check dated and recent event posts from the configured announcement channels.
 • `/ecr` — check saved Event Crate Rush event updates; ECR event info is separate from promo codes.
 • `/promo_codes` — check the latest saved, explicitly labeled promo-code posts; validity is not guaranteed.
@@ -105,7 +106,7 @@ class MechBot(commands.Bot):
         # Ambient channel questions and announcement ingestion both require the privileged
         # Message Content intent; ambient replies remain opt-in and are separately gated.
         intents=discord.Intents.default()
-        self.announcement_ingestion_enabled=env_enabled('ANNOUNCEMENT_INGESTION_ENABLED',False)
+        self.announcement_ingestion_enabled=env_enabled('ANNOUNCEMENT_INGESTION_ENABLED',True)
         self.ambient_channel_chat_enabled=env_enabled('MESSAGE_CONTENT_ENABLED',False)
         self.message_content_enabled=self.ambient_channel_chat_enabled or self.announcement_ingestion_enabled
         intents.message_content=self.message_content_enabled
@@ -113,7 +114,7 @@ class MechBot(commands.Bot):
         self.catalog=catalog;self.store=store;self.workers=WorkerStore(store);self.payouts=PayoutTracker(store);self.alerts=AlertManager()
         self.runner=None;self.worker_runner=None;self.payout_runner=None;self.announcement_runner=None;self.conversation_runner=None
         self.emoji_runner=None;self.command_sync_task=None;self.worker_setup_lock=asyncio.Lock();self.announcement_access={}
-        self.ai_session=None;self.currency_emojis={};self.ambient_last_reply={}
+        self.ai_session=None;self.currency_emojis={};self.ambient_last_reply={};self.pending_build_requests={}
 
     async def setup_hook(self):
         guild=os.getenv('TEST_GUILD_ID','').strip()
@@ -570,9 +571,22 @@ class MechBot(commands.Bot):
         if not is_dm and not mentioned and not prompt_reply:
             reply_to_bot=await self.message_replies_to_bot(message)
         text=re.sub(r'<@!?'+str(self.user.id)+r'>','',message.content).strip()
+        build_scope=(str(getattr(getattr(message,'guild',None),'id','') or ''),
+                    str(getattr(getattr(message,'channel',None),'id','') or ''),
+                    str(getattr(getattr(message,'author',None),'id','') or ''))
+        now_monotonic=time.monotonic()
+        for old_scope,pending in list(self.pending_build_requests.items()):
+            if now_monotonic-pending.get('created_at',0)>BUILD_SP_PROMPT_TTL_SECONDS:
+                self.pending_build_requests.pop(old_scope,None)
+        pending_build=self.pending_build_requests.get(build_scope)
+        pending_sp_range=parse_build_sp_range(text,allow_bare=True) if pending_build else None
+        pending_build_reply=bool(pending_build and pending_sp_range)
         ambient_question=False
         parsed_reminder=parse_natural_reminder(text)
         directed=is_dm or mentioned or prompt_reply or reply_to_bot
+        if pending_build_reply and not directed:
+            directed=True
+            ambient_question=True
         if not directed:
             # Never jump into another member's reply chain or respond to a message aimed at a user.
             reference=getattr(message,'reference',None)
@@ -626,6 +640,18 @@ class MechBot(commands.Bot):
                 await self.reply_message(message,await self.ecr_response(),mention_author=not ambient_question);return
             if wants_upcoming(text):
                 await self.reply_message(message,await self.upcoming_response(),mention_author=not ambient_question);return
+            if pending_build_reply:
+                self.pending_build_requests.pop(build_scope,None)
+                try:
+                    payload=await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),pending_build['mech'])
+                    parts=builds_response_parts(payload,mech=pending_build['mech'],
+                        mode=pending_build.get('mode'),sp_range=pending_sp_range)
+                except Exception:
+                    log.exception('SP-filtered public builds lookup failed')
+                    parts=['The public builds API is unavailable or returned an unexpected response. Please ask again shortly.']
+                for index,part in enumerate(parts):
+                    await self.reply_message(message,part,mention_author=not ambient_question and index==0)
+                return
             build_request=natural_builds_request(text,self.catalog.mech_names)
             if build_request:
                 if build_request['ambiguous']:
@@ -633,16 +659,36 @@ class MechBot(commands.Bot):
                 elif build_request['unresolved']:
                     out='I couldn’t match that mech to the catalog. Please give me its exact name for a filtered build lookup.'
                 elif build_request['needs_mech']:
-                    out='Which mech do you want a build for? The best loadout depends on the mech and game mode; try “best Surge build for 5v5”.'
+                    out='Which mech do you want builds for? Name one mech, and I’ll check community submissions at your SP.'
                 else:
+                    query=build_request['query']
+                    sp_range=build_request['sp_range']
+                    if query and not build_request['list_requested'] and sp_range is None:
+                        self.pending_build_requests[build_scope]={
+                            'mech':query,'mode':build_request['mode'],'created_at':time.monotonic()}
+                        mode_text=f' for {build_request["mode"]}' if build_request['mode'] else ''
+                        out=(f'What SP range are you targeting for {safe_text(query,80)}{mode_text}? '
+                             'Reply with one SP value (like `6,500`) or a range (like `6,000–8,000`), and I’ll list all matching community builds.')
+                        await self.reply_message(message,out,mention_author=not ambient_question);return
                     try:
-                        query=build_request['query']
                         payload=await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),query)
-                        best=bool(query) and (build_request['best_requested'] or not build_request['list_requested'])
-                        out=builds_response(payload,mech=query,mode=build_request['mode'],best=best)
+                        if sp_range is not None:
+                            parts=builds_response_parts(payload,mech=query,mode=build_request['mode'],sp_range=sp_range)
+                            out=None
+                        else:
+                            best=bool(query) and (build_request['best_requested'] or not build_request['list_requested'])
+                            out=builds_response(payload,mech=query,mode=build_request['mode'],best=best)
+                            parts=None
                     except Exception:
                         log.exception('Natural-language public builds lookup failed')
                         out='The public builds API is unavailable or returned an unexpected response.'
+                        parts=None
+                    if parts is not None:
+                        for index,part in enumerate(parts):
+                            await self.reply_message(message,part,mention_author=not ambient_question and index==0)
+                    else:
+                        await self.reply_message(message,out,mention_author=not ambient_question)
+                    return
                 await self.reply_message(message,out,mention_author=not ambient_question);return
             expression=parse_natural_calculation(text)
             if expression:
@@ -994,15 +1040,29 @@ def install_commands(bot):
         except (ValueError,SyntaxError) as e:out='Cannot calculate: '+safe_text(e,200)
         await i.response.send_message(out,ephemeral=True)
 
-    @tree.command(name='builds',description='Get a community build recommendation for a mech')
-    @app_commands.describe(mech='Find the best-tagged community loadout for this mech; omit for recent builds')
-    async def builds(i:discord.Interaction,mech:str=None):
+    @tree.command(name='builds',description='Filter community mech builds by squad power')
+    @app_commands.describe(mech='Mech to search; omit for recent submissions',
+                           sp_range='Your SP value or range, e.g. 6500 or 6000-8000')
+    async def builds(i:discord.Interaction,mech:str=None,sp_range:str=None):
+        requested_sp=parse_build_sp_range(sp_range,allow_bare=True) if sp_range else None
+        if sp_range and requested_sp is None:
+            await i.response.send_message('Give one SP value or a range, such as `6,500` or `6,000–8,000`.',ephemeral=True);return
+        if mech and requested_sp is None:
+            await i.response.send_message(f'What SP range are you targeting for {safe_text(mech,80)}? Re-run `/builds` with one SP value (like `6,500`) or a range (like `6,000–8,000`).',ephemeral=True);return
+        if requested_sp is not None and not mech:
+            await i.response.send_message('Choose a mech too so I can filter its builds by SP.',ephemeral=True);return
         await i.response.defer(ephemeral=True)
         try:
             payload=await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),mech)
-            out=builds_response(payload,mech=mech,best=bool(mech))
-        except Exception:log.exception('Public builds lookup failed');out='The public builds API is unavailable or returned an unexpected response.'
-        await i.followup.send(out,ephemeral=True)
+            if requested_sp is not None:
+                parts=builds_response_parts(payload,mech=mech,sp_range=requested_sp)
+                for part in parts:await i.followup.send(part,ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
+            else:
+                out=builds_response(payload,mech=mech,best=False)
+                await i.followup.send(out,ephemeral=True)
+        except Exception:
+            log.exception('Public builds lookup failed')
+            await i.followup.send('The public builds API is unavailable or returned an unexpected response.',ephemeral=True)
 
     @tree.command(name='upcoming',description='Show upcoming events in the configured announcement channels')
     async def upcoming(i:discord.Interaction):

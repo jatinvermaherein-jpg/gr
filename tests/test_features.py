@@ -22,7 +22,8 @@ from mechbot.assistant import (wants_invite_link, bot_identity_response, direct_
                                parse_natural_calculation, natural_builds_request, builds_response, _archive_attribution,
                                _archive_fallback, _supported_game_reply, discord_text,
                                naturalize_discord_reply, weapon_response, mech_response,
-                               game_knowledge_context, answer_question_with_brain, upgrade_cost_response, general_ai)
+                               game_knowledge_context, answer_question_with_brain, upgrade_cost_response, general_ai,
+                               parse_build_sp_range, builds_response_parts, natural_builds_request)
 from mechbot.announcements import (DEFAULT_ANNOUNCEMENT_CHANNELS, INITIAL_BACKFILL_LIMIT, wants_upcoming, wants_ecr_info,
                                    message_text, upcoming_items, ecr_event_items, format_upcoming, format_ecr_events,
                                    wants_promo_codes, promo_code_items, format_promo_codes)
@@ -38,6 +39,8 @@ class AnnouncementTests(unittest.TestCase):
         from datetime import datetime
         from zoneinfo import ZoneInfo
         self.assertEqual(INITIAL_BACKFILL_LIMIT,100)
+        self.assertTrue({1524319795791659080,1570083896823906364,1512089401193271539}
+                        .issubset(set(DEFAULT_ANNOUNCEMENT_CHANNELS)))
         now=datetime(2026,11,10,12,tzinfo=ZoneInfo('Asia/Kolkata')).timestamp()
         self.assertTrue(wants_upcoming("what's coming up next?"))
         self.assertTrue(wants_upcoming('next event'))
@@ -163,10 +166,10 @@ class ParserTests(unittest.TestCase):
         self.assertTrue(should_answer_unmentioned('2+2'))
         self.assertEqual(natural_builds_request('Any builds for Redox?',['Redox']),
                          {'mechs':['Redox'],'query':'Redox','mode':None,'best_requested':False,
-                          'list_requested':False,'ambiguous':False,'unresolved':False,'needs_mech':False})
+                          'list_requested':False,'sp_range':None,'ambiguous':False,'unresolved':False,'needs_mech':False})
         self.assertEqual(natural_builds_request('Show the latest builds',[]),
                          {'mechs':[],'query':None,'mode':None,'best_requested':False,
-                          'list_requested':True,'ambiguous':False,'unresolved':False,'needs_mech':False})
+                          'list_requested':True,'sp_range':None,'ambiguous':False,'unresolved':False,'needs_mech':False})
         self.assertTrue(natural_builds_request('Show builds for an unknown mech',[])['unresolved'])
         best=natural_builds_request('Best Surge build for 5v5?',['Surge'])
         self.assertEqual((best['query'],best['mode'],best['needs_mech']),('Surge','5v5',False))
@@ -339,6 +342,10 @@ class ParserTests(unittest.TestCase):
 
     def test_command_registration(self):
         class Placeholder:pass
+        with patch.dict(os.environ,{'MESSAGE_CONTENT_ENABLED':'false'},clear=True):
+            default_bot=MechBot(Placeholder(),Placeholder())
+            self.assertTrue(default_bot.announcement_ingestion_enabled)
+            self.assertTrue(default_bot.intents.message_content)
         with patch.dict(os.environ,{'MESSAGE_CONTENT_ENABLED':'false','ANNOUNCEMENT_INGESTION_ENABLED':'false'}):
             bot=MechBot(Placeholder(),Placeholder())
         install_commands(bot)
@@ -401,6 +408,14 @@ class BuildsTests(unittest.TestCase):
              'label':'Midgame Meta','note':'good for beacons; top build for FFA','created_at':100},
         ]}
 
+    def test_sp_range_parser_accepts_explicit_ranges_and_bare_followups(self):
+        self.assertEqual(parse_build_sp_range('Best Surge build for 5v5 at 6,000–8,000 SP'),(6000,8000))
+        self.assertEqual(parse_build_sp_range('SP 6–8k'),(6000,8000))
+        self.assertEqual(parse_build_sp_range('7000',allow_bare=True),(7000,7000))
+        self.assertEqual(parse_build_sp_range('6k-8k',allow_bare=True),(6000,8000))
+        self.assertIsNone(parse_build_sp_range('Best Surge build for 5v5'))
+        self.assertIsNone(parse_build_sp_range('5v5',allow_bare=True))
+
     def test_mech_lookup_returns_a_real_best_tagged_loadout(self):
         result=builds_response(self.payload,mech='Surge',best=True)
         self.assertIn('Compound Beam 10 ×2',result)
@@ -426,6 +441,17 @@ class BuildsTests(unittest.TestCase):
         self.assertIn('Revoker 8 + Revoker 10',result)
         self.assertIn('SP 4,000–6,000',result)
         self.assertNotIn('mech: Surge',result)
+
+    def test_sp_filter_returns_every_overlapping_build_with_short_summaries(self):
+        parts=builds_response_parts(self.payload,mech='Surge',sp_range=(7000,7000))
+        result='\n'.join(parts)
+        self.assertEqual(len(parts),1)
+        self.assertIn('Found 2 matching build(s)',result)
+        self.assertIn('Compound Beam 10 ×2',result)
+        self.assertIn('Revoker 10 ×2',result)
+        self.assertNotIn('Revoker 8 + Revoker 10',result)
+        self.assertIn('SP 6,000–8,000',result)
+        self.assertIn('no ratings or votes',result)
 
     def test_unknown_mech_does_not_reuse_another_mechs_build(self):
         result=builds_response(self.payload,mech='Redox',best=True)
@@ -701,6 +727,30 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         allowed=sent.kwargs['allowed_mentions']
         self.assertFalse(allowed.everyone or allowed.users or allowed.roles or allowed.replied_user)
 
+    async def test_first_announcement_read_backfills_latest_100_messages(self):
+        calls=[]
+        async def history(limit,after=None,oldest_first=False):
+            calls.append({'limit':limit,'after':after,'oldest_first':oldest_first})
+            yield SimpleNamespace(id=900000000000000001,content='Event update: starts soon.',embeds=[],
+                created_at=SimpleNamespace(timestamp=lambda:1700000000),edited_at=None,
+                jump_url='https://discord.com/channels/1509560571563868160/1524319795791659080/900000000000000001')
+        guild=SimpleNamespace(id=1509560571563868160,name='Game Server',me=SimpleNamespace())
+        channel=SimpleNamespace(id=1524319795791659080,name='announcements',guild=guild,history=history,
+            permissions_for=lambda member:SimpleNamespace(view_channel=True,read_message_history=True))
+        store=SimpleNamespace(supports_announcements=True,announcement_cursor=AsyncMock(return_value=None),
+                              upsert_announcements=AsyncMock())
+        with patch.dict(os.environ,{'ANNOUNCEMENT_INGESTION_ENABLED':'true'}):bot=MechBot(object(),store)
+        with patch.object(bot,'get_channel',return_value=channel):
+            saved=await bot.ingest_announcement_channel(channel.id)
+        self.assertEqual(saved,1)
+        self.assertEqual([call['limit'] for call in calls],[100,25])
+        self.assertTrue(all(call['oldest_first'] is False for call in calls))
+        store.announcement_cursor.assert_awaited_once_with(channel.id)
+        store.upsert_announcements.assert_awaited_once()
+        record=store.upsert_announcements.await_args.args[0][0]
+        self.assertEqual(record['channel_id'],str(channel.id))
+        self.assertIn('Event update',record['content'])
+
     async def test_ecr_response_reads_only_configured_event_posts(self):
         posts=[
             {'channel_id':str(DEFAULT_ANNOUNCEMENT_CHANNELS[0]),
@@ -809,27 +859,43 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         brain.assert_not_awaited()
         bot.reply_message.assert_awaited_once_with(message,'Result: 42',mention_author=False)
 
-    async def test_plain_language_build_lookup_uses_known_mech_only(self):
+    async def test_plain_language_build_lookup_asks_for_sp_then_filters_matches(self):
         class Catalog:
             weapon_names=[]
             mech_names=['Redox']
+        payload={'builds':[
+            {'mech':'Redox','weapon_1':'Revoker 10','weapon_2':'Revoker 10',
+             'sp_min':6000,'sp_max':8000,'note':'solid long-range setup'},
+            {'mech':'Redox','weapon_1':'Disc Launcher 8','weapon_2':'Disc Launcher 8',
+             'sp_min':4000,'sp_max':6000,'note':'low-SP option'},
+        ]}
         with patch.dict(os.environ,{'MESSAGE_CONTENT_ENABLED':'true','ANNOUNCEMENT_INGESTION_ENABLED':'false'}):
             bot=MechBot(Catalog(),object())
         bot._connection.user=SimpleNamespace(id=987654321098765432)
         bot.reply_message=AsyncMock()
         author=SimpleNamespace(id=123456789012345678,bot=False)
-        message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
-            mentions=[],content='Any builds for Redox?',reference=None)
-        with (patch('mechbot.bot.fetch_builds',new=AsyncMock(return_value={'builds':[{'name':'Redox setup'}]})) as fetch,
+        channel=SimpleNamespace(id=444)
+        guild=SimpleNamespace(id=999)
+        request=SimpleNamespace(author=author,channel=channel,guild=guild,mentions=[],
+            content='Any builds for Redox?',reference=None)
+        with (patch('mechbot.bot.fetch_builds',new=AsyncMock(return_value=payload)) as fetch,
               patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain):
-            await bot.on_message(message)
-        fetch.assert_awaited_once()
-        self.assertEqual(fetch.await_args.args[1],'Redox')
-        self.assertIn('Redox setup',bot.reply_message.await_args.args[1])
+            await bot.on_message(request)
+            fetch.assert_not_awaited()
+            self.assertIn('What SP range',bot.reply_message.await_args.args[1])
+            bot.reply_message.reset_mock()
+            followup=SimpleNamespace(author=author,channel=channel,guild=guild,mentions=[],
+                content='7000',reference=None)
+            await bot.on_message(followup)
+            fetch.assert_awaited_once()
+        result=bot.reply_message.await_args.args[1]
+        self.assertIn('Redox community builds',result)
+        self.assertIn('Revoker 10 ×2',result)
+        self.assertNotIn('Disc Launcher 8 ×2',result)
         self.assertFalse(bot.reply_message.await_args.kwargs['mention_author'])
         brain.assert_not_awaited()
 
-    async def test_best_build_question_returns_weapons_and_sp_from_public_record(self):
+    async def test_best_build_question_filters_all_matching_sp_builds(self):
         class Catalog:
             weapon_names=[]
             mech_names=['Surge']
@@ -839,6 +905,9 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
              'note':'best build for FFA & 5v5','created_at':300},
             {'mech':'Surge','weapon_1':'Revoker 8','weapon_2':'Revoker 10',
              'same_weapon':False,'sp_min':4000,'sp_max':6000,'note':'best for FFA','created_at':200},
+            {'mech':'Surge','weapon_1':'Revoker 10','weapon_2':'Revoker 10',
+             'same_weapon':True,'sp_min':6500,'sp_max':7500,'label':'Midgame Meta',
+             'note':'good for beacons','created_at':100},
         ]}
         with patch.dict(os.environ,{'MESSAGE_CONTENT_ENABLED':'true','ANNOUNCEMENT_INGESTION_ENABLED':'false'}):
             bot=MechBot(Catalog(),object())
@@ -846,16 +915,18 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         bot.reply_message=AsyncMock()
         author=SimpleNamespace(id=123456789012345678,bot=False)
         message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
-            mentions=[],content='Best Surge build for 5v5?',reference=None)
+            mentions=[],content='Best Surge build at 7,000 SP?',reference=None)
         with (patch('mechbot.bot.fetch_builds',new=AsyncMock(return_value=payload)) as fetch,
               patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain):
             await bot.on_message(message)
         fetch.assert_awaited_once()
         self.assertEqual(fetch.await_args.args[1],'Surge')
         result=bot.reply_message.await_args.args[1]
+        self.assertIn('Found 2 matching build(s)',result)
         self.assertIn('Compound Beam 10 ×2',result)
+        self.assertIn('Revoker 10 ×2',result)
+        self.assertNotIn('Revoker 8 + Revoker 10',result)
         self.assertIn('SP 6,000–8,000',result)
-        self.assertIn('best build for FFA & 5v5',result)
         self.assertFalse(bot.reply_message.await_args.kwargs['mention_author'])
         brain.assert_not_awaited()
 
