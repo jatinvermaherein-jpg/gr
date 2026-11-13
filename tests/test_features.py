@@ -17,7 +17,7 @@ from mechbot.store import Store, CONVERSATION_TTL_SECONDS, CONVERSATION_TURN_LIM
 from mechbot.workers import WORKERS, WorkerStore, assignment_text, parse_worker_time, parse_worker_snooze
 from mechbot.payouts import PayoutTracker, parse_snapshot
 from mechbot.alerts import AlertManager, MAX_POOLS_PER_TARGET, validate
-from mechbot.bot import MechBot, install_commands, OPERATORS, REPLY_MENTIONS, help_text
+from mechbot.bot import MechBot, install_commands, OPERATORS, REPLY_MENTIONS, help_text, configured_announcement_channels
 from mechbot.assistant import (wants_invite_link, bot_identity_response, direct_item_lookup, should_answer_unmentioned,
                                parse_natural_calculation, natural_builds_request, builds_response, _archive_attribution,
                                _archive_fallback, _supported_game_reply, discord_text,
@@ -27,6 +27,9 @@ from mechbot.assistant import (wants_invite_link, bot_identity_response, direct_
 from mechbot.announcements import (DEFAULT_ANNOUNCEMENT_CHANNELS, INITIAL_BACKFILL_LIMIT, wants_upcoming, wants_ecr_info,
                                    message_text, upcoming_items, ecr_event_items, format_upcoming, format_ecr_events,
                                    wants_promo_codes, promo_code_items, format_promo_codes)
+from mechbot.forum_archive import (FORUM_ARCHIVE_PATH, format_forum_request, format_forum_search,
+                                   format_recent_forum_threads, recent_forum_threads,
+                                   refresh_forum_archive, search_forum_threads, wants_forum_lookup)
 from mechbot.catalog import (ARCHIVE, Catalog, _candidate_fingerprint, apply_user_confirmed_ocr_review,
                              apply_user_confirmed_public_review, apply_user_confirmed_drive_ocr_review, initialize_snapshot)
 from mechbot.timeparse import next_daily, parse_spec, parse_natural_reminder
@@ -39,8 +42,11 @@ class AnnouncementTests(unittest.TestCase):
         from datetime import datetime
         from zoneinfo import ZoneInfo
         self.assertEqual(INITIAL_BACKFILL_LIMIT,100)
-        self.assertTrue({1524319795791659080,1570083896823906364,1512089401193271539}
-                        .issubset(set(DEFAULT_ANNOUNCEMENT_CHANNELS)))
+        self.assertEqual(set(DEFAULT_ANNOUNCEMENT_CHANNELS),{1524319795791659080,1570083896823906364})
+        self.assertNotIn(1512089401193271539,DEFAULT_ANNOUNCEMENT_CHANNELS)
+        with patch.dict(os.environ,{'ANNOUNCEMENT_CHANNEL_IDS':
+                '1524319795791659080,1512089401193271539,1570083896823906364'}):
+            self.assertEqual(configured_announcement_channels(),DEFAULT_ANNOUNCEMENT_CHANNELS)
         now=datetime(2026,11,10,12,tzinfo=ZoneInfo('Asia/Kolkata')).timestamp()
         self.assertTrue(wants_upcoming("what's coming up next?"))
         self.assertTrue(wants_upcoming('next event'))
@@ -136,6 +142,103 @@ class AnnouncementTests(unittest.TestCase):
         self.assertIn('Update @\u200bhere [member]',text)
         self.assertIn('@\u200beveryone Event notice',text)
         self.assertIn('Starts soon',text)
+
+
+class ForumArchiveTests(unittest.TestCase):
+    @staticmethod
+    def _thread(title,url,category,text,created,author='Player',role=''):
+        return {
+            'title':title,'url':url,'category':{'name':category},
+            'author':{'name':author,'role':role},
+            'created':{'display':created,'iso':'2026-11-12 10:00'},
+            'original_post':{'text':text},
+        }
+
+    def test_search_and_recent_listing_are_source_linked_and_not_a_schedule(self):
+        with tempfile.TemporaryDirectory() as td:
+            archive=Path(td)/'forum.json'
+            rows=[
+                self._thread('Patch notes: Skystrike balance changes',
+                    'https://forum.plarium.com/mech-arena/854_news/123456/',
+                    'News & Announcements',
+                    'The Skystrike balance changes arrive next month.\n\n@everyone please read the post.',
+                    'Nov 12, 2026, 10:00','Forum Manager','Community Manager'),
+                self._thread('Players discuss Orion',
+                    'https://forum.plarium.com/mech-arena/702_game-discussion/123457/',
+                    'Game Discussion','Orion feels strong in this match.',
+                    'Nov 11, 2026, 10:00'),
+                self._thread('Hidden bad link',
+                    'https://evil.example/mech-arena/854_news/123458/',
+                    'News & Announcements','Skystrike changed.',
+                    'Nov 10, 2026, 10:00'),
+            ]
+            archive.write_text(json.dumps({'metadata':{},'threads':rows}),encoding='utf-8')
+            matches=search_forum_threads('Skystrike balance',limit=5,path=archive)
+            self.assertEqual(len(matches),1)
+            self.assertEqual(matches[0]['author']['role'],'Community Manager')
+            self.assertEqual(matches[0]['url'],rows[0]['url'])
+            result=format_forum_search('Skystrike balance',path=archive)
+            self.assertIn('[Patch notes: Skystrike balance changes](https://forum.plarium.com/',result)
+            self.assertIn('Community Manager',result)
+            mentions=format_forum_search('everyone',path=archive)
+            self.assertIn('@\u200beveryone',mentions)
+            self.assertIn('not current/upcoming event information',result)
+            self.assertNotIn('evil.example',result)
+            latest=format_forum_request('latest forum posts',path=archive)
+            self.assertIn('Recent threads in the stored Plarium Forum snapshot',latest)
+            self.assertIn('not current/upcoming event information',latest)
+            self.assertIn('Patch notes: Skystrike balance changes',latest)
+            self.assertEqual(recent_forum_threads(limit=1,path=archive)[0]['title'],rows[0]['title'])
+
+    def test_supplied_snapshot_is_readable_but_not_claimed_as_current_or_upcoming(self):
+        posts=recent_forum_threads(limit=10,path=FORUM_ARCHIVE_PATH)
+        self.assertEqual(len(posts),10)
+        self.assertEqual(len(json.loads(FORUM_ARCHIVE_PATH.read_text(encoding='utf-8'))['threads']),150)
+        self.assertTrue(all(post['url'].startswith('https://forum.plarium.com/mech-arena/') for post in posts))
+        response=format_recent_forum_threads(limit=3,path=FORUM_ARCHIVE_PATH)
+        self.assertIn('stored crawl',response)
+        self.assertIn('not current/upcoming event information',response)
+
+    def test_forum_lookup_detection_is_explicit_and_ambient_safe(self):
+        for query in ('latest forum posts','What is the forum saying about Skystrike?',
+                      'what are players saying about Surge?','forum build guides'):
+            with self.subTest(query=query):
+                self.assertTrue(wants_forum_lookup(query))
+                self.assertTrue(should_answer_unmentioned(query))
+        self.assertFalse(wants_forum_lookup('I visited the forum yesterday.'))
+        self.assertFalse(should_answer_unmentioned('I visited the forum yesterday.'))
+
+
+class ForumScraperIntegrationTests(unittest.IsolatedAsyncioTestCase):
+    async def test_refresh_atomically_replaces_snapshot_and_rejects_incomplete_result(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            destination=root/'threads.json'
+            destination.write_text('{"last_good": true}',encoding='utf-8')
+            rows=[{'title':f'Live thread {i}','url':f'https://forum.plarium.com/mech-arena/702_discussion/{i}/',
+                   'category':{'name':'Game Discussion'},'author':{'name':'Player','role':''},
+                   'created':{'display':f'Nov 12, 2026, 10:{i%60:02d}','iso':f'2026-11-12 10:{i%60:02d}'},
+                   'original_post':{'text':f'Live post {i}.'}} for i in range(150)]
+            payload=repr(json.dumps({'metadata':{'threads_returned':150,'scraped_at_utc':'2026-11-10 12:00:00 UTC'},'threads':rows}))
+            script=root/'fake_scraper.py'
+            script.write_text(
+                'import json,sys\n'
+                'prefix=sys.argv[sys.argv.index("--out")+1]\n'
+                f'data=json.loads({payload})\n'
+                'with open(prefix+".json","w",encoding="utf-8") as f: json.dump(data,f)\n',
+                encoding='utf-8')
+            count=await refresh_forum_archive(path=destination,scraper_path=script)
+            self.assertEqual(count,150)
+            self.assertEqual(recent_forum_threads(limit=1,path=destination)[0]['title'],'Live thread 0')
+            good_snapshot=destination.read_bytes()
+            script.write_text(
+                'import json,sys\n'
+                'prefix=sys.argv[sys.argv.index("--out")+1]\n'
+                'with open(prefix+".json","w",encoding="utf-8") as f: json.dump({"threads":[]},f)\n',
+                encoding='utf-8')
+            with self.assertRaises(RuntimeError):
+                await refresh_forum_archive(path=destination,scraper_path=script)
+            self.assertEqual(destination.read_bytes(),good_snapshot)
 
 
 class ParserTests(unittest.TestCase):
@@ -326,7 +429,7 @@ class ParserTests(unittest.TestCase):
         for text in ('How much to upgrade Redox from rank 4 to 5?',
                      'Could you explain that setup?', 'What is the best mech?',
                      'Redox stats', 'When is the next event?', 'any event',
-                     'What types of events are in Mech Arena?'):
+                     'What types of events are in Mech Arena?', 'latest forum posts about Surge'):
             with self.subTest(text=text):self.assertTrue(should_answer_unmentioned(text,['Redox']))
         for text in ('Redox is amazing', 'remind me in 20 seconds to write notes',
                      'Can you remind me in 20 seconds to write notes?',
@@ -351,8 +454,9 @@ class ParserTests(unittest.TestCase):
         class Placeholder:pass
         with patch.dict(os.environ,{'MESSAGE_CONTENT_ENABLED':'false'},clear=True):
             default_bot=MechBot(Placeholder(),Placeholder())
-            self.assertTrue(default_bot.announcement_ingestion_enabled)
-            self.assertTrue(default_bot.intents.message_content)
+        self.assertTrue(default_bot.announcement_ingestion_enabled)
+        self.assertTrue(default_bot.forum_sync_enabled)
+        self.assertTrue(default_bot.intents.message_content)
         with patch.dict(os.environ,{'MESSAGE_CONTENT_ENABLED':'false','ANNOUNCEMENT_INGESTION_ENABLED':'false'}):
             bot=MechBot(Placeholder(),Placeholder())
         install_commands(bot)
@@ -367,7 +471,7 @@ class ParserTests(unittest.TestCase):
             self.assertTrue(announcement_bot.intents.message_content)
             self.assertFalse(announcement_bot.ambient_channel_chat_enabled)
         commands={x.name for x in bot.tree.get_commands()}
-        expected={'help','invite','worker_setup','worker_time','ping_loop','dm_loop','stop_loop','stop_user_loops','upcoming','ecr','promo_codes','upgrade_cost'}
+        expected={'help','invite','worker_setup','worker_time','ping_loop','dm_loop','stop_loop','stop_user_loops','upcoming','forum','ecr','promo_codes','upgrade_cost'}
         self.assertTrue(expected<=commands)
         self.assertFalse(any(name.startswith('emergency') for name in commands))
         guild=SimpleNamespace(id=1509560571563868160)
@@ -1123,14 +1227,18 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_upcoming_response_reads_posts_from_any_configured_channel(self):
         rows=[
-            {'channel_id':str(DEFAULT_ANNOUNCEMENT_CHANNELS[2]),
+            {'channel_id':str(DEFAULT_ANNOUNCEMENT_CHANNELS[1]),
              'content':'Tournament starts December 15, 2099', 'posted_at':int(time.time()),
              'channel_name':'special-announcements','guild_name':'Game Server',
              'message_url':'https://discord.com/channels/1/1570083896823906364/200'},
-            {'channel_id':'999999999999999999',
+            {'channel_id':'1512089401193271539',
              'content':'Tournament starts December 16, 2099', 'posted_at':int(time.time()),
+             'channel_name':'removed','guild_name':'Other Server',
+             'message_url':'https://discord.com/channels/9/1512089401193271539/201'},
+            {'channel_id':'999999999999999999',
+             'content':'Tournament starts December 17, 2099', 'posted_at':int(time.time()),
              'channel_name':'unconfigured','guild_name':'Other Server',
-             'message_url':'https://discord.com/channels/9/999999999999999999/201'},
+             'message_url':'https://discord.com/channels/9/999999999999999999/202'},
         ]
         store=SimpleNamespace(supports_announcements=True,recent_announcements=AsyncMock(return_value=rows))
         with (patch.dict(os.environ,{'ANNOUNCEMENT_INGESTION_ENABLED':'true'}),
@@ -1140,6 +1248,7 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('Tournament starts December 15, 2099',result)
         self.assertIn('#special-announcements',result)
         self.assertNotIn('December 16, 2099',result)
+        self.assertNotIn('December 17, 2099',result)
         store.recent_announcements.assert_awaited_once()
 
     async def test_any_event_request_uses_announcement_lookup_not_ai(self):
@@ -1159,6 +1268,24 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         brain.assert_not_awaited()
         bot.upcoming_response.assert_awaited_once_with()
         bot.reply_message.assert_awaited_once_with(message,'No verified event announcement is saved.',mention_author=True)
+
+    async def test_forum_lookup_uses_stored_forum_response_not_ai(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+        bot=MechBot(Catalog(),object())
+        bot_user=SimpleNamespace(id=987654321098765432)
+        bot._connection.user=bot_user
+        bot.reply_message=AsyncMock()
+        author=SimpleNamespace(id=123456789012345678,bot=False)
+        message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
+            mentions=[bot_user],content=f'<@{bot_user.id}> latest forum posts about Surge',reference=None)
+        with (patch.object(bot,'forum_response',return_value='Stored forum results') as forum_response,
+              patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain):
+            await bot.on_message(message)
+        brain.assert_not_awaited()
+        forum_response.assert_called_once_with('latest forum posts about Surge')
+        bot.reply_message.assert_awaited_once_with(message,'Stored forum results',mention_author=True)
 
     async def test_direct_replies_work_and_bystander_reply_chains_are_ignored_by_default(self):
         class Catalog:

@@ -14,6 +14,8 @@ __pycache__/
 data/local_users.sqlite3*
 
 # User-provided screenshot inputs and local OCR/review artifacts are not deploy assets
+# Keep the original imported forum ZIP extraction locally; the integrated scraper and JSON live elsewhere.
+drive_import/
 data/source_archives/
 data/drive_ocr_review_cards/
 data/drive_ocr_stage/

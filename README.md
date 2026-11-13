@@ -1,6 +1,6 @@
 # Mech Arena Discord Bot
 
-ARCHΛNGLE is an unofficial Mech Arena community helper for weapon and mech reviews, build lookups, reminders, calculations, and upcoming event updates. It is not affiliated with Plarium.
+ARCHΛNGLE is an unofficial Mech Arena community helper for weapon and mech reviews, build lookups, reminders, calculations, upcoming event updates, and searchable Plarium Forum threads. It is not affiliated with Plarium.
 
 **Profile description draft (Discord Developer Portal):**
 > Mech Arena weapon and mech reviews · builds · reminders · upcoming announcements · community tools.<br>
@@ -9,7 +9,7 @@ ARCHΛNGLE is an unofficial Mech Arena community helper for weapon and mech revi
 
 ## Commands and replies
 
-- `/help`, `/invite`, `/weapon`, `/mech`, `/upgrade_cost`, `/builds`, `/recent`, `/upcoming`, `/ecr`, `/promo_codes`, `/timezone`, `/remind`, `/reminders`, `/cancel`, `/note`, `/calc`.
+- `/help`, `/invite`, `/weapon`, `/mech`, `/upgrade_cost`, `/builds`, `/recent`, `/upcoming`, `/forum [query]`, `/ecr`, `/promo_codes`, `/timezone`, `/remind`, `/reminders`, `/cancel`, `/note`, `/calc`.
 - Assigned database workers also use `/worker_setup`, `/worker_time`, `/worker_status`, `/worker_snooze`, and `/worker_pause`.
 - Only Discord IDs **1442058583129722986** and **1444891876376186901** can start `/ping_loop` and `/dm_loop` or use `/stop_user_loops` to stop another member’s loops. These commands work in any server where the bot is installed; `/stop_loop` remains available for users to stop their own loops.
 - Public message replies ping only the reply author. Other user, role, `@everyone`, and `@here` mentions are disabled.
@@ -36,15 +36,22 @@ ARCHΛNGLE is an unofficial Mech Arena community helper for weapon and mech revi
 
 ## Announcement ingestion and upcoming events
 
-The bot is configured to read only the three user-specified announcement channels:
+The bot is configured to read only these two announcement channels:
 
 - `1524319795791659080` in server `1509560571563868160`
-- `1512089401193271539` in server `1456726444603473922`
 - `1570083896823906364` in server `1479464891709526051`
+
+Channel `1512089401193271539` is excluded even if it appears in `ANNOUNCEMENT_CHANNEL_IDS`.
 
 The background reader retries every 10 minutes. On its first successful access, it backfills the last 100 messages from each configured channel, then fetches new posts and refreshes a short tail for edits. A missing server, channel, or permission is transient: the bot keeps retrying and does not mark the source permanently unavailable. It stores only text, embed titles/descriptions/fields, channel labels, timestamps, and the Discord source link in the private `mech_bot_app.announcements` table. It never follows links embedded in the posts. `/ecr` and bare ECR/event questions show saved Event Crate Rush event posts only; `/promo_codes` and explicit promo-code questions search for clearly labeled codes separately. Code replies link to their source post and report a code as expired only when the post explicitly says so. Other codes are unverified for validity, and the bot does not send proactive promo notifications or claim a code works.
 
-Announcement ingestion is enabled by default in the code; set `ANNOUNCEMENT_INGESTION_ENABLED=false` only to disable it. An existing deployment with that variable explicitly set to `false` must change it to `true`. Enable the privileged **Message Content Intent** in the Discord Developer Portal and grant the bot View Channel and Read Message History in each source channel. On first successful access it reads the newest 100 messages from each channel; then it fetches new posts every 10 minutes and refreshes a short tail for edits. Set `MESSAGE_CONTENT_ENABLED=true` separately if users should be able to ask natural-language questions without mentioning the bot. The bot ignores messages aimed at another member and reply chains to other members, never pings the author for an ambient answer, and rate-limits to one ambient answer per user/channel every eight seconds. Explicitly worded and fully specified natural reminder text is allowed; reminders and confirmations are private by DM, while notes and loop-management actions are not executed from ambient channel text. Unclear reminder requests are ignored in ambient chat. DMs and explicit bot mentions work with the intent off for the ambient feature. `ANNOUNCEMENT_CHANNEL_IDS`, if explicitly set, overrides the defaults and must include every channel to be read. The defaults include the two requested here (`1524319795791659080` and `1570083896823906364`) plus the previously requested `1512089401193271539`. `/upcoming` and a mention such as `@bot what’s coming up?` show future dates only when a post explicitly includes a year. Recent event-related posts with incomplete dates are labelled as such and are not claimed to be upcoming. Every result links to its source message; no date or event detail is invented.
+Announcement ingestion is enabled by default in the code; set `ANNOUNCEMENT_INGESTION_ENABLED=false` only to disable it. An existing deployment with that variable explicitly set to `false` must change it to `true`. Enable the privileged **Message Content Intent** in the Discord Developer Portal and grant the bot View Channel and Read Message History in each source channel. On first successful access it reads the newest 100 messages from each channel; then it fetches new posts every 10 minutes and refreshes a short tail for edits. Set `MESSAGE_CONTENT_ENABLED=true` separately if users should be able to ask natural-language questions without mentioning the bot. The bot ignores messages aimed at another member and reply chains to other members, never pings the author for an ambient answer, and rate-limits to one ambient answer per user/channel every eight seconds. Explicitly worded and fully specified natural reminder text is allowed; reminders and confirmations are private by DM, while notes and loop-management actions are not executed from ambient channel text. Unclear reminder requests are ignored in ambient chat. DMs and explicit bot mentions work with the intent off for the ambient feature. `ANNOUNCEMENT_CHANNEL_IDS`, if explicitly set, overrides the defaults and must include every channel to be read; the removed channel `1512089401193271539` is always excluded. Defaults are `1524319795791659080` and `1570083896823906364`. `/upcoming` and a mention such as `@bot what’s coming up?` show future dates only when a post explicitly includes a year. Recent event-related posts with incomplete dates are labelled as such and are not claimed to be upcoming. Every result links to its source message; no date or event detail is invented.
+
+## Plarium Forum snapshot and search
+
+`/forum [query]` and natural-language requests such as `latest forum posts about Surge` search or list the stored Plarium Forum thread crawl. It covers the scraper’s 150 newest-created threads across English sections and includes original-post text, category, author metadata, forum-displayed dates, and source links. It does not collect replies. Search results are community/source material, not verified game statistics, rankings, or a live event schedule; forum timestamps are reproduced as shown because the forum does not publish a timezone. `/forum` and this archive are deliberately separate from `/upcoming`, which uses only the configured Discord announcement channels. The supplied JSON snapshot is not presented as current or upcoming event information.
+
+The bot runs `scripts/scrape_mech_arena.py` at startup and refreshes every 12 hours by default (`FORUM_SYNC_SECONDS` accepts 1–48 hours). A failed scrape preserves the last-good JSON and retries after one hour. A result replaces `data/mech_arena_last_150_threads.json` only when it contains at least 150 valid Plarium Forum thread links; the replacement is atomic. Set `FORUM_SYNC_ENABLED=false` to disable scheduled scraping or tune the interval with `FORUM_SYNC_SECONDS`. The scraper dependencies are installed from `requirements.txt`.
 
 ## Payout reporting
 

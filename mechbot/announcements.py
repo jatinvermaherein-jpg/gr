@@ -1,11 +1,10 @@
-"""Safe ingestion and date-aware presentation for the three user-specified announcement channels."""
+"""Safe ingestion and date-aware presentation for configured announcement channels."""
 from datetime import date, datetime, timezone
 from zoneinfo import ZoneInfo
 import re
 
 DEFAULT_ANNOUNCEMENT_CHANNELS = (
     1524319795791659080,
-    1512089401193271539,
     1570083896823906364,
 )
 ANNOUNCEMENT_SYNC_SECONDS = 600

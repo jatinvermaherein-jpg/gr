@@ -22,6 +22,8 @@ from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECO
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
 from .alerts import AlertManager, OPERATORS, MAX_POOLS_PER_TARGET, validate as validate_alert
+from .forum_archive import (FORUM_SYNC_RETRY_SECONDS, format_forum_request, forum_sync_seconds,
+                            refresh_forum_archive, wants_forum_lookup)
 
 log=logging.getLogger('mechbot')
 REPLY_MENTIONS=discord.AllowedMentions(everyone=False,users=False,roles=False,replied_user=True)
@@ -33,6 +35,9 @@ def env_enabled(name,default=False):
     if value is None:return default
     return value.strip().casefold() in ('1','true','yes','on')
 
+DISABLED_ANNOUNCEMENT_CHANNELS=frozenset((1512089401193271539,))
+
+
 def configured_announcement_channels():
     raw=os.getenv('ANNOUNCEMENT_CHANNEL_IDS','').replace(';',',')
     values=[]
@@ -42,7 +47,7 @@ def configured_announcement_channels():
         except ValueError:
             log.warning('Ignoring an invalid announcement channel ID; no value or secret was logged.')
             continue
-        if channel_id>0 and channel_id not in values:values.append(channel_id)
+        if channel_id>0 and channel_id not in DISABLED_ANNOUNCEMENT_CHANNELS and channel_id not in values:values.append(channel_id)
     return tuple(values) or DEFAULT_ANNOUNCEMENT_CHANNELS
 
 ANNOUNCEMENT_CHANNELS=configured_announcement_channels()
@@ -60,6 +65,7 @@ Use `/help` anytime to see this command list.
 • `/mech name` — a short mech review with key details and listed purchase price.
 • `/builds [mech] [sp_range]` — browse recent builds or filter all mech builds by your SP range.
 • `/upcoming` — check dated and recent event posts from the configured announcement channels.
+• `/forum [query]` — search saved recent Plarium Forum threads; forum posts are not a live event schedule.
 • `/ecr` — check saved Event Crate Rush event updates; ECR event info is separate from promo codes.
 • `/promo_codes` — check the latest saved, explicitly labeled promo-code posts; validity is not guaranteed.
 • `/recent` — read recent posts in a channel you can access.
@@ -108,13 +114,15 @@ class MechBot(commands.Bot):
         # Message Content intent; ambient replies remain opt-in and are separately gated.
         intents=discord.Intents.default()
         self.announcement_ingestion_enabled=env_enabled('ANNOUNCEMENT_INGESTION_ENABLED',True)
+        self.forum_sync_enabled=env_enabled('FORUM_SYNC_ENABLED',True)
         self.ambient_channel_chat_enabled=env_enabled('MESSAGE_CONTENT_ENABLED',False)
         self.message_content_enabled=self.ambient_channel_chat_enabled or self.announcement_ingestion_enabled
         intents.message_content=self.message_content_enabled
         super().__init__(command_prefix=commands.when_mentioned, intents=intents, allowed_mentions=discord.AllowedMentions.none())
         self.catalog=catalog;self.store=store;self.workers=WorkerStore(store);self.payouts=PayoutTracker(store);self.alerts=AlertManager()
         self.runner=None;self.worker_runner=None;self.payout_runner=None;self.announcement_runner=None;self.conversation_runner=None
-        self.emoji_runner=None;self.command_sync_task=None;self.worker_setup_lock=asyncio.Lock();self.announcement_access={}
+        self.forum_archive_runner=None;self.emoji_runner=None;self.command_sync_task=None
+        self.worker_setup_lock=asyncio.Lock();self.announcement_access={}
         self.ai_session=None;self.currency_emojis={};self.ambient_last_reply={};self.pending_build_requests={}
 
     async def setup_hook(self):
@@ -137,6 +145,10 @@ class MechBot(commands.Bot):
             self.conversation_runner=asyncio.create_task(self.conversation_cleanup_loop())
         else:
             log.warning('Short-lived conversation memory is disabled until its private Supabase table is installed.')
+        if self.forum_sync_enabled:
+            self.forum_archive_runner=asyncio.create_task(self.forum_archive_sync_loop())
+        else:
+            log.info('Automated Plarium Forum scraping is disabled by FORUM_SYNC_ENABLED.')
         self.emoji_runner=asyncio.create_task(self.application_emoji_setup_loop())
 
     async def sync_guild_commands(self,guild_id):
@@ -237,10 +249,25 @@ class MechBot(commands.Bot):
             except Exception as exc:log.warning('Expired conversation-memory cleanup failed (%s); it will retry.',type(exc).__name__)
             await asyncio.sleep(60)
 
+    async def forum_archive_sync_loop(self):
+        """Refresh the last-150 Plarium Forum snapshot without blocking Discord handling."""
+        await self.wait_until_ready()
+        while not self.is_closed():
+            try:
+                count=await refresh_forum_archive()
+                log.info('Refreshed %s recent Plarium Forum threads.',count)
+                delay=forum_sync_seconds()
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                log.warning('Forum scrape failed (%s); the last-good snapshot remains available and will retry.',type(exc).__name__)
+                delay=FORUM_SYNC_RETRY_SECONDS
+            await asyncio.sleep(delay)
+
     async def close(self):
         await self.alerts.close()
         tasks=(self.command_sync_task,self.runner,self.worker_runner,self.payout_runner,self.announcement_runner,
-               self.conversation_runner,self.emoji_runner)
+               self.conversation_runner,self.forum_archive_runner,self.emoji_runner)
         for task in tasks:
             if task:task.cancel()
         for task in tasks:
@@ -341,6 +368,10 @@ class MechBot(commands.Bot):
             log.warning('Could not read saved announcement records (%s).',type(exc).__name__)
             return 'I can’t read the saved announcements right now. I’ll retry when the private storage is available.'
         return format_upcoming(rows,enabled=enabled,access_states=self.announcement_access)
+
+    def forum_response(self,query=None):
+        """Search or list the stored Plarium Forum crawl, separate from event scheduling."""
+        return format_forum_request(query)
 
     async def ecr_response(self):
         enabled=(self.announcement_ingestion_enabled and self.intents.message_content
@@ -650,6 +681,8 @@ class MechBot(commands.Bot):
                 if ambient_question:await self.reply_message(message,out,mention_author=False)
                 else:await self.private_reply(message,out)
                 return
+            if wants_forum_lookup(text):
+                await self.reply_message(message,self.forum_response(text),mention_author=not ambient_question);return
             if wants_promo_codes(text):
                 await self.reply_message(message,await self.promo_codes_response(),mention_author=not ambient_question);return
             if wants_ecr_info(text):
@@ -1079,6 +1112,12 @@ def install_commands(bot):
         except Exception:
             log.exception('Public builds lookup failed')
             await i.followup.send('The public builds API is unavailable or returned an unexpected response.',ephemeral=True)
+
+    @tree.command(name='forum',description='Search saved recent Plarium Forum threads; not an event schedule')
+    @app_commands.describe(query='Optional topic, item, or phrase to search in saved forum posts')
+    async def forum(i:discord.Interaction,query:str=None):
+        await i.response.send_message(discord_text(bot.forum_response(query)),ephemeral=True,
+                                      allowed_mentions=discord.AllowedMentions.none())
 
     @tree.command(name='upcoming',description='Show upcoming events in the configured announcement channels')
     async def upcoming(i:discord.Interaction):
