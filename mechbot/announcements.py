@@ -368,20 +368,85 @@ def ecr_event_items(rows,limit=5):
     return result
 
 
-def format_ecr_events(rows,*,enabled,access_states=None,limit=5):
-    """Present ECR event updates only; promo-code posts use their separate lookup."""
+def _announcement_access_description(state):
+    """Explain the last per-channel ingestion result without guessing at permissions."""
+    value=str(state or 'not_checked')
+    exact={
+        'available':'history read and storage succeeded',
+        'not_checked':'no ingestion attempt recorded yet',
+        'message_content_intent_disabled':'the bot did not request the Discord Message Content intent',
+        'announcement_ingestion_disabled':'ANNOUNCEMENT_INGESTION_ENABLED is false',
+        'private_table_not_installed':'the private announcement-storage table is missing',
+        'view_channel_missing':'the bot’s effective Discord permissions lack View Channel',
+        'read_message_history_missing':'the bot’s effective Discord permissions lack Read Message History',
+        'view_channel_or_read_history_missing':'the bot’s effective permissions lack View Channel or Read Message History',
+        'permission_denied':'Discord returned 403 Forbidden during channel access/history read',
+        'permission_denied_channel_lookup':'Discord returned 403 Forbidden while resolving the channel',
+        'permission_denied_history_read':'Discord returned 403 Forbidden while reading message history',
+        'not_found_or_not_a_member':'Discord returned 404; the ID may be wrong/deleted or the bot may not be in that server',
+        'not_found_channel_lookup':'Discord returned 404 while resolving the channel; verify its ID and server membership',
+        'not_found_history_read':'Discord returned 404 while reading history; the channel may have been deleted',
+        'not_a_server_message_channel':'the resolved ID is not a server text/announcement channel with history',
+    }
+    if value in exact:return exact[value]
+    if value.startswith('permission_denied_'):
+        stage=value[len('permission_denied_'):].replace('_',' ')
+        return f'Discord returned 403 Forbidden during {stage}'
+    if value.startswith('not_found_'):
+        stage=value[len('not_found_'):].replace('_',' ')
+        return f'Discord returned 404 during {stage}; verify the channel ID and server membership'
+    if value.startswith('discord_http_'):
+        parts=value[len('discord_http_'):].rsplit('_',2)
+        if len(parts)==3:
+            stage,error_type,status=parts
+            return f'Discord returned HTTP {status} ({error_type}) during {stage.replace("_"," ")}'
+        detail=value[len('discord_http_'):].replace('_',' ')
+        return f'Discord API returned {detail} during ingestion'
+    if value.startswith('ingestion_error_'):
+        detail=value[len('ingestion_error_'):].replace('_',' ')
+        return f'bot ingestion/storage failed with {detail}; check the bot runtime log for the stack trace'
+    return f'unmapped last status `{value}`; check the bot runtime log'
+
+
+def _announcement_access_report(access_states=None,channel_ids=()):
+    states=access_states or {}
+    ids=list(channel_ids or states.keys())
+    lines=[]
+    failures=[]
+    for channel_id in ids:
+        state=states.get(channel_id,states.get(str(channel_id),'not_checked'))
+        line=f'• `{channel_id}` — {_announcement_access_description(state)}.'
+        lines.append(line)
+        if state!='available':failures.append(line)
+    return lines,failures
+
+
+def format_ecr_events(rows,*,enabled,access_states=None,limit=5,configured_channel_ids=(),disabled_reasons=(),excluded_channel_ids=()):
+    """Present ECR event updates only; include exact configured-channel read diagnostics."""
     rows=list(rows or [])
+    channel_ids=list(configured_channel_ids or ())
     items=ecr_event_items(rows,limit=limit)
     if not items:
+        status_lines,failures=_announcement_access_report(access_states,channel_ids)
+        channel_text=', '.join(f'`{channel_id}`' for channel_id in channel_ids) or 'none configured'
+        excluded_text=', '.join(f'`{channel_id}`' for channel_id in excluded_channel_ids)
+        exclusion_note=f' Explicitly excluded channel IDs: {excluded_text}.' if excluded_text else ''
         if not enabled:
-            return ('ECR means Event Crate Rush; it is separate from promo codes. Current ECR updates need '
-                    'announcement reading and channel access enabled.')
-        if access_states and any(state!='available' for state in access_states.values()):
-            return ('I don’t have a saved ECR event update yet because one or more configured channels are not readable. '
-                    'I’ll retry when access is available. ECR event updates and promo codes are separate lookups.')
+            reasons='; '.join(str(item) for item in disabled_reasons) or 'announcement ingestion is disabled'
+            return (f'ECR means Event Crate Rush; it is separate from promo codes. Announcement lookup is disabled: '
+                    f'{reasons}. Configured channel IDs: {channel_text}.{exclusion_note} Check bot configuration and restart after changes.')
+        if failures:
+            return ('I don’t have a saved ECR event update. Last result for each configured source channel:\n'
+                    +'\n'.join(status_lines)+'\n'
+                    +f'Configured channel IDs: {channel_text}.{exclusion_note} I’ll retry automatically. '
+                    'If the ECR post is in another channel, add that channel ID to `ANNOUNCEMENT_CHANNEL_IDS`.')
+        status_summary=('\n'.join(status_lines) if status_lines else 'No per-channel read result has been recorded yet.')
         if rows:
-            return 'I found no saved ECR event updates in the configured channels. Promo codes are looked up separately.'
-        return 'I haven’t saved an ECR event update from the configured channels yet. I’ll keep retrying; promo codes are looked up separately.'
+            return ('ECR means Event Crate Rush; I read the saved announcements but found no ECR event update '
+                    f'(promo-code posts are separate). Configured channel IDs: {channel_text}.{exclusion_note}\n{status_summary}')
+        return ('ECR means Event Crate Rush; no saved ECR event update is available yet. '
+                f'Configured channel IDs: {channel_text}.{exclusion_note} Last channel-read results:\n{status_summary}\n'
+                'Promo codes are looked up separately; I’ll retry the configured channels.')
     lines=['**Saved Event Crate Rush updates** *(event information, not promo codes)*']
     for item in items:
         label=item['source_label'].replace('[','').replace(']','')
@@ -392,4 +457,5 @@ def format_ecr_events(rows,*,enabled,access_states=None,limit=5):
             lines.append('• More ECR updates omitted to fit Discord.')
             break
         lines.append(line)
+    if not enabled:lines.append('*Announcement ingestion is disabled; these are cached posts.*')
     return '\n'.join(lines)

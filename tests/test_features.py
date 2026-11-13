@@ -888,6 +888,51 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(record['channel_id'],str(channel.id))
         self.assertIn('Event update',record['content'])
 
+    async def test_announcement_ingestion_distinguishes_view_and_history_permission_failures(self):
+        channel_id=1524319795791659080
+        for permission_state,expected in (
+            ({'view_channel':False,'read_message_history':True},'view_channel_missing'),
+            ({'view_channel':True,'read_message_history':False},'read_message_history_missing'),
+        ):
+            with self.subTest(expected=expected):
+                store=SimpleNamespace(supports_announcements=True,announcement_cursor=AsyncMock(),
+                                      upsert_announcements=AsyncMock())
+                guild=SimpleNamespace(id=1,name='Test Server',me=SimpleNamespace())
+                channel=SimpleNamespace(id=channel_id,name='events',guild=guild,
+                    history=AsyncMock(),permissions_for=lambda member:SimpleNamespace(**permission_state))
+                with patch.dict(os.environ,{'ANNOUNCEMENT_INGESTION_ENABLED':'true'}):bot=MechBot(object(),store)
+                with patch.object(bot,'get_channel',return_value=channel):
+                    self.assertEqual(await bot.ingest_announcement_channel(channel_id),0)
+                self.assertEqual(bot.announcement_access[channel_id],expected)
+                store.announcement_cursor.assert_not_awaited()
+
+    async def test_ecr_response_explains_exact_channel_failures_and_configured_scope(self):
+        store=SimpleNamespace(supports_announcements=True,recent_announcements=AsyncMock(return_value=[]))
+        with (patch.dict(os.environ,{'ANNOUNCEMENT_INGESTION_ENABLED':'true'}),
+              patch('mechbot.bot.ANNOUNCEMENT_CHANNELS',(1524319795791659080,1570083896823906364))):
+            bot=MechBot(object(),store)
+        bot.announcement_access={
+            1524319795791659080:'permission_denied_history_read',
+            1570083896823906364:'available',
+        }
+        result=await bot.ecr_response()
+        self.assertIn('`1524319795791659080`',result)
+        self.assertIn('403 Forbidden while reading message history',result)
+        self.assertIn('`1570083896823906364`',result)
+        self.assertIn('history read and storage succeeded',result)
+        self.assertIn('1512089401193271539',result)
+        self.assertNotIn('`1512089401193271539` —',result)
+        self.assertIn('ANNOUNCEMENT_CHANNEL_IDS',result)
+
+    async def test_ecr_response_explains_disabled_ingestion_setting(self):
+        store=SimpleNamespace(supports_announcements=True,recent_announcements=AsyncMock(return_value=[]))
+        with patch.dict(os.environ,{'ANNOUNCEMENT_INGESTION_ENABLED':'false','MESSAGE_CONTENT_ENABLED':'false'},clear=True):
+            bot=MechBot(object(),store)
+        result=await bot.ecr_response()
+        self.assertIn('ANNOUNCEMENT_INGESTION_ENABLED=false',result)
+        self.assertIn('Message Content intent',result)
+        self.assertIn('Configured channel IDs',result)
+
     async def test_ecr_response_reads_only_configured_event_posts(self):
         posts=[
             {'channel_id':str(DEFAULT_ANNOUNCEMENT_CHANNELS[0]),

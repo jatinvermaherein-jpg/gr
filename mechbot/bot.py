@@ -286,12 +286,16 @@ class MechBot(commands.Bot):
             log.warning('Announcement source %s is not readable (%s); it will be retried.',channel_id,state)
 
     async def ingest_announcement_channel(self,channel_id):
-        if not self.announcement_ingestion_enabled or not self.intents.message_content:
+        if not self.announcement_ingestion_enabled:
+            self._set_announcement_access(channel_id,'announcement_ingestion_disabled')
+            return 0
+        if not self.intents.message_content:
             self._set_announcement_access(channel_id,'message_content_intent_disabled')
             return 0
         if not getattr(self.store,'supports_announcements',True):
             self._set_announcement_access(channel_id,'private_table_not_installed')
             return 0
+        stage='channel_lookup'
         try:
             channel=self.get_channel(channel_id) or await self.fetch_channel(channel_id)
             if not hasattr(channel,'history') or not getattr(channel,'guild',None):
@@ -300,11 +304,16 @@ class MechBot(commands.Bot):
             member=getattr(channel.guild,'me',None)
             if member and hasattr(channel,'permissions_for'):
                 permissions=channel.permissions_for(member)
-                if not permissions.view_channel or not permissions.read_message_history:
-                    self._set_announcement_access(channel_id,'view_channel_or_read_history_missing')
+                if not permissions.view_channel:
+                    self._set_announcement_access(channel_id,'view_channel_missing')
                     return 0
+                if not permissions.read_message_history:
+                    self._set_announcement_access(channel_id,'read_message_history_missing')
+                    return 0
+            stage='storage_cursor'
             cursor=await self.store.announcement_cursor(channel_id)
             messages={}
+            stage='history_read'
             if cursor:
                 async for message in channel.history(limit=INCREMENTAL_LIMIT,after=discord.Object(id=cursor),oldest_first=True):
                     messages[int(message.id)]=message
@@ -330,15 +339,20 @@ class MechBot(commands.Bot):
                     'posted_at':int(created.timestamp()),
                     'edited_at':int(edited.timestamp()) if edited else None,'fetched_at':now,
                 })
+            stage='storage_upsert'
             await self.store.upsert_announcements(records)
             self._set_announcement_access(channel_id,'available')
             return len(records)
         except discord.Forbidden:
-            self._set_announcement_access(channel_id,'permission_denied')
+            self._set_announcement_access(channel_id,'permission_denied_'+stage)
         except discord.NotFound:
-            self._set_announcement_access(channel_id,'not_found_or_not_a_member')
+            self._set_announcement_access(channel_id,'not_found_'+stage)
         except discord.HTTPException as exc:
-            self._set_announcement_access(channel_id,'discord_http_'+type(exc).__name__)
+            self._set_announcement_access(channel_id,
+                f'discord_http_{stage}_{type(exc).__name__}_{getattr(exc,"status","unknown")}')
+        except Exception as exc:
+            self._set_announcement_access(channel_id,f'ingestion_error_{stage}_{type(exc).__name__}')
+            log.exception('Announcement ingestion failed during %s for channel %s.',stage,channel_id)
         return 0
 
     async def announcement_ingestion_loop(self):
@@ -374,18 +388,27 @@ class MechBot(commands.Bot):
         return format_forum_request(query)
 
     async def ecr_response(self):
-        enabled=(self.announcement_ingestion_enabled and self.intents.message_content
-                 and getattr(self.store,'supports_announcements',True))
+        channels=', '.join(f'`{channel_id}`' for channel_id in ANNOUNCEMENT_CHANNELS) or 'none configured'
         if not getattr(self.store,'supports_announcements',True):
-            return 'ECR event lookup needs the private announcement-storage migration before it can read saved posts.'
+            return (f'ECR storage is unavailable: the private announcement table is not installed. '
+                    f'Configured channel IDs: {channels}. Apply the announcement-storage migration.')
+        disabled_reasons=[]
+        if not self.announcement_ingestion_enabled:
+            disabled_reasons.append('`ANNOUNCEMENT_INGESTION_ENABLED=false`')
+        if not self.intents.message_content:
+            disabled_reasons.append('the bot did not request Message Content intent; also enable the privileged intent in the Discord Developer Portal')
+        enabled=not disabled_reasons
         try:
             rows=await self.store.recent_announcements(int(time.time())-365*86400,limit=2000)
             allowed={str(channel_id) for channel_id in ANNOUNCEMENT_CHANNELS}
             rows=[row for row in rows if str(row.get('channel_id') or '') in allowed]
         except Exception as exc:
             log.warning('Could not read saved ECR event posts (%s).',type(exc).__name__)
-            return 'I can’t read saved ECR event posts right now. I’ll retry when private storage is available.'
-        return format_ecr_events(rows,enabled=enabled,access_states=self.announcement_access)
+            return (f'ECR storage read failed with `{type(exc).__name__}`. Configured channel IDs: {channels}. '
+                    'This is a storage/database failure, not proof of a Discord channel-permission failure; check the bot runtime log.')
+        return format_ecr_events(rows,enabled=enabled,access_states=self.announcement_access,
+            configured_channel_ids=ANNOUNCEMENT_CHANNELS,disabled_reasons=disabled_reasons,
+            excluded_channel_ids=DISABLED_ANNOUNCEMENT_CHANNELS)
 
     async def promo_codes_response(self):
         enabled=(self.announcement_ingestion_enabled and self.intents.message_content
