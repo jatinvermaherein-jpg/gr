@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, patch
 from mechbot.store import Store, CONVERSATION_TTL_SECONDS, CONVERSATION_TURN_LIMIT
 from mechbot.workers import WORKERS, WorkerStore, assignment_text, parse_worker_time, parse_worker_snooze
 from mechbot.payouts import PayoutTracker, parse_snapshot
-from mechbot.alerts import AlertManager, validate
+from mechbot.alerts import AlertManager, MAX_POOLS_PER_TARGET, validate
 from mechbot.bot import MechBot, install_commands, OPERATORS, REPLY_MENTIONS, help_text
 from mechbot.assistant import (wants_invite_link, bot_identity_response, direct_item_lookup, should_answer_unmentioned,
                                parse_natural_calculation, natural_builds_request, builds_response, _archive_attribution,
@@ -200,7 +200,14 @@ class ParserTests(unittest.TestCase):
         self.assertIn('Nub',builder)
         self.assertIn('confirmed code-author',builder)
         self.assertNotIn('built by Nub',builder)
-        self.assertIn('ᧁꪖꪶꪖ𝓽ꫀ𝘘',bot_identity_response('Who maintains the database?'))
+        database=bot_identity_response('Who provided your database?')
+        self.assertIn('ᧁꪖꪶꪖ𝓽ꫀ𝘳',database)
+        self.assertNotIn('ᧁꪖꪶꪖ𝓽ꫀ𝘘',database)
+        self.assertIn('<@1444891876376186901>',database)
+        self.assertIn('https://discord.com/users/1444891876376186901',database)
+        manager=bot_identity_response('Who runs the bot?')
+        self.assertIn('<@1442058583129722986>',manager)
+        self.assertIn('https://discord.com/users/1442058583129722986',manager)
         event_credits=bot_identity_response('Who does the ECR event guides?')
         self.assertIn('MRX',event_credits)
         self.assertIn('separate from ECR event information',event_credits)
@@ -685,6 +692,32 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
             response.send_message.assert_awaited_once()
             self.assertIn('authorized operator IDs',response.send_message.await_args.args[0])
 
+    async def test_dm_loop_schedules_followups_to_the_member_not_the_initial_message(self):
+        bot=MechBot(object(),object());install_commands(bot)
+        calls=[]
+        async def send_dm(*args,**kwargs):
+            calls.append(('send',args,kwargs))
+            return SimpleNamespace(send=AsyncMock())
+        member=SimpleNamespace(id=223456789012345678,bot=False,send=AsyncMock(side_effect=send_dm))
+        def start(*args):
+            calls.append(('start',args,{}))
+            return 'abcd1234'
+        response=SimpleNamespace(defer=AsyncMock(),send_message=AsyncMock())
+        followup=SimpleNamespace(send=AsyncMock())
+        interaction=SimpleNamespace(guild=SimpleNamespace(id=999999999999999999),
+            user=SimpleNamespace(id=1442058583129722986),response=response,followup=followup)
+        with patch.object(bot.alerts,'start',side_effect=start) as start_loop:
+            await bot.tree.get_command('dm_loop').callback(interaction,member,5,10,'Check this')
+        member.send.assert_awaited_once()
+        start_loop.assert_called_once()
+        self.assertEqual(calls[0][0],'send')
+        self.assertEqual(calls[1][0],'start')
+        self.assertIs(calls[1][1][0],member)
+        self.assertEqual(calls[1][1][1],'dm')
+        self.assertIs(calls[1][1][2],member)
+        response.defer.assert_awaited_once_with(ephemeral=True)
+        followup.send.assert_awaited_once()
+
     async def test_legacy_emergency_phrase_does_not_cancel_loops(self):
         class Catalog:
             weapon_names=[]
@@ -1067,6 +1100,48 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         store.conversation_history.assert_not_awaited()
         store.add_conversation_turn.assert_not_awaited()
 
+    async def test_identity_answers_ping_only_the_credited_profiles(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+        bot=MechBot(Catalog(),object())
+        bot_user=SimpleNamespace(id=987654321098765432)
+        bot._connection.user=bot_user
+        author=SimpleNamespace(id=123456789012345678,bot=False)
+        for question,user_id in (('Who maintains your database?',1444891876376186901),
+                                 ('Who runs the bot?',1442058583129722986)):
+            message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
+                mentions=[bot_user],content=f'<@{bot_user.id}> {question}',reference=None,reply=AsyncMock())
+            await bot.on_message(message)
+            message.reply.assert_awaited_once()
+            reply=message.reply.await_args
+            self.assertIn(f'<@{user_id}>',reply.args[0])
+            self.assertIn(f'https://discord.com/users/{user_id}',reply.args[0])
+            allowed=reply.kwargs['allowed_mentions']
+            self.assertEqual([user.id for user in allowed.users],[user_id])
+            self.assertFalse(allowed.everyone or allowed.roles)
+
+    async def test_upcoming_response_reads_posts_from_any_configured_channel(self):
+        rows=[
+            {'channel_id':str(DEFAULT_ANNOUNCEMENT_CHANNELS[2]),
+             'content':'Tournament starts December 15, 2099', 'posted_at':int(time.time()),
+             'channel_name':'special-announcements','guild_name':'Game Server',
+             'message_url':'https://discord.com/channels/1/1570083896823906364/200'},
+            {'channel_id':'999999999999999999',
+             'content':'Tournament starts December 16, 2099', 'posted_at':int(time.time()),
+             'channel_name':'unconfigured','guild_name':'Other Server',
+             'message_url':'https://discord.com/channels/9/999999999999999999/201'},
+        ]
+        store=SimpleNamespace(supports_announcements=True,recent_announcements=AsyncMock(return_value=rows))
+        with (patch.dict(os.environ,{'ANNOUNCEMENT_INGESTION_ENABLED':'true'}),
+              patch('mechbot.bot.ANNOUNCEMENT_CHANNELS',DEFAULT_ANNOUNCEMENT_CHANNELS)):
+            bot=MechBot(object(),store)
+            result=await bot.upcoming_response()
+        self.assertIn('Tournament starts December 15, 2099',result)
+        self.assertIn('#special-announcements',result)
+        self.assertNotIn('December 16, 2099',result)
+        store.recent_announcements.assert_awaited_once()
+
     async def test_any_event_request_uses_announcement_lookup_not_ai(self):
         class Catalog:
             weapon_names=[]
@@ -1374,6 +1449,48 @@ class DataTests(unittest.IsolatedAsyncioTestCase):
         await p.delivered(UID,DAY,13,token)
         await p.observe(UID,'2026-11-12',10)
         self.assertEqual(len(await p.pending()),1)
+    async def test_loop_pools_are_independent_and_capped_per_target(self):
+        class User:
+            def __init__(self,uid):self.id=uid;self.mention=f'<@{uid}>'
+        self.assertEqual(MAX_POOLS_PER_TARGET,3)
+        member=User(323456789012345678)
+        another=User(423456789012345678)
+        destination=SimpleNamespace(send=AsyncMock())
+        mgr=AlertManager()
+        keys=[mgr.start(member,'channel',destination,5,30,9,f'Check {number}')
+              for number in range(MAX_POOLS_PER_TARGET)]
+        self.assertEqual(len(set(keys)),MAX_POOLS_PER_TARGET)
+        self.assertFalse(mgr.available(member.id,'dm'))
+        with self.assertRaisesRegex(ValueError,'3 active loop pools'):
+            mgr.start(member,'dm',destination,5,30,9,'One too many')
+        self.assertTrue(mgr.available(another.id,'channel'))
+        another_key=mgr.start(another,'channel',destination,5,30,9,'Separate target')
+        self.assertIn(another_key,mgr.alerts)
+        self.assertEqual(len(mgr.alerts),MAX_POOLS_PER_TARGET+1)
+        self.assertTrue(all(mgr.alerts[key]['target']==member.id for key in keys))
+        await mgr.close()
+        self.assertFalse(mgr.alerts)
+
+    async def test_dm_loop_sends_scheduled_followups_to_the_member(self):
+        class User:
+            id=323456789012345678
+            def __init__(self):self.send=AsyncMock()
+        member=User()
+        await member.send('Initial DM loop notice')
+        mgr=AlertManager()
+        with patch('mechbot.alerts.MIN_INTERVAL',1):
+            key=mgr.start(member,'dm',member,1,2,9,'Please check this')
+            task=mgr.alerts[key]['task']
+            await asyncio.wait_for(task,timeout=2.5)
+        self.assertEqual(member.send.await_count,2)
+        followup=member.send.await_args_list[-1]
+        self.assertIn('Direct-message loop (2)',followup.args[0])
+        self.assertIn('Please check this',followup.args[0])
+        allowed=followup.kwargs['allowed_mentions']
+        self.assertFalse(allowed.everyone or allowed.users or allowed.roles or allowed.replied_user)
+        self.assertFalse(mgr.alerts)
+        await mgr.close()
+
     async def test_ping_loop_followup_is_a_scoped_ping_and_can_be_stopped(self):
         class User:
             id=123456789012345678
@@ -1387,7 +1504,7 @@ class DataTests(unittest.IsolatedAsyncioTestCase):
         mgr=AlertManager()
         with patch('mechbot.alerts.MIN_INTERVAL',1):
             key=mgr.start(User(),'channel',destination,1,3,9,'Test')
-            self.assertFalse(mgr.available(User.id,'channel'))
+            self.assertTrue(mgr.available(User.id,'channel'))  # another independent pool is allowed
             await asyncio.wait_for(started.wait(),timeout=2)
             self.assertEqual(destination.send.await_count,1)
             content=destination.send.await_args.args[0]

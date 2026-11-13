@@ -17,11 +17,11 @@ from dotenv import load_dotenv
 from .catalog import Catalog, initialize_snapshot
 from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, tzinfo
-from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, weapon_response, mech_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
+from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, weapon_response, mech_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
 from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INITIAL_BACKFILL_LIMIT, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes, format_promo_codes
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
-from .alerts import AlertManager, OPERATORS, validate as validate_alert
+from .alerts import AlertManager, OPERATORS, MAX_POOLS_PER_TARGET, validate as validate_alert
 
 log=logging.getLogger('mechbot')
 REPLY_MENTIONS=discord.AllowedMentions(everyone=False,users=False,roles=False,replied_user=True)
@@ -79,6 +79,7 @@ def help_text(user_id=None,guild_id=None):
     if user_id in OPERATORS and guild_id is not None:
         restricted=('• `/ping_loop member interval_seconds duration_seconds reason` — send an immediate, single-user ping, then bounded follow-up pings.\n'
                     '• `/dm_loop member interval_seconds duration_seconds reason` — start a bounded DM loop.\n'
+                    'Each command starts an independent loop pool; a member may have at most three active pools across both destinations.\n'
                     '• `/stop_user_loops member` — stop that member’s channel and DM loops.\n')
         return HELP.replace('• `/stop_loop`',restricted+'• `/stop_loop`')
     return HELP
@@ -334,6 +335,8 @@ class MechBot(commands.Bot):
             return 'Announcement storage is not installed yet. The private database migration is required before ingestion can be enabled.'
         try:
             rows=await self.store.recent_announcements(int(time.time())-365*86400,limit=1000)
+            allowed={str(channel_id) for channel_id in ANNOUNCEMENT_CHANNELS}
+            rows=[row for row in rows if str(row.get('channel_id') or '') in allowed]
         except Exception as exc:
             log.warning('Could not read saved announcement records (%s).',type(exc).__name__)
             return 'I can’t read the saved announcements right now. I’ll retry when the private storage is available.'
@@ -494,12 +497,22 @@ class MechBot(commands.Bot):
             if path.is_file():files.append(discord.File(path,filename=filename,description=label+' icon'))
         return files
 
-    async def reply_message(self,message,text,with_currency_icons=False,mention_author=True):
+    async def reply_message(self,message,text,with_currency_icons=False,mention_author=True,allowed_user_ids=()):
         kwargs={}
         if with_currency_icons and not self.currency_emojis:
             files=self.currency_icon_files()
             if files:kwargs['files']=files
-        allowed=REPLY_MENTIONS if mention_author else discord.AllowedMentions.none()
+        allowed_ids=[]
+        for user_id in allowed_user_ids or ():
+            try:user_id=int(user_id)
+            except (TypeError,ValueError):continue
+            if user_id in IDENTITY_PROFILE_IDS and user_id not in allowed_ids:allowed_ids.append(user_id)
+        if allowed_ids:
+            allowed=discord.AllowedMentions(everyone=False,
+                users=[discord.Object(id=user_id) for user_id in allowed_ids],roles=False,
+                replied_user=mention_author)
+        else:
+            allowed=REPLY_MENTIONS if mention_author else discord.AllowedMentions.none()
         await message.reply(discord_text(text),mention_author=mention_author,allowed_mentions=allowed,**kwargs)
 
     async def conversation_history_for(self,message):
@@ -602,7 +615,10 @@ class MechBot(commands.Bot):
         try:
             identity=bot_identity_response(text)
             if identity:
-                await self.reply_message(message,identity,mention_author=not ambient_question);return
+                identity_user_ids=[int(user_id) for user_id in re.findall(r'<@!?(\d+)>',identity)
+                                   if int(user_id) in IDENTITY_PROFILE_IDS]
+                await self.reply_message(message,identity,mention_author=not ambient_question,
+                                         allowed_user_ids=identity_user_ids);return
             if wants_invite_link(text):
                 await self.reply_message(message,f'Invite **ARCHΛNGLE** to a server where you can add bots: {INVITE_URL}',mention_author=not ambient_question);return
             if re.fullmatch(r'(?:stop|cancel)\s+(?:(?:my|the)\s+)?(?:(?:ping|dm|direct[- ]message)\s+)?loops?',text,re.I):
@@ -793,7 +809,7 @@ def install_commands(bot):
         try:validate_alert(interval_seconds,duration_seconds)
         except ValueError as e:await i.response.send_message(str(e),ephemeral=True);return
         if not bot.alerts.available(member.id,'channel'):
-            await i.response.send_message('A loop is already active for that target and destination, or the five-loop limit has been reached.',ephemeral=True);return
+            await i.response.send_message(f'This member already has {MAX_POOLS_PER_TARGET} active loop pools across channel and DM destinations. Stop one before adding another.',ephemeral=True);return
         reason=safe_text(reason.strip() or 'Please check this',180)
         total_messages=1+(duration_seconds-1)//interval_seconds
         allowed=discord.AllowedMentions(everyone=False,users=[discord.Object(id=member.id)],roles=False,replied_user=False)
@@ -831,12 +847,12 @@ def install_commands(bot):
         try:validate_alert(interval_seconds,duration_seconds)
         except ValueError as e:await i.response.send_message(str(e),ephemeral=True);return
         if not bot.alerts.available(member.id,'dm'):
-            await i.response.send_message('A loop is already active for that member and destination, or the five-loop limit has been reached.',ephemeral=True);return
+            await i.response.send_message(f'This member already has {MAX_POOLS_PER_TARGET} active loop pools across channel and DM destinations. Stop one before adding another.',ephemeral=True);return
         reason=safe_text(reason.strip() or 'Please check this',180)
         await i.response.defer(ephemeral=True)
         try:
-            anchor=await member.send(f'🔔 A direct-message loop was started by an authorized operator: {reason}. Additional messages will arrive every {interval_seconds}s for up to {duration_seconds}s. Use `/stop_loop` to stop it.',allowed_mentions=discord.AllowedMentions.none())
-            key=bot.alerts.start(member,'dm',anchor,interval_seconds,duration_seconds,i.user.id,reason)
+            await member.send(f'🔔 A direct-message loop was started by an authorized operator: {reason}. Additional messages will arrive every {interval_seconds}s for up to {duration_seconds}s. Use `/stop_loop` to stop it.',allowed_mentions=discord.AllowedMentions.none())
+            key=bot.alerts.start(member,'dm',member,interval_seconds,duration_seconds,i.user.id,reason)
             await i.followup.send(f'DM loop `{key}` started. You or an authorized operator can stop it with `/stop_loop`.',ephemeral=True)
         except discord.HTTPException:await i.followup.send('Could not send the initial DM, so the loop did not start. The member may have DMs closed.',ephemeral=True)
         except ValueError as e:await i.followup.send('Loop not started: '+str(e),ephemeral=True)

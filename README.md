@@ -5,7 +5,7 @@ ARCHΛNGLE is an unofficial Mech Arena community helper for weapon and mech revi
 **Profile description draft (Discord Developer Portal):**
 > Mech Arena weapon and mech reviews · builds · reminders · upcoming announcements · community tools.<br>
 > Unofficial fan project; not affiliated with Plarium.<br>
-> Powered and managed by Nub · Game database maintained by ᧁꪖꪶꪖ𝓽ꫀ𝘘 · Promo-code posts and event guides by MRX. ECR event information is separate from promo codes; contact the relevant person for bot, database, or event questions.
+> Powered and managed by [Nub](https://discord.com/users/1442058583129722986) · Game database maintained by [ᧁꪖꪶꪖ𝓽ꫀ𝘳](https://discord.com/users/1444891876376186901) · Promo-code posts and event guides by MRX. ECR event information is separate from promo codes; contact the relevant person for bot, database, or event questions.
 
 ## Commands and replies
 
@@ -24,7 +24,7 @@ ARCHΛNGLE is an unofficial Mech Arena community helper for weapon and mech revi
 - `/ping_loop member interval_seconds duration_seconds reason` sends one immediate channel message and then new follow-up messages, explicitly mentioning only the target member. The bot needs View Channel and Send Messages; the target must be able to view the channel.
 - `/dm_loop member interval_seconds duration_seconds reason` sends an initial DM followed by separate DM messages. If the target cannot receive the initial DM, the loop does not start.
 - `/stop_loop [member]` stops the caller's channel and DM loops; an operator may select another user. `/stop_user_loops member` is restricted to the two operators and also cancels both modes for that target. There is no `/emergency_*` command or `stop emergency` text handler; use `/stop_loop` to stop a loop.
-- Safety bounds are a minimum **5-second interval**, maximum **30-minute duration**, and maximum **300 repeated pings**. A 5-second interval can run for at most 25 minutes to stay within the repeat cap. There is one active loop per target and destination mode, with at most five loops overall. Delivery failures, cancellation, process restart, and the deadline stop loops; they are not resumed after restart. One in-flight message may still arrive after a stop request.
+- Safety bounds are a minimum **5-second interval**, maximum **30-minute duration**, and maximum **300 repeated pings**. A 5-second interval can run for at most 25 minutes to stay within the repeat cap. Each command invocation creates an independent loop pool, and multiple loops may run for the same target and mode. A target can have at most three active pools across both channel and DM destinations. Delivery failures, cancellation, process restart, and the deadline stop loops; they are not resumed after restart. One in-flight message may still arrive after a stop request.
 
 ## Nine database workers
 
