@@ -485,6 +485,7 @@ def main():
 
     # ---------------- Phase A: category listing scan (interleaved rounds)
     cands = {}          # topic_id -> candidate
+    listing_failures = []
     cat_state = {}      # slug -> {pages, last_page, last_date, first_date_next..., violations}
     for c in CATEGORIES:
         cat_state[c["slug"]] = {"pages": 0, "last_page": None, "last_date": None,
@@ -515,12 +516,17 @@ def main():
             url = f"{BASE}/mech-arena/{cat['slug']}/" if rnd == 1 else f"{BASE}/mech-arena/{cat['slug']}/{rnd}"
             html = fetch(url)
             if html is None:
-                st["last_page"] = st["pages"]  # cannot fetch -> treat exhausted
+                listing_failures.append(f"{cat['name']} page {rnd}: fetch failed")
+                log(f"  !! incomplete listing: {cat['name']} page {rnd} could not be fetched")
                 continue
             st["last_page"] = last_page_of(html, cat["slug"])
             if st["pages"] >= st["last_page"]:
                 continue
             items = parse_listing(html, cat)
+            if not items:
+                listing_failures.append(f"{cat['name']} page {rnd}: no topic cards parsed")
+                log(f"  !! incomplete listing: {cat['name']} page {rnd} contained no parsed topic cards")
+                continue
             first_page = st["pages"] == 0
             st["pages"] = rnd
             st["count"] += len(items)
@@ -594,10 +600,13 @@ def main():
         margin = timedelta(days=MARGIN_DAYS_LOOSE if violations_total() else MARGIN_DAYS)
         # activity cutoff among fetched candidates (unfetched cands are older)
         fetched_ids = set(fetched)
+        # The newest remaining listing activity is the conservative upper bound on
+        # any unfetched thread's creation date. Include parse/fetch failures: they
+        # are still potentially among the newest 150 until their bound is older.
         unfetched_dates = [c.get("last_activity") or datetime.max
                            for tid, c in cands.items()
-                           if tid not in fetched_ids and tid not in failed]
-        f_cut = min(unfetched_dates) if unfetched_dates else datetime.min
+                           if tid not in fetched_ids]
+        f_cut = max(unfetched_dates) if unfetched_dates else datetime.min
         # displayed-date boundary of unfetched listing pages
         b_cut = cat_boundaries()
         upper = max(f_cut, b_cut)
@@ -613,6 +622,9 @@ def main():
         rounds += 1
         log(f"-- listing round {rounds} --")
         scan_round(rounds)
+        if listing_failures:
+            details='; '.join(listing_failures[:5])
+            sys.exit(f"Incomplete forum crawl; leaving any previous snapshot untouched. {details}")
         if len(cands) >= target:
             # fetch OPs until the provable stop condition holds
             while True:
@@ -642,14 +654,16 @@ def main():
     threads = [t for t in fetched.values() if t.get("created")]
     threads_no_date = [t for t in fetched.values() if not t.get("created")]
     threads.sort(key=lambda t: t["created"], reverse=True)
-    top = threads[:TARGET]
+    top = threads[:target]
+    complete = stop_condition_met()
     log(f"== collected {len(cands)} candidates, fetched {len(fetched)} topic pages, "
         f"ranking {len(top)} threads by OP creation date ==")
     if threads_no_date:
         log(f"  note: {len(threads_no_date)} fetched topics had unparseable creation dates")
 
-    if not top:
-        sys.exit("No threads collected — aborting.")
+    if len(top) < target or not complete:
+        sys.exit(f"Incomplete forum crawl ({len(top)}/{target} dated threads; stop condition not proven); "
+                 "no new snapshot was written.")
 
     # sanity output
     log("  newest:", top[0]["created_display"], "|", top[0]["title"][:60])
@@ -661,18 +675,24 @@ def main():
         "scope": "All English sections (News & Announcements, Game Discussion, Tavern, "
                  "Guides and Tutorials, Feedback & Suggestions, Bug Reports, Forum Rules, "
                  "Release Notes, Announcements, Archive)",
-        "definition": "The 150 most recently created threads (by original-post timestamp), "
+        "definition": f"The {target} most recently created threads (by original-post timestamp), "
                       "each with its full original post and complete metadata.",
         "ordering": "newest thread first (rank 1 = most recently created)",
         "timezone_note": "Forum timestamps are reproduced exactly as displayed on the site; "
                          "the forum does not publish its timezone.",
         "scraped_at_utc": scraped_at_utc.strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "target_threads": target,
+        "crawl_complete": complete,
         "listing_pages_scanned": {c["name"]: cat_state[c["slug"]]["pages"] for c in CATEGORIES},
+        "listing_pages_failed": len(listing_failures),
         "candidates_from_listings": len(cands),
         "topic_pages_fetched": len(fetched),
+        "topic_pages_failed": len(failed),
         "threads_returned": len(top),
-        "stop_condition": "150th newest thread creation date > all unfetched listing boundaries "
+        "stop_condition": f"{target}th newest thread creation date > all unfetched listing boundaries "
                           f"(+{MARGIN_DAYS if not violations_total() else MARGIN_DAYS_LOOSE}-day safety margin)",
+        "completeness_note": "The newest remaining candidate activity and every unfetched listing-page boundary were checked; failed topic pages remain in the boundary until they are provably older than the cutoff.",
+
         "sort_monotonicity_violations": violations_total(),
         "fields": ["rank", "topic_id", "title", "url", "category", "author", "created",
                    "last_activity", "stats", "original_post"],
@@ -778,7 +798,7 @@ def main():
         ("Sort monotonicity violations", violations_total()),
         ("", ""),
         ("Rank 1 (newest)", f"{top[0]['created_display']} — {top[0]['title']}"),
-        ("Rank 150 (oldest in set)", f"{top[-1]['created_display']} — {top[-1]['title']}"),
+        (f"Rank {target} (oldest in set)", f"{top[-1]['created_display']} — {top[-1]['title']}"),
         ("", ""),
         ("Full machine-readable data", args.out + ".json (includes OP HTML + metadata)"),
     ]

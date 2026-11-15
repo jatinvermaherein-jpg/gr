@@ -16,14 +16,15 @@ from unittest.mock import AsyncMock, patch
 from mechbot.store import Store, CONVERSATION_TTL_SECONDS, CONVERSATION_TURN_LIMIT
 from mechbot.workers import WORKERS, WorkerStore, assignment_text, parse_worker_time, parse_worker_snooze
 from mechbot.payouts import PayoutTracker, parse_snapshot
-from mechbot.alerts import AlertManager, MAX_POOLS_PER_TARGET, validate
+from mechbot.alerts import AlertManager, MAX_ACTIVE_LOOPS, validate
 from mechbot.bot import MechBot, install_commands, OPERATORS, REPLY_MENTIONS, help_text, configured_announcement_channels
 from mechbot.assistant import (wants_invite_link, bot_identity_response, direct_item_lookup, should_answer_unmentioned,
                                parse_natural_calculation, natural_builds_request, builds_response, _archive_attribution,
                                _archive_fallback, _supported_game_reply, discord_text,
                                naturalize_discord_reply, weapon_response, mech_response,
                                game_knowledge_context, answer_question_with_brain, upgrade_cost_response, general_ai,
-                               parse_build_sp_range, builds_response_parts, natural_builds_request)
+                               parse_build_sp_range, builds_response_parts, natural_builds_request, pilot_response,
+                               _build_author_profile_url)
 from mechbot.announcements import (DEFAULT_ANNOUNCEMENT_CHANNELS, INITIAL_BACKFILL_LIMIT, wants_upcoming, wants_ecr_info,
                                    message_text, upcoming_items, ecr_event_items, format_upcoming, format_ecr_events,
                                    wants_promo_codes, promo_code_items, format_promo_codes)
@@ -33,6 +34,7 @@ from mechbot.forum_archive import (FORUM_ARCHIVE_PATH, format_forum_request, for
 from mechbot.catalog import (ARCHIVE, Catalog, _candidate_fingerprint, apply_user_confirmed_ocr_review,
                              apply_user_confirmed_public_review, apply_user_confirmed_drive_ocr_review, initialize_snapshot)
 from mechbot.timeparse import next_daily, parse_spec, parse_natural_reminder
+from mechbot.source_summaries import combined_source_summary, wants_patch_bug_lookup
 
 UID='1515232384159715364'
 DAY='2026-11-11'
@@ -63,11 +65,46 @@ class AnnouncementTests(unittest.TestCase):
             {'content':'Event was held November 9, 2026','posted_at':int(now-1000),'channel_name':'news','guild_name':'Game Server','message_url':'https://discord.com/channels/1/2/7'},
         ]
         items=upcoming_items(rows,now=now)
-        self.assertEqual([x['date_label'] for x in items],['November 15, 2026','Date not stated','Year not stated'])
+        self.assertEqual([x['date_label'] for x in items],['November 15, 2026','Date not stated','November 12'])
         response=format_upcoming(rows,enabled=True,now=now)
-        self.assertIn('[Source: #news · Game Server](https://discord.com/channels/1/2/3)',response)
-        self.assertIn('explicit year',response)
+        self.assertIn('**Event date:** November 15, 2026',response)
+        self.assertIn('**Event date mentioned:** November 12 (year not stated)',response)
+        self.assertIn('**Event date not stated · Post date:** Nov 10, 2026',response)
+        self.assertIn('publication date, not the event date',response)
+        self.assertNotIn('discord.com/channels/',response)
+        self.assertNotIn('#news',response)
         self.assertNotIn('November 9, 2026',response)
+
+    def test_posting_dates_in_body_are_not_mistaken_for_event_dates(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        now=datetime(2026,11,10,12,tzinfo=ZoneInfo('Asia/Kolkata')).timestamp()
+        rows=[
+            {'content':'Event post published on November 9, 2026.','posted_at':int(now-1000)},
+            {'content':'Event post published on November 9, 2026. The tournament starts December 15, 2026.',
+             'posted_at':int(now-1000)},
+            {'content':'Event schedule was announced on November 9, 2026.','posted_at':int(now-1000)},
+            {'content':'The event dates were announced on November 9, 2026, and the tournament starts December 15, 2026.',
+             'posted_at':int(now-1000)},
+            {'content':'Post published on November 9. The tournament starts December 15.',
+             'posted_at':int(now-1000)},
+            {'content':'ECR event announcement on November 9, 2026.','posted_at':int(now-1000)},
+            {'content':'ECR event announcement on November 9, 2026. The ECR event starts December 16, 2026.',
+             'posted_at':int(now-1000)},
+        ]
+        items=upcoming_items(rows,now=now)
+        self.assertEqual(len(items),7)
+        response=format_upcoming(rows,enabled=True,now=now)
+        self.assertIn('Event date not stated',response)
+        self.assertIn('December 15, 2026',response)
+        self.assertIn('**Post date:** Nov 10, 2026',response)
+        self.assertIn('Event date:** December 16, 2026',response)
+        self.assertNotIn('Event date:** November 9, 2026',response)
+        self.assertNotIn('Event post published on November 9, 2026',response)
+        self.assertNotIn('schedule was announced on November 9, 2026',response)
+        self.assertIn('Event date:** December 15, 2026',response)
+        self.assertIn('Event date mentioned:** December 15 (year not stated)',response)
+        self.assertNotIn('event dates were',response.casefold())
 
     def test_promo_lookup_only_extracts_labeled_codes_and_preserves_caveats(self):
         self.assertTrue(wants_promo_codes('Any ECR promo codes?'))
@@ -106,20 +143,24 @@ class AnnouncementTests(unittest.TestCase):
         self.assertIn('`SAVE2026`',response)
         self.assertIn('`BONUS-10`',response)
         self.assertIn('validity not confirmed',response)
-        self.assertIn('[Source: #events · Game Server](https://discord.com/channels/1/2/200)',response)
-        self.assertIn('not validated in-game',response)
+        self.assertIn('posted Jan 1, 1970',response)
+        self.assertNotIn('https://discord.com/channels/',response)
+        self.assertIn('not verified in-game',response)
         expired=promo_code_items([{'content':'Promo code: OLD2024 has expired','posted_at':400}])
         self.assertEqual(expired[0]['status'],'marked_expired')
         compact=promo_code_items([{'content':'PROMOCODE: NEW2026','posted_at':450}])
         self.assertEqual([item['code'] for item in compact],['NEW2026'])
         self.assertEqual(promo_code_items([{'content':'Try NEW2026 now','posted_at':500}]),[])
+        self.assertEqual(promo_code_items([{'content':'Promo code: SAFE2026','posted_at':'not-a-time'}])[0]['posted_at'],0)
+        self.assertEqual(len(ecr_event_items([{'content':'ECR event starts December 10, 2026.',
+                                               'posted_at':'not-a-time'}])),1)
 
     def test_ecr_event_updates_are_separate_from_promo_code_posts(self):
         rows=[
             {'content':'Event Crate Rush update: next event starts November 20. New crate rewards will be announced.',
-             'posted_at':200,'channel_id':'1','channel_name':'events','guild_name':'Game Server',
+             'posted_at':1794225600,'channel_id':'1','channel_name':'events','guild_name':'Game Server',
              'message_url':'https://discord.com/channels/1/2/200'},
-            {'content':'ECR Promo codes: `SAVE2026`','posted_at':300,'channel_id':'1',
+            {'content':'ECR Promo codes: `SAVE2026`','posted_at':1794225700,'channel_id':'1',
              'channel_name':'events','guild_name':'Game Server',
              'message_url':'https://discord.com/channels/1/2/300'},
         ]
@@ -127,10 +168,13 @@ class AnnouncementTests(unittest.TestCase):
         self.assertEqual(len(items),1)
         self.assertIn('next event starts November 20',items[0]['excerpt'])
         response=format_ecr_events(rows,enabled=True)
-        self.assertIn('Event Crate Rush updates',response)
+        self.assertIn('Event Crate Rush summary',response)
         self.assertIn('next event starts November 20',response)
+        self.assertIn('**Event date mentioned:** November 20 (year not stated)',response)
+        self.assertIn('**Post date:** Nov 9, 2026',response)
         self.assertNotIn('SAVE2026',response)
-        self.assertIn('[#events · Game Server](https://discord.com/channels/1/2/200)',response)
+        self.assertNotIn('https://discord.com/channels/',response)
+        self.assertNotIn('#events',response)
         blocked=format_ecr_events([],enabled=True,access_states={1:'missing'})
         self.assertIn('ECR event update',blocked)
         self.assertNotIn('promo-code post',blocked)
@@ -144,6 +188,67 @@ class AnnouncementTests(unittest.TestCase):
         self.assertIn('Starts soon',text)
 
 
+class SourceSummaryTests(unittest.TestCase):
+    @staticmethod
+    def _post(title, content, created='2026-11-09 10:00', url='https://forum.plarium.com/mech-arena/702_discussion/123/'):
+        return {'title':title,'content':content,'excerpt':content,'url':url,
+                'created':{'iso':created,'display':'Nov 9, 2026, 10:00'}}
+
+    def test_event_summary_combines_sources_and_labels_post_dates_separately(self):
+        from datetime import datetime, timezone
+        now=datetime(2026,11,10,12,tzinfo=timezone.utc).timestamp()
+        forum_posts=[
+            self._post('Tournament schedule','The tournament starts December 15, 2026. Rewards include a new crate.'),
+            self._post('Event teaser','The next event is still being prepared; rewards will be announced soon.',
+                       url='https://forum.plarium.com/mech-arena/702_discussion/124/'),
+        ]
+        announcements=[
+            {'content':'Event schedule: The next event date is not stated; new rewards will be announced soon.',
+             'posted_at':int(now-86400),'channel_id':'123','channel_name':'private-channel',
+             'message_url':'https://discord.com/channels/1/2/3'}]
+        with patch('mechbot.source_summaries.search_forum_threads',return_value=forum_posts):
+            result=combined_source_summary('upcoming events',announcements,topic='events',now=now)
+        self.assertIn('Tournament schedule',result)
+        self.assertIn('December 15, 2026',result)
+        self.assertIn('Event date not stated · Post date:',result)
+        self.assertIn('Nov 9, 2026',result)
+        self.assertIn('publication date, not the event date',result)
+        self.assertNotIn('private-channel',result)
+        self.assertNotIn('discord.com/channels/',result)
+        self.assertNotIn('forum.plarium.com',result)
+        self.assertNotIn('(forum post)',result)
+
+    def test_promo_code_summary_combines_sources_but_uses_only_labeled_codes(self):
+        forum_posts=[
+            self._post('Promo code drop','Promo code: FORUM2026 is available for a limited time.'),
+            self._post('Chat mention','Try RANDOM2026 in the shop.',url='https://forum.plarium.com/mech-arena/702_discussion/125/'),
+        ]
+        announcements=[{'content':'ECR promo code: NEWS2026','posted_at':1794200000,
+                        'channel_name':'private-channel','message_url':'https://discord.com/channels/1/2/4'}]
+        with patch('mechbot.source_summaries.search_forum_threads',return_value=forum_posts):
+            result=combined_source_summary('latest promo codes',announcements,topic='promo',now=1794297600)
+        self.assertIn('FORUM2026',result)
+        self.assertIn('NEWS2026',result)
+        self.assertNotIn('RANDOM2026',result)
+        self.assertNotIn('forum.plarium.com',result)
+        self.assertNotIn('discord.com/channels/',result)
+        self.assertIn('validity',result)
+
+    def test_patch_and_bug_summary_searches_both_sources(self):
+        self.assertTrue(wants_patch_bug_lookup('Any recent patch notes or bug reports?'))
+        forum_posts=[self._post('Known bug report','The Guardian shield can fail to activate after respawn.')]
+        announcements=[{'content':'Patch notes: Version 4.2 fixes the Guardian shield crash.',
+                        'posted_at':1794200000,'message_url':'https://discord.com/channels/1/2/5'}]
+        with patch('mechbot.source_summaries.search_forum_threads',return_value=forum_posts):
+            result=combined_source_summary('Any recent patch notes or bug reports?',announcements,
+                                           topic='issues',now=1794297600)
+        self.assertIn('Known bug report',result)
+        self.assertIn('Patch notes',result)
+        self.assertIn('Guardian',result)
+        self.assertNotIn('forum.plarium.com',result)
+        self.assertNotIn('discord.com/channels/',result)
+
+
 class ForumArchiveTests(unittest.TestCase):
     @staticmethod
     def _thread(title,url,category,text,created,author='Player',role=''):
@@ -154,7 +259,7 @@ class ForumArchiveTests(unittest.TestCase):
             'original_post':{'text':text},
         }
 
-    def test_search_and_recent_listing_are_source_linked_and_not_a_schedule(self):
+    def test_search_and_recent_listing_are_summaries_not_a_schedule(self):
         with tempfile.TemporaryDirectory() as td:
             archive=Path(td)/'forum.json'
             rows=[
@@ -178,15 +283,18 @@ class ForumArchiveTests(unittest.TestCase):
             self.assertEqual(matches[0]['author']['role'],'Community Manager')
             self.assertEqual(matches[0]['url'],rows[0]['url'])
             result=format_forum_search('Skystrike balance',path=archive)
-            self.assertIn('[Patch notes: Skystrike balance changes](https://forum.plarium.com/',result)
-            self.assertIn('Community Manager',result)
+            self.assertIn('Patch notes: Skystrike balance changes',result)
+            self.assertIn('Skystrike balance changes arrive next month',result)
+            self.assertIn('**Post date:** Nov 12, 2026',result)
+            self.assertNotIn('forum.plarium.com',result)
+            self.assertNotIn('Community Manager',result)
             mentions=format_forum_search('everyone',path=archive)
             self.assertIn('@\u200beveryone',mentions)
-            self.assertIn('not current/upcoming event information',result)
+            self.assertIn('live event schedule',result)
             self.assertNotIn('evil.example',result)
             latest=format_forum_request('latest forum posts',path=archive)
-            self.assertIn('Recent threads in the stored Plarium Forum snapshot',latest)
-            self.assertIn('not current/upcoming event information',latest)
+            self.assertIn('Recent saved forum highlights',latest)
+            self.assertIn('live event schedule',latest)
             self.assertIn('Patch notes: Skystrike balance changes',latest)
             self.assertEqual(recent_forum_threads(limit=1,path=archive)[0]['title'],rows[0]['title'])
 
@@ -196,8 +304,8 @@ class ForumArchiveTests(unittest.TestCase):
         self.assertEqual(len(json.loads(FORUM_ARCHIVE_PATH.read_text(encoding='utf-8'))['threads']),150)
         self.assertTrue(all(post['url'].startswith('https://forum.plarium.com/mech-arena/') for post in posts))
         response=format_recent_forum_threads(limit=3,path=FORUM_ARCHIVE_PATH)
-        self.assertIn('stored crawl',response)
-        self.assertIn('not current/upcoming event information',response)
+        self.assertIn('Recent saved forum highlights',response)
+        self.assertIn('live event schedule',response)
 
     def test_forum_lookup_detection_is_explicit_and_ambient_safe(self):
         for query in ('latest forum posts','What is the forum saying about Skystrike?',
@@ -215,11 +323,13 @@ class ForumScraperIntegrationTests(unittest.IsolatedAsyncioTestCase):
             root=Path(td)
             destination=root/'threads.json'
             destination.write_text('{"last_good": true}',encoding='utf-8')
-            rows=[{'title':f'Live thread {i}','url':f'https://forum.plarium.com/mech-arena/702_discussion/{i}/',
+            rows=[{'topic_id':i+1,'title':f'Live thread {i}','url':f'https://forum.plarium.com/mech-arena/702_discussion/{i+1}/',
                    'category':{'name':'Game Discussion'},'author':{'name':'Player','role':''},
                    'created':{'display':f'Nov 12, 2026, 10:{i%60:02d}','iso':f'2026-11-12 10:{i%60:02d}'},
                    'original_post':{'text':f'Live post {i}.'}} for i in range(150)]
-            payload=repr(json.dumps({'metadata':{'threads_returned':150,'scraped_at_utc':'2026-11-10 12:00:00 UTC'},'threads':rows}))
+            payload=repr(json.dumps({'metadata':{'threads_returned':150,'target_threads':150,
+                'crawl_complete':True,'listing_pages_failed':0,
+                'scraped_at_utc':'2026-11-10 12:00:00 UTC'},'threads':rows}))
             script=root/'fake_scraper.py'
             script.write_text(
                 'import json,sys\n'
@@ -231,6 +341,18 @@ class ForumScraperIntegrationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(count,150)
             self.assertEqual(recent_forum_threads(limit=1,path=destination)[0]['title'],'Live thread 0')
             good_snapshot=destination.read_bytes()
+            incomplete=repr(json.dumps({'metadata':{'threads_returned':150,'target_threads':150,
+                'crawl_complete':False,'listing_pages_failed':0,
+                'scraped_at_utc':'2026-11-10 12:00:00 UTC'},'threads':rows}))
+            script.write_text(
+                'import json,sys\n'
+                'prefix=sys.argv[sys.argv.index("--out")+1]\n'
+                f'data=json.loads({incomplete})\n'
+                'with open(prefix+".json","w",encoding="utf-8") as f: json.dump(data,f)\n',
+                encoding='utf-8')
+            with self.assertRaises(RuntimeError):
+                await refresh_forum_archive(path=destination,scraper_path=script)
+            self.assertEqual(destination.read_bytes(),good_snapshot)
             script.write_text(
                 'import json,sys\n'
                 'prefix=sys.argv[sys.argv.index("--out")+1]\n'
@@ -471,7 +593,7 @@ class ParserTests(unittest.TestCase):
             self.assertTrue(announcement_bot.intents.message_content)
             self.assertFalse(announcement_bot.ambient_channel_chat_enabled)
         commands={x.name for x in bot.tree.get_commands()}
-        expected={'help','invite','worker_setup','worker_time','ping_loop','dm_loop','stop_loop','stop_user_loops','upcoming','forum','ecr','promo_codes','upgrade_cost'}
+        expected={'help','invite','worker_setup','worker_time','ping_loop','dm_loop','stop_loop','stop_user_loops','upcoming','forum','ecr','promo_codes','pilot','upgrade_cost'}
         self.assertTrue(expected<=commands)
         self.assertFalse(any(name.startswith('emergency') for name in commands))
         guild=SimpleNamespace(id=1509560571563868160)
@@ -568,6 +690,31 @@ class BuildsTests(unittest.TestCase):
         result=builds_response(self.payload,mech='Redox',best=True)
         self.assertIn('no submitted builds for Redox',result)
         self.assertNotIn('Compound Beam',result)
+
+    def test_submitter_is_shown_without_an_invented_profile_link(self):
+        item={'mech':'Surge','weapon_1':'Revoker 10','weapon_2':'Revoker 10','sp_min':6000,'sp_max':8000,
+              'author':{'id':'author-42','display':'Pixel Predator','handle':'pixel'}}
+        payload={'builds':[item]}
+        result=builds_response(payload,mech='Surge',best=True)
+        self.assertIn('**Submitted by:** Pixel Predator (pixel)',result)
+        self.assertNotIn('portico-hq-live.netlify.app',result)
+        self.assertEqual(_build_author_profile_url(item),'')
+
+    def test_profile_link_is_omitted_until_source_verifies_a_public_route(self):
+        author={'id':'author-42','display':'Pixel Predator','handle':'pixel'}
+        base={'mech':'Surge','author':author}
+        self.assertEqual(_build_author_profile_url(base),'')
+        for candidate in ('http://portico-hq-live.netlify.app/users/42',
+                          'https://evil.example/users/42',
+                          'https://portico-hq-live.netlify.app/api/mech-arena/avatar/42',
+                          'https://portico-hq-live.netlify.app/users/42?embed=true',
+                          'https://portico-hq-live.netlify.app/member/verified'):
+            with self.subTest(candidate=candidate):
+                item={'mech':'Surge','author':{**author,'profile_url':candidate}}
+                self.assertEqual(_build_author_profile_url(item),'')
+                result=builds_response({'builds':[item]},mech='Surge',best=True)
+                self.assertIn('Submitted by',result)
+                self.assertNotIn('https://',result)
 
 
 class ArchivePresentationTests(unittest.TestCase):
@@ -1110,6 +1257,7 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn('Revoker 8 + Revoker 10',result)
         self.assertIn('SP 6,000–8,000',result)
         self.assertFalse(bot.reply_message.await_args.kwargs['mention_author'])
+        self.assertTrue(bot.reply_message.await_args.kwargs['suppress_embeds'])
         brain.assert_not_awaited()
 
     async def test_plain_language_upgrade_cost_is_deterministic(self):
@@ -1290,8 +1438,9 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
               patch('mechbot.bot.ANNOUNCEMENT_CHANNELS',DEFAULT_ANNOUNCEMENT_CHANNELS)):
             bot=MechBot(object(),store)
             result=await bot.upcoming_response()
-        self.assertIn('Tournament starts December 15, 2099',result)
-        self.assertIn('#special-announcements',result)
+        self.assertIn('December 15, 2099',result)
+        self.assertRegex(result,r'\*\*Post date:\*\* [A-Z][a-z]{2} \d{1,2}, 20\d{2}')
+        self.assertNotIn('#special-announcements',result)
         self.assertNotIn('December 16, 2099',result)
         self.assertNotIn('December 17, 2099',result)
         store.recent_announcements.assert_awaited_once()
@@ -1311,8 +1460,27 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain:
             await bot.on_message(message)
         brain.assert_not_awaited()
-        bot.upcoming_response.assert_awaited_once_with()
+        bot.upcoming_response.assert_awaited_once_with('any event')
         bot.reply_message.assert_awaited_once_with(message,'No verified event announcement is saved.',mention_author=True)
+
+    async def test_patch_and_bug_questions_use_combined_sources_not_ai(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+        bot=MechBot(Catalog(),object())
+        bot_user=SimpleNamespace(id=987654321098765432)
+        bot._connection.user=bot_user
+        bot.reply_message=AsyncMock()
+        bot.patch_bug_response=AsyncMock(return_value='Saved patch and bug summary')
+        author=SimpleNamespace(id=123456789012345678,bot=False)
+        text='Any known bugs in the latest patch?'
+        message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
+            mentions=[bot_user],content=f'<@{bot_user.id}> {text}',reference=None)
+        with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain:
+            await bot.on_message(message)
+        brain.assert_not_awaited()
+        bot.patch_bug_response.assert_awaited_once_with(text)
+        bot.reply_message.assert_awaited_once_with(message,'Saved patch and bug summary',mention_author=True)
 
     async def test_forum_lookup_uses_stored_forum_response_not_ai(self):
         class Catalog:
@@ -1443,6 +1611,55 @@ class CatalogReviewTests(unittest.TestCase):
             catalog.close()
 
 
+class PilotLookupTests(unittest.IsolatedAsyncioTestCase):
+    def test_pilot_lookup_uses_only_verified_listings_and_hides_ocr_candidates(self):
+        with tempfile.TemporaryDirectory() as td:
+            snapshot=Path(td)/'runtime.sqlite3'
+            with patch.dict(os.environ,{'SNAPSHOT_PATH':str(snapshot)}):
+                catalog=Catalog(initialize_snapshot())
+            try:
+                self.assertIn('Acantha',catalog.pilot_names)
+                profile=catalog.pilot_profile('Acantha')
+                self.assertEqual(profile['listing']['name'],'Acantha')
+                self.assertNotIn('raw_ocr',profile)
+                result=pilot_response(profile)
+                self.assertIn('Acantha',result)
+                self.assertIn('Weapon specialty:',result)
+                self.assertIn('Listed acquisition price:',result)
+                self.assertIn('won’t guess',result)
+                self.assertNotIn('User-approved screenshot text',result)
+                self.assertNotIn('bonus damage',result.casefold())
+                context=game_knowledge_context('What are Acantha pilot bonuses?',catalog)
+                self.assertTrue(any(fact.get('type')=='pilot' for fact in context['verified_game_facts']))
+                self.assertEqual(context['archive_material'],[])
+                self.assertFalse(any(fact.get('type')=='confirmed_archive_material'
+                                     for fact in context['verified_game_facts']))
+                hits=catalog.search_confirmed_archive('Crow pilot bonus',['Crow'],limit=8)
+                self.assertFalse(any(hit.get('archive_name')=='PILOT.zip' for hit in hits))
+            finally:
+                catalog.close()
+
+    async def test_natural_pilot_lookup_skips_ai(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+            pilot_names=['Acantha']
+            def pilot_profile(self,name):
+                return {'matches':[{'name':'Acantha','rarity':'epic','skill':'Assault',
+                                    'cost':{'amount':0,'currency':'Paid'}}]}
+        bot=MechBot(Catalog(),object())
+        bot._connection.user=SimpleNamespace(id=987654321098765432)
+        bot.conversation_turn_reply=AsyncMock()
+        author=SimpleNamespace(id=123456789012345678,bot=False)
+        message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
+            mentions=[bot.user],content=f'<@{bot.user.id}> What are Acantha pilot bonuses?',reference=None)
+        with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain:
+            await bot.on_message(message)
+        brain.assert_not_awaited()
+        bot.conversation_turn_reply.assert_awaited_once()
+        self.assertIn('Acantha',bot.conversation_turn_reply.await_args.args[2])
+
+
 class PublicArchiveTests(unittest.TestCase):
     def test_confirmed_archive_drives_weapon_review_costs_and_forum_retrieval(self):
         with tempfile.TemporaryDirectory() as td:
@@ -1517,8 +1734,10 @@ class PublicArchiveTests(unittest.TestCase):
             raw_ocr=catalog._user_confirmed_raw_ocr_records()
             self.assertEqual(len(raw_ocr),90)
             pilot_hits=catalog.search_confirmed_archive('CROW pilot bonus',['CROW'],limit=8)
-            self.assertTrue(any(x.get('kind')=='user_confirmed_raw_ocr' and 'CROW' in x.get('excerpt','')
-                                for x in pilot_hits))
+            self.assertFalse(any(x.get('archive_name')=='PILOT.zip' for x in pilot_hits))
+            crow=catalog.pilot_profile('Crow')
+            self.assertEqual(crow['listing']['name'],'Crow')
+            self.assertNotIn('raw_ocr',crow)
             chat_hits=catalog.search_confirmed_archive('Redox legendary mech',['Redox'],limit=8)
             safe_chat=[x for x in chat_hits if x.get('source')=='user_chat_upload']
             self.assertTrue(safe_chat)
@@ -1621,25 +1840,27 @@ class DataTests(unittest.IsolatedAsyncioTestCase):
         await p.delivered(UID,DAY,13,token)
         await p.observe(UID,'2026-11-12',10)
         self.assertEqual(len(await p.pending()),1)
-    async def test_loop_pools_are_independent_and_capped_per_target(self):
+    async def test_loop_limits_preserve_one_per_destination_and_five_global(self):
         class User:
             def __init__(self,uid):self.id=uid;self.mention=f'<@{uid}>'
-        self.assertEqual(MAX_POOLS_PER_TARGET,3)
-        member=User(323456789012345678)
-        another=User(423456789012345678)
+        self.assertEqual(MAX_ACTIVE_LOOPS,5)
+        members=[User(323456789012345678+i) for i in range(6)]
         destination=SimpleNamespace(send=AsyncMock())
         mgr=AlertManager()
-        keys=[mgr.start(member,'channel',destination,5,30,9,f'Check {number}')
-              for number in range(MAX_POOLS_PER_TARGET)]
-        self.assertEqual(len(set(keys)),MAX_POOLS_PER_TARGET)
-        self.assertFalse(mgr.available(member.id,'dm'))
-        with self.assertRaisesRegex(ValueError,'3 active loop pools'):
-            mgr.start(member,'dm',destination,5,30,9,'One too many')
-        self.assertTrue(mgr.available(another.id,'channel'))
-        another_key=mgr.start(another,'channel',destination,5,30,9,'Separate target')
-        self.assertIn(another_key,mgr.alerts)
-        self.assertEqual(len(mgr.alerts),MAX_POOLS_PER_TARGET+1)
-        self.assertTrue(all(mgr.alerts[key]['target']==member.id for key in keys))
+        channel_key=mgr.start(members[0],'channel',destination,5,30,9,'Channel test')
+        self.assertFalse(mgr.available(members[0].id,'channel'))
+        with self.assertRaisesRegex(ValueError,'already active'):
+            mgr.start(members[0],'channel',destination,5,30,9,'Duplicate channel')
+        dm_key=mgr.start(members[0],'dm',destination,5,30,9,'DM test')
+        self.assertIn(channel_key,mgr.alerts)
+        self.assertIn(dm_key,mgr.alerts)
+        keys=[channel_key,dm_key]
+        for index,member in enumerate(members[1:4],start=1):
+            keys.append(mgr.start(member,'channel',destination,5,30,9,f'User {index}'))
+        self.assertEqual(len(mgr.alerts),MAX_ACTIVE_LOOPS)
+        self.assertFalse(mgr.available(members[5].id,'channel'))
+        with self.assertRaisesRegex(ValueError,'five-loop limit'):
+            mgr.start(members[5],'channel',destination,5,30,9,'Global cap')
         await mgr.close()
         self.assertFalse(mgr.alerts)
 
@@ -1676,7 +1897,7 @@ class DataTests(unittest.IsolatedAsyncioTestCase):
         mgr=AlertManager()
         with patch('mechbot.alerts.MIN_INTERVAL',1):
             key=mgr.start(User(),'channel',destination,1,3,9,'Test')
-            self.assertTrue(mgr.available(User.id,'channel'))  # another independent pool is allowed
+            self.assertFalse(mgr.available(User.id,'channel'))  # duplicate destination loops remain blocked
             await asyncio.wait_for(started.wait(),timeout=2)
             self.assertEqual(destination.send.await_count,1)
             content=destination.send.await_args.args[0]

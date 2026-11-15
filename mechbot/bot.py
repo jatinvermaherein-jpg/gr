@@ -17,13 +17,14 @@ from dotenv import load_dotenv
 from .catalog import Catalog, initialize_snapshot
 from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, tzinfo
-from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, weapon_response, mech_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
-from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INITIAL_BACKFILL_LIMIT, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes, format_promo_codes
+from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, weapon_response, mech_response, pilot_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
+from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INITIAL_BACKFILL_LIMIT, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
-from .alerts import AlertManager, OPERATORS, MAX_POOLS_PER_TARGET, validate as validate_alert
+from .alerts import AlertManager, OPERATORS, validate as validate_alert
 from .forum_archive import (FORUM_SYNC_RETRY_SECONDS, format_forum_request, forum_sync_seconds,
                             refresh_forum_archive, wants_forum_lookup)
+from .source_summaries import combined_source_summary, wants_patch_bug_lookup
 
 log=logging.getLogger('mechbot')
 REPLY_MENTIONS=discord.AllowedMentions(everyone=False,users=False,roles=False,replied_user=True)
@@ -63,11 +64,12 @@ Use `/help` anytime to see this command list.
 • `/weapon name rank level` — a concise weapon review, key stats, perk and listed purchase price.
 • `/upgrade_cost item from_rank to_rank [from_level to_level] [blueprints_owned]` — calculate upgrade costs and price missing Blueprints; defaults to 0 owned.
 • `/mech name` — a short mech review with key details and listed purchase price.
+• `/pilot name` — a verified pilot listing, weapon specialty, and listed acquisition price; unverified bonus stats are withheld.
 • `/builds [mech] [sp_range]` — browse recent builds or filter all mech builds by your SP range.
-• `/upcoming` — check dated and recent event posts from the configured announcement channels.
-• `/forum [query]` — search saved recent Plarium Forum threads; forum posts are not a live event schedule.
-• `/ecr` — check saved Event Crate Rush event updates; ECR event info is separate from promo codes.
-• `/promo_codes` — check the latest saved, explicitly labeled promo-code posts; validity is not guaranteed.
+• `/upcoming` — summarize relevant saved forum and announcement posts; event dates are kept distinct from post dates.
+• `/forum [query]` — search and summarize saved Plarium Forum discussions; not a live event schedule.
+• `/ecr` — summarize saved Event Crate Rush announcements; ECR event info is separate from promo codes.
+• `/promo_codes` — summarize explicitly labeled codes found in saved forum and announcement posts; validity is not guaranteed.
 • `/recent` — read recent posts in a channel you can access.
 • `/timezone` — set your IANA timezone; default is UTC.
 • `/remind`, `/reminders`, `/cancel` — private DM reminders; recurring reminders are supported.
@@ -85,7 +87,7 @@ def help_text(user_id=None,guild_id=None):
     if user_id in OPERATORS and guild_id is not None:
         restricted=('• `/ping_loop member interval_seconds duration_seconds reason` — send an immediate, single-user ping, then bounded follow-up pings.\n'
                     '• `/dm_loop member interval_seconds duration_seconds reason` — start a bounded DM loop.\n'
-                    'Each command starts an independent loop pool; a member may have at most three active pools across both destinations.\n'
+                    'A member may have one channel loop and one DM loop; five loops can run in total.\n'
                     '• `/stop_user_loops member` — stop that member’s channel and DM loops.\n')
         return HELP.replace('• `/stop_loop`',restricted+'• `/stop_loop`')
     return HELP
@@ -369,19 +371,36 @@ class MechBot(commands.Bot):
                     log.exception('Announcement ingestion failed for a configured channel; it will retry.')
             await asyncio.sleep(ANNOUNCEMENT_SYNC_SECONDS)
 
-    async def upcoming_response(self):
+    async def _saved_announcement_rows(self, since, limit, operation):
+        if not getattr(self.store,'supports_announcements',True):
+            return [],'storage_missing'
+        try:
+            rows=await self.store.recent_announcements(int(since),limit=limit)
+            allowed={str(channel_id) for channel_id in ANNOUNCEMENT_CHANNELS}
+            return [row for row in rows if str(row.get('channel_id') or '') in allowed],None
+        except Exception as exc:
+            log.warning('Could not read saved %s posts (%s).',operation,type(exc).__name__)
+            return [],'read_failed'
+
+    async def upcoming_response(self,query='upcoming events'):
         enabled=(self.announcement_ingestion_enabled and self.intents.message_content
                  and getattr(self.store,'supports_announcements',True))
-        if not getattr(self.store,'supports_announcements',True):
-            return 'Announcement storage is not installed yet. The private database migration is required before ingestion can be enabled.'
-        try:
-            rows=await self.store.recent_announcements(int(time.time())-365*86400,limit=1000)
-            allowed={str(channel_id) for channel_id in ANNOUNCEMENT_CHANNELS}
-            rows=[row for row in rows if str(row.get('channel_id') or '') in allowed]
-        except Exception as exc:
-            log.warning('Could not read saved announcement records (%s).',type(exc).__name__)
-            return 'I can’t read the saved announcements right now. I’ll retry when the private storage is available.'
-        return format_upcoming(rows,enabled=enabled,access_states=self.announcement_access)
+        rows,error=await self._saved_announcement_rows(time.time()-365*86400,1000,'event')
+        result=combined_source_summary(query or 'upcoming events',rows,topic='events')
+        if result.startswith('I couldn’t find'):
+            if error=='storage_missing':
+                return 'I couldn’t find an event update in the saved forum material, and announcement storage is unavailable.'
+            if error=='read_failed':
+                return 'I couldn’t read saved event announcements and found no matching forum summary. Please try again later.'
+            if not rows:
+                return format_upcoming(rows,enabled=enabled,access_states=self.announcement_access)
+        if error=='storage_missing':
+            result+='\n*Announcement storage is unavailable; this summary uses saved forum material only.*'
+        elif error=='read_failed':
+            result+='\n*Saved announcements could not be read; this summary may be incomplete.*'
+        elif not enabled:
+            result+='\n*Announcement reading is disabled; this summary may be incomplete.*'
+        return result
 
     def forum_response(self,query=None):
         """Search or list the stored Plarium Forum crawl, separate from event scheduling."""
@@ -410,19 +429,31 @@ class MechBot(commands.Bot):
             configured_channel_ids=ANNOUNCEMENT_CHANNELS,disabled_reasons=disabled_reasons,
             excluded_channel_ids=DISABLED_ANNOUNCEMENT_CHANNELS)
 
-    async def promo_codes_response(self):
+    async def promo_codes_response(self,query='promo codes'):
         enabled=(self.announcement_ingestion_enabled and self.intents.message_content
                  and getattr(self.store,'supports_announcements',True))
-        if not getattr(self.store,'supports_announcements',True):
-            return 'Promo-code lookup needs the private announcement-storage migration before it can read saved posts.'
-        try:
-            rows=await self.store.recent_announcements(0,limit=2000)
-            allowed={str(channel_id) for channel_id in ANNOUNCEMENT_CHANNELS}
-            rows=[row for row in rows if str(row.get('channel_id') or '') in allowed]
-        except Exception as exc:
-            log.warning('Could not read saved promo-code source posts (%s).',type(exc).__name__)
-            return 'I can’t read the saved announcement posts right now. I’ll retry when private storage is available.'
-        return format_promo_codes(rows,enabled=enabled,access_states=self.announcement_access)
+        rows,error=await self._saved_announcement_rows(0,2000,'promo-code')
+        result=combined_source_summary(query or 'promo codes',rows,topic='promo')
+        if error=='storage_missing':
+            result+='\n*Announcement storage is unavailable; this summary uses saved forum material only.*'
+        elif error=='read_failed':
+            result+='\n*Saved announcements could not be read; this lookup may be incomplete.*'
+        elif not enabled:
+            result+='\n*Announcement reading is disabled; this lookup may be incomplete.*'
+        return result
+
+    async def patch_bug_response(self,query):
+        enabled=(self.announcement_ingestion_enabled and self.intents.message_content
+                 and getattr(self.store,'supports_announcements',True))
+        rows,error=await self._saved_announcement_rows(time.time()-365*86400,2000,'patch/bug')
+        result=combined_source_summary(query,rows,topic='issues')
+        if error=='storage_missing':
+            result+='\n*Announcement storage is unavailable; this summary uses saved forum material only.*'
+        elif error=='read_failed':
+            result+='\n*Saved announcements could not be read; this lookup may be incomplete.*'
+        elif not enabled:
+            result+='\n*Announcement reading is disabled; this lookup may be incomplete.*'
+        return result
 
     async def payout_loop(self):
         await self.wait_until_ready()
@@ -551,8 +582,9 @@ class MechBot(commands.Bot):
             if path.is_file():files.append(discord.File(path,filename=filename,description=label+' icon'))
         return files
 
-    async def reply_message(self,message,text,with_currency_icons=False,mention_author=True,allowed_user_ids=()):
+    async def reply_message(self,message,text,with_currency_icons=False,mention_author=True,allowed_user_ids=(),suppress_embeds=False):
         kwargs={}
+        if suppress_embeds:kwargs['suppress_embeds']=True
         if with_currency_icons and not self.currency_emojis:
             files=self.currency_icon_files()
             if files:kwargs['files']=files
@@ -660,7 +692,8 @@ class MechBot(commands.Bot):
             if (not self.ambient_channel_chat_enabled or getattr(reference,'message_id',None)
                     or getattr(message,'mentions',None)):
                 return
-            names=tuple(getattr(self.catalog,'weapon_names',()))+tuple(getattr(self.catalog,'mech_names',()))
+            names=(tuple(getattr(self.catalog,'weapon_names',()))+tuple(getattr(self.catalog,'mech_names',()))
+                   +tuple(getattr(self.catalog,'pilot_names',())))
             # Only fully specified natural reminder requests may bypass the ambient question gate;
             # the reminder itself is private and never pings the channel author.
             if (not should_answer_unmentioned(text,names) and not parsed_reminder) or self.ambient_chat_rate_limited(message):return
@@ -707,11 +740,15 @@ class MechBot(commands.Bot):
             if wants_forum_lookup(text):
                 await self.reply_message(message,self.forum_response(text),mention_author=not ambient_question);return
             if wants_promo_codes(text):
-                await self.reply_message(message,await self.promo_codes_response(),mention_author=not ambient_question);return
+                await self.reply_message(message,await self.promo_codes_response(text),mention_author=not ambient_question);return
+            if wants_patch_bug_lookup(text):
+                await self.reply_message(message,await self.patch_bug_response(text),mention_author=not ambient_question);return
             if wants_ecr_info(text):
                 await self.reply_message(message,await self.ecr_response(),mention_author=not ambient_question);return
             if wants_upcoming(text):
-                await self.reply_message(message,await self.upcoming_response(),mention_author=not ambient_question);return
+                await self.reply_message(message,await self.upcoming_response(text),mention_author=not ambient_question);return
+            if wants_forum_lookup(text):
+                await self.reply_message(message,self.forum_response(text),mention_author=not ambient_question);return
             if pending_build_reply:
                 self.pending_build_requests.pop(build_scope,None)
                 try:
@@ -722,7 +759,8 @@ class MechBot(commands.Bot):
                     log.exception('SP-filtered public builds lookup failed')
                     parts=['The public builds API is unavailable or returned an unexpected response. Please ask again shortly.']
                 for index,part in enumerate(parts):
-                    await self.reply_message(message,part,mention_author=not ambient_question and index==0)
+                    await self.reply_message(message,part,mention_author=not ambient_question and index==0,
+                                             suppress_embeds=True)
                 return
             build_request=natural_builds_request(text,self.catalog.mech_names)
             if build_request:
@@ -757,9 +795,11 @@ class MechBot(commands.Bot):
                         parts=None
                     if parts is not None:
                         for index,part in enumerate(parts):
-                            await self.reply_message(message,part,mention_author=not ambient_question and index==0)
+                            await self.reply_message(message,part,mention_author=not ambient_question and index==0,
+                                                     suppress_embeds=True)
                     else:
-                        await self.reply_message(message,out,mention_author=not ambient_question)
+                        await self.reply_message(message,out,mention_author=not ambient_question,
+                                                 suppress_embeds=True)
                     return
                 await self.reply_message(message,out,mention_author=not ambient_question);return
             expression=parse_natural_calculation(text)
@@ -813,6 +853,14 @@ class MechBot(commands.Bot):
             if mech_name:
                 out=mech_response(self.catalog.mech_profile(mech_name))
                 await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
+            pilot_name=direct_item_lookup(text,getattr(self.catalog,'pilot_names',()))
+            if pilot_name and hasattr(self.catalog,'pilot_profile'):
+                out=pilot_response(self.catalog.pilot_profile(pilot_name))
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
+            pilot_mentions=find_mentions(text,getattr(self.catalog,'pilot_names',()))
+            if pilot_mentions and hasattr(self.catalog,'pilot_profile'):
+                out='\n\n'.join(pilot_response(self.catalog.pilot_profile(name)) for name in pilot_mentions[:3])
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             conversation_history=await self.conversation_history_for(message)
             reply=await answer_question_with_brain(os.getenv('AI_BASE_URL','https://api.openai.com/v1'),
                 os.getenv('AI_API_KEY',''),os.getenv('AI_MODEL',''),text,self.catalog,session=self.ai_session,
@@ -865,7 +913,7 @@ def install_commands(bot):
         try:validate_alert(interval_seconds,duration_seconds)
         except ValueError as e:await i.response.send_message(str(e),ephemeral=True);return
         if not bot.alerts.available(member.id,'channel'):
-            await i.response.send_message(f'This member already has {MAX_POOLS_PER_TARGET} active loop pools across channel and DM destinations. Stop one before adding another.',ephemeral=True);return
+            await i.response.send_message('A loop is already active for that member and destination, or the five-loop limit has been reached.',ephemeral=True);return
         reason=safe_text(reason.strip() or 'Please check this',180)
         total_messages=1+(duration_seconds-1)//interval_seconds
         allowed=discord.AllowedMentions(everyone=False,users=[discord.Object(id=member.id)],roles=False,replied_user=False)
@@ -903,7 +951,7 @@ def install_commands(bot):
         try:validate_alert(interval_seconds,duration_seconds)
         except ValueError as e:await i.response.send_message(str(e),ephemeral=True);return
         if not bot.alerts.available(member.id,'dm'):
-            await i.response.send_message(f'This member already has {MAX_POOLS_PER_TARGET} active loop pools across channel and DM destinations. Stop one before adding another.',ephemeral=True);return
+            await i.response.send_message('A loop is already active for that member and destination, or the five-loop limit has been reached.',ephemeral=True);return
         reason=safe_text(reason.strip() or 'Please check this',180)
         await i.response.defer(ephemeral=True)
         try:
@@ -1062,6 +1110,16 @@ def install_commands(bot):
     async def mech_autocomplete(i:discord.Interaction,current:str):
         return [app_commands.Choice(name=n,value=n) for n in bot.catalog.mech_names if current.casefold() in n.casefold()][:25]
 
+    @tree.command(name='pilot',description='Look up a pilot’s verified listing; unverified bonus stats are withheld')
+    async def pilot(i:discord.Interaction,name:str):
+        await i.response.send_message(pilot_response(bot.catalog.pilot_profile(name)),ephemeral=True,
+                                      allowed_mentions=discord.AllowedMentions.none())
+
+    @pilot.autocomplete('name')
+    async def pilot_autocomplete(i:discord.Interaction,current:str):
+        return [app_commands.Choice(name=n,value=n) for n in bot.catalog.pilot_names
+                if current.casefold() in n.casefold()][:25]
+
     @tree.command(name='timezone',description='Set your timezone for reminder scheduling')
     async def set_timezone(i:discord.Interaction,zone:str):
         try:tzinfo(zone)
@@ -1128,10 +1186,12 @@ def install_commands(bot):
             payload=await fetch_builds(os.getenv('PORTICO_BASE_URL',BASE),mech)
             if requested_sp is not None:
                 parts=builds_response_parts(payload,mech=mech,sp_range=requested_sp)
-                for part in parts:await i.followup.send(part,ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
+                for part in parts:
+                    await i.followup.send(part,ephemeral=True,allowed_mentions=discord.AllowedMentions.none(),
+                                          suppress_embeds=True)
             else:
                 out=builds_response(payload,mech=mech,best=False)
-                await i.followup.send(out,ephemeral=True)
+                await i.followup.send(out,ephemeral=True,suppress_embeds=True)
         except Exception:
             log.exception('Public builds lookup failed')
             await i.followup.send('The public builds API is unavailable or returned an unexpected response.',ephemeral=True)
@@ -1142,7 +1202,7 @@ def install_commands(bot):
         await i.response.send_message(discord_text(bot.forum_response(query)),ephemeral=True,
                                       allowed_mentions=discord.AllowedMentions.none())
 
-    @tree.command(name='upcoming',description='Show upcoming events in the configured announcement channels')
+    @tree.command(name='upcoming',description='Summarize relevant saved event posts and separate event dates from post dates')
     async def upcoming(i:discord.Interaction):
         await i.response.defer(ephemeral=True)
         await i.followup.send(discord_text(await bot.upcoming_response()),ephemeral=True,allowed_mentions=discord.AllowedMentions.none())

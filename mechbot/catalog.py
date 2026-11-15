@@ -425,6 +425,8 @@ class Catalog:
         self.mech_names = [r['name'] for r in self.db.execute('SELECT name FROM mechs')]
         self._record_cache = {}
         self._raw_ocr_records_cache=None
+        self.pilot_names=sorted({str(record.get('name')) for record in self._structured_records('pilot_list')
+                                 if record.get('name')},key=str.casefold)
 
     def close(self):
         self.db.close()
@@ -570,6 +572,23 @@ class Catalog:
         return {'matches': matches,
                 'review': self._structured_match('database_mechs', 'name', matches[0]['name']),
                 'listing': self._structured_match('list', 'list', matches[0]['name'])}
+
+    def pilot(self, name, limit=10):
+        """Search approved public pilot listings; never load derived OCR stat candidates."""
+        needle=str(name or '').strip().casefold()
+        if not needle:return []
+        records=[record for record in self._structured_records('pilot_list') if record.get('name')]
+        exact=[record for record in records if self._same_name(record.get('name'),needle)]
+        found=exact or [record for record in records if needle in str(record.get('name') or '').casefold()]
+        try:limit=max(0,min(int(limit),25))
+        except (TypeError,ValueError):limit=10
+        return [{key:value for key,value in record.items() if not key.startswith('_archive_')}
+                for record in found[:limit]]
+
+    def pilot_profile(self, name):
+        """Return only the matching verified pilot_list record; never attach OCR-derived stats."""
+        matches=self.pilot(name)
+        return {'matches':matches,'listing':matches[0] if len(matches)==1 else None}
 
     def upgrade_cost(self, name, from_rank, to_rank, from_level=None, to_level=None):
         """Return verified calculator totals; a rank-only step means max level to next rank."""
@@ -760,6 +779,8 @@ class Catalog:
         # The user-approved OCR collections are narrowly allowlisted; derived pilot/mech candidate
         # collections are intentionally not loaded here even though they share the same documents.
         for record in self._user_confirmed_raw_ocr_records():
+            # Pilot values are exposed only from the reviewed pilot_list collection.
+            if record.get('archive_name')=='PILOT.zip':continue
             excerpt=str(record.get('ocr_text') or '')[:750]
             if record.get('_archive_source')=='user_chat_upload':
                 excerpt=_safe_user_chat_ocr_excerpt(excerpt)

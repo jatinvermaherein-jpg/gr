@@ -3,6 +3,8 @@ from datetime import date, datetime, timezone
 from zoneinfo import ZoneInfo
 import re
 
+from .text_summaries import clean_source_text, omit_publication_only_sentences, summarize_source_text
+
 DEFAULT_ANNOUNCEMENT_CHANNELS = (
     1524319795791659080,
     1570083896823906364,
@@ -148,7 +150,7 @@ def promo_code_items(rows,limit=MAX_PROMO_CODE_ITEMS):
     limit=max(0,int(limit))
     if not limit:return []
     items=[];seen=set()
-    ordered=sorted(rows or [],key=lambda row:int(row.get('posted_at') or 0),reverse=True)
+    ordered=sorted(rows or [],key=_posted_timestamp,reverse=True)
     for row in ordered:
         text=str(row.get('content') or '')
         values=[]
@@ -158,7 +160,7 @@ def promo_code_items(rows,limit=MAX_PROMO_CODE_ITEMS):
             key=code.casefold()
             if key in seen:continue
             seen.add(key)
-            items.append({'code':code,'status':status,'posted_at':int(row.get('posted_at') or 0),
+            items.append({'code':code,'status':status,'posted_at':_posted_timestamp(row),
                           'source_label':_source_label(row),'url':str(row.get('message_url') or '')})
             if len(items)>=limit:return items
     return items
@@ -177,19 +179,15 @@ def format_promo_codes(rows,*,enabled,access_states=None,limit=MAX_PROMO_CODE_IT
         if rows:
             return 'I found no clearly labeled promo codes in the saved announcement posts. I won’t guess from unlabeled text.'
         return 'I haven’t saved announcement posts from the configured channels yet. I’ll keep retrying their initial backfill and updates.'
-    lines=['**Latest saved promo-code mentions from configured channels**']
-    footer='Codes are not validated in-game; check the linked post before redeeming. Validity may have changed since posting.'
-    if not enabled:footer+=' Announcement ingestion is off; these are cached mentions and may be stale.'
+    lines=['**Promo-code summary**']
+    footer='Codes are not verified in-game; validity can change after a post is published.'
+    if not enabled:footer+=' Announcement ingestion is off, so these cached mentions may be stale.'
     for item in items:
-        status='the source post marks it expired' if item['status']=='marked_expired' else 'validity not confirmed'
-        posted=f"<t:{item['posted_at']}:d>" if item['posted_at']>0 else 'date not recorded'
-        url=item['url']
-        label=str(item['source_label'])
-        for marker in '[]()<>`*_~':label=label.replace(marker,'')
-        source=f"[Source: {label}]({url})" if url.startswith('https://discord.com/channels/') else f"Source: {label}"
-        line=f"• `{item['code']}` — {status}; posted {posted} · {source}"
+        status='the post marks it expired' if item['status']=='marked_expired' else 'validity not confirmed'
+        posted=post_date_label(item['posted_at'])
+        line=f"• `{item['code']}` — {status} · posted {posted}"
         if len(chr(10).join([*lines,line,footer]))>1900:
-            lines.append('• More promo-code mentions omitted to fit Discord.')
+            lines.append('• More mentions omitted to fit Discord.')
             break
         lines.append(line)
     return chr(10).join([*lines,footer])
@@ -228,6 +226,26 @@ def message_text(message):
 
 def event_like(text):
     return bool(_EVENT_WORDS.search(str(text or '')))
+
+
+def _posted_timestamp(row):
+    """Return a safe integer publication timestamp, treating malformed values as absent."""
+    try:
+        return int(row.get('posted_at') or 0)
+    except (AttributeError, TypeError, ValueError, OverflowError):
+        return 0
+
+
+def post_date_label(timestamp):
+    """Render an announcement's publication date as an absolute Asia/Kolkata date."""
+    try:
+        stamp=int(timestamp or 0)
+        if stamp<=0:
+            return 'date not recorded'
+        posted=datetime.fromtimestamp(stamp,ZoneInfo('Asia/Kolkata')).date()
+        return f'{posted.strftime("%b")} {posted.day}, {posted.year}'
+    except (TypeError,ValueError,OverflowError,OSError):
+        return 'date not recorded'
 
 
 def _date_candidates(text):
@@ -269,51 +287,136 @@ def _local_today(now):
 
 
 def _title_from_content(text, limit=150):
-    lines = [re.sub(r'\s+', ' ', x).strip() for x in str(text or '').splitlines()]
-    for line in lines:
-        line = re.sub(r'<[^>]{1,80}>', '', line)
-        line = re.sub(r'\*{1,3}|_{1,3}|`|~', '', line).strip(' :—-#')
-        if line and not re.fullmatch(r'@(?:everyone|here)', line, flags=re.I):
+    """Extract a compact label without treating the whole first body sentence as a title."""
+    for raw_line in str(text or '').splitlines():
+        raw_line=str(raw_line or '').strip()
+        if not raw_line:
+            continue
+        is_heading=bool(re.match(r'^#{1,6}\s+',raw_line))
+        cleaned_line=omit_publication_only_sentences(raw_line)
+        if not cleaned_line:
+            continue
+        line=clean_source_text(cleaned_line,limit=500).strip(' :—–-#')
+        if not line or re.fullmatch(r'@(?:everyone|here)',line,flags=re.I):
+            continue
+        if is_heading:
             return line[:limit].rstrip()
-    return 'Announcement'
+        # A short prefix before a colon is a common explicit announcement heading.
+        colon=re.search(r'\s*[:：]\s*',line)
+        if colon and 2<=colon.start()<=85 and colon.end()<len(line):
+            heading=line[:colon.start()].strip()
+            if heading:
+                return heading[:limit].rstrip()
+        # Separate a compact lead-in from body text in one-line announcements.
+        semicolon=re.search(r'\s*[;]\s*',line)
+        if semicolon and 6<=semicolon.start()<=90:
+            heading=line[:semicolon.start()].strip()
+            if heading:
+                return heading[:limit].rstrip()
+        action=re.search(r'\b(?:starts?|begins?|launch(?:es)?|opens?|runs?|ends?|held|occurs?|takes?\s+place)\b',line,flags=re.I)
+        if action and action.start()>0:
+            subject=line[:action.start()]
+            subject=re.split(r'[.!?;\n]',subject)[-1].strip(' :—–-')
+            subject=re.sub(r'\b(?:will|is|are|was|were)\s*$','',subject,flags=re.I).strip()
+            if 2<=len(subject)<=85:
+                return subject[:limit].rstrip()
+        if len(line)<=100 and not re.search(r'[.!?]',line):
+            return line[:limit].rstrip()
+        return 'Event update' if event_like(line) else 'Announcement'
+    cleaned=clean_source_text(omit_publication_only_sentences(text),limit=500)
+    return (cleaned[:limit].rstrip() or ('Event update' if event_like(text) else 'Announcement'))
+
+
+def _post_summary(text,title='',limit=250):
+    cleaned=omit_publication_only_sentences(text)
+    if title and cleaned.casefold().startswith(title.casefold()):
+        cleaned=cleaned[len(title):].lstrip(' :—–-')
+    return summarize_source_text(cleaned,query_terms=('event','reward','starts','available','price','free','pilot','weapon'),
+                                 max_chars=limit,max_sentences=2)
+
+
+_EVENT_DATE_SUBJECT=r'(?:event\s+crate\s+rush|ecr|battle\s+pass|event|tournament|season|challenge)'
+_EVENT_DATE_MARKER=r'(?:date|schedule|scheduled|on|from|until|through|starts?|begins?|starting|launch(?:es)?|opens?|runs?|ends?|held|occurred)'
+_EVENT_DATE_CUE=re.compile(
+    r'\b(?:date|schedule|scheduled|starts?|begins?|starting|launch(?:es)?|opens?|runs?|ends?|'
+    r'held|occurred|occurs?|takes?\s+place|from|until|through)\b',re.I)
+_POSTING_CUE=re.compile(
+    r'\b(?:post(?:s|ed)?|publish(?:es|ed|ing|ation)?|creat(?:es|ed|ion)|shar(?:es|ed|ing)|'
+    r'upload(?:s|ed|ing)?|announc(?:es|ed|ement|ements)|releas(?:es|ed)|updat(?:es|ed))\b',re.I)
+
+
+def _has_event_date_context(text,position,length=0):
+    """Accept explicit event timing, not dates that describe the announcement itself."""
+    value=str(text or '')
+    before=value[max(0,position-140):position]
+    after=value[position+length:position+length+100]
+    # Bound the context to one clause so a publication date in one sentence cannot
+    # become the event date for the next sentence (or vice versa).
+    clause_before=re.split(r'[.!?;\n]',before)[-1]
+    clause_after=re.split(r'[.!?;,\n]',after)[0]
+    subject=rf'\b{_EVENT_DATE_SUBJECT}\b'
+    subject_matches=list(re.finditer(subject,clause_before,flags=re.I))
+    if subject_matches:
+        tail=clause_before[subject_matches[-1].end():]
+        cues=list(_EVENT_DATE_CUE.finditer(tail))
+        posting=list(_POSTING_CUE.finditer(tail))
+        last_post=posting[-1].end() if posting else -1
+        if cues and cues[-1].start()>=last_post:
+            return True
+        # “The event is on November 15” is explicit, but “ECR announcement on
+        # November 9” and “post published on November 9” are publication dates.
+        if re.search(r'\bon\b',tail,flags=re.I) and not posting:
+            return True
+    # Date first, then an event-start statement: “Nov 15 — the tournament begins”.
+    if re.search(rf'{subject}.{{0,45}}{_EVENT_DATE_MARKER}\b',clause_after,flags=re.I):
+        return True
+    return False
+
+
+def _explicit_event_dates(text):
+    return [entry for entry in _date_candidates(text)
+            if _has_event_date_context(text,entry[0],len(entry[3]))]
+
+
+def _explicit_partial_event_date(text):
+    for match in _PARTIAL_DATE.finditer(str(text or '')):
+        if _has_event_date_context(text,match.start(),len(match.group(0))):
+            return match.group(0)
+    return ''
 
 
 def upcoming_items(rows, now=None, lookback_days=ANNOUNCEMENT_LOOKBACK_DAYS, limit=MAX_UPCOMING_ITEMS):
-    """Extract future-dated event posts and recent undated event posts, preserving their source links."""
-    now = datetime.now(timezone.utc).timestamp() if now is None else float(now)
-    today = _local_today(now)
-    result = []
+    """Extract dated future events and recent posts without an identifiable event date."""
+    now=datetime.now(timezone.utc).timestamp() if now is None else float(now)
+    today=_local_today(now)
+    result=[]
     for row in rows:
-        text = str(row.get('content') or '')
+        text=str(row.get('content') or '')
         if not text or not event_like(text):
             continue
-        posted = int(row.get('posted_at') or 0)
-        dates = _date_candidates(text)
-        future = next((entry for entry in dates if entry[2] >= today), None)
+        posted=_posted_timestamp(row)
+        title=_title_from_content(text)
+        summary=_post_summary(text,title)
+        dates=_explicit_event_dates(text)
+        future=next((entry for entry in dates if entry[2]>=today),None)
+        partial=_explicit_partial_event_date(text)
         if future:
-            _, start, end, label = future
+            _,start,__,label=future
             result.append({
-                'dated': True,
-                'date_label': label,
-                'sort_date': start,
-                'title': _title_from_content(text),
-                'source_label': _source_label(row),
-                'url': str(row.get('message_url') or ''),
-                'posted_at': posted,
+                'dated':True,'event_date_status':'dated','date_label':label,
+                'sort_date':start,'title':title,'summary':summary,
+                'source_label':_source_label(row),'url':str(row.get('message_url') or ''),
+                'posted_at':posted,
             })
-        elif not dates and posted >= now - int(lookback_days) * 86400:
-            partial_date = bool(_PARTIAL_DATE.search(text))
+        elif not dates and posted>=now-int(lookback_days)*86400:
             result.append({
-                'dated': False,
-                'date_label': 'Year not stated' if partial_date else 'Date not stated',
-                'sort_date': None,
-                'title': _title_from_content(text),
-                'source_label': _source_label(row),
-                'url': str(row.get('message_url') or ''),
-                'posted_at': posted,
+                'dated':False,'event_date_status':'partial' if partial else 'missing',
+                'date_label':partial or 'Date not stated','sort_date':None,
+                'title':title,'summary':summary,'source_label':_source_label(row),
+                'url':str(row.get('message_url') or ''),'posted_at':posted,
             })
-    result.sort(key=lambda item: (not item['dated'], item['sort_date'] or date.max, -item['posted_at']))
-    return result[:max(0, int(limit))]
+    result.sort(key=lambda item:(not item['dated'],item['sort_date'] or date.max,-item['posted_at']))
+    return result[:max(0,int(limit))]
 
 
 def _source_label(row):
@@ -323,22 +426,27 @@ def _source_label(row):
 
 
 def format_upcoming(rows, *, enabled, access_states=None, now=None):
-    items = upcoming_items(rows, now=now)
+    items=upcoming_items(rows,now=now)
     if items:
-        lines = ['**Upcoming from the announcement channels**']
+        lines=['**Event update summary**']
         for item in items:
-            title = item['title'].replace('[', '').replace(']', '')
-            url = item['url']
-            if url.startswith('https://discord.com/channels/'):
-                source = f"[Source: {item['source_label']}]({url})"
+            title=clean_source_text(item.get('title') or 'Event announcement',limit=150)
+            summary=clean_source_text(item.get('summary') or '',limit=260)
+            if summary:
+                lines.append(f"• **{title}** — {summary}")
             else:
-                source = f"Source: {item['source_label']}"
-            lines.append(f"• **{item['date_label']}** — {title} · {source}")
-        if any(not item['dated'] for item in items):
-            lines.append('Dates are shown only when the post gives an explicit year. Undated items may no longer be current; check the source post.')
-        text = '\n'.join(lines)
-        if len(text) > 1900:
-            text = text[:1880].rsplit('\n', 1)[0] + '\n… More posts omitted.'
+                lines.append(f"• **{title}**")
+            posted_label=post_date_label(item.get('posted_at'))
+            status=item.get('event_date_status')
+            if status=='dated':
+                lines.append(f"  **Event date:** {item['date_label']} · **Post date:** {posted_label}")
+            elif status=='partial':
+                lines.append(f"  **Event date mentioned:** {item['date_label']} (year not stated) · **Post date:** {posted_label}")
+            else:
+                lines.append(f"  **Event date not stated · Post date:** {posted_label} *(publication date, not the event date)*")
+        text='\n'.join(lines)
+        if len(text)>1900:
+            text=text[:1880].rsplit('\n',1)[0]+'\n… More event summaries omitted.'
         return text
     if not rows:
         if not enabled:
@@ -347,24 +455,34 @@ def format_upcoming(rows, *, enabled, access_states=None, now=None):
         if access_states and any(state!='available' for state in access_states.values()):
             return 'I haven’t saved announcements yet. One or more configured channels are not readable right now; I’ll retry automatically when access is available.'
         return 'I haven’t saved announcements yet. I’ll keep retrying the configured channels as soon as the bot can read them.'
-    return 'I found no future-dated event posts in the saved announcements. A recent post without an explicit year may still be worth checking in its source channel.'
+    return 'I found no future-dated event posts in the saved announcements. A recent post without an explicit event date may still be worth checking.'
+
+
+def _explicit_event_date(text):
+    dates=_explicit_event_dates(text)
+    return dates[0][3] if dates else ''
 
 
 def ecr_event_items(rows,limit=5):
     """Keep saved ECR event posts separate from explicitly labeled promo-code posts."""
     limit=max(0,int(limit))
     if not limit:return []
-    ordered=sorted(rows or [],key=lambda row:int(row.get('posted_at') or 0),reverse=True)
+    ordered=sorted(rows or [],key=_posted_timestamp,reverse=True)
     result=[]
     for row in ordered:
         text=str(row.get('content') or '').strip()
         if not text or not _ECR_REFERENCE.search(text) or _PROMO_CODE_LABEL.search(text):continue
-        excerpt=re.sub(r'\s+',' ',_safe_announcement_text(text)).strip()
-        if len(excerpt)>480:
-            excerpt=excerpt[:479].rsplit(' ',1)[0].rstrip(' ,;:')+'…'
-        result.append({'excerpt':excerpt,'posted_at':int(row.get('posted_at') or 0),
-                       'source_label':_source_label(row),'url':str(row.get('message_url') or '')})
-        if len(result)>=max(0,int(limit)):break
+        title=_title_from_content(text)
+        summary=_post_summary(text,title,limit=360)
+        posted=_posted_timestamp(row)
+        event_date=_explicit_event_date(text)
+        partial_event_date=_explicit_partial_event_date(text) if not event_date else ''
+        result.append({'title':title,'summary':summary,'excerpt':summary,
+                       'event_date_label':event_date or partial_event_date,
+                       'event_date_status':'dated' if event_date else ('partial' if partial_event_date else 'missing'),
+                       'posted_at':posted,'source_label':_source_label(row),
+                       'url':str(row.get('message_url') or '')})
+        if len(result)>=limit:break
     return result
 
 
@@ -447,15 +565,22 @@ def format_ecr_events(rows,*,enabled,access_states=None,limit=5,configured_chann
         return ('ECR means Event Crate Rush; no saved ECR event update is available yet. '
                 f'Configured channel IDs: {channel_text}.{exclusion_note} Last channel-read results:\n{status_summary}\n'
                 'Promo codes are looked up separately; I’ll retry the configured channels.')
-    lines=['**Saved Event Crate Rush updates** *(event information, not promo codes)*']
+    lines=['**Event Crate Rush summary** *(event information, not promo codes)*']
     for item in items:
-        label=item['source_label'].replace('[','').replace(']','')
-        source=f"[#{label.lstrip('#')}]({item['url']})" if item['url'].startswith('https://discord.com/channels/') else label
-        posted=f" · posted <t:{item['posted_at']}:d>" if item['posted_at']>0 else ''
-        line=f"• {item['excerpt']}{posted} · {source}"
-        if len('\n'.join([*lines,line]))>1800:
-            lines.append('• More ECR updates omitted to fit Discord.')
+        title=clean_source_text(item.get('title') or 'ECR update',limit=140)
+        summary=clean_source_text(item.get('summary') or item.get('excerpt') or '',limit=360)
+        line=f"• **{title}** — {summary}" if summary else f"• **{title}**"
+        posted_label=post_date_label(item.get('posted_at'))
+        status=item.get('event_date_status')
+        if status=='dated' and item.get('event_date_label'):
+            line+=f"\n  **Event date:** {item['event_date_label']} · **Post date:** {posted_label}"
+        elif status=='partial' and item.get('event_date_label'):
+            line+=f"\n  **Event date mentioned:** {item['event_date_label']} (year not stated) · **Post date:** {posted_label}"
+        else:
+            line+=f"\n  **Event date not stated · Post date:** {posted_label} *(publication date, not the event date)*"
+        if len('\n'.join([*lines,line]))>1750:
+            lines.append('• More ECR summaries omitted to fit Discord.')
             break
         lines.append(line)
-    if not enabled:lines.append('*Announcement ingestion is disabled; these are cached posts.*')
+    if not enabled:lines.append('*Announcement ingestion is disabled; these are cached summaries.*')
     return '\n'.join(lines)

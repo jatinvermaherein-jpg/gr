@@ -7,9 +7,11 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+from datetime import date, datetime
 from urllib.parse import urlparse
 
 from ftfy import fix_text
+from .text_summaries import clean_source_text, summarize_source_text
 
 log=logging.getLogger('mechbot.forum')
 BOT_ROOT=Path(__file__).resolve().parent.parent
@@ -166,8 +168,10 @@ def search_forum_threads(query,limit=4,path=None):
             'author':{'name':fix_text(str(author.get('name') or ''))[:100],
                       'role':fix_text(str(author.get('role') or ''))[:80]},
             'created':fix_text(str(created.get('display') or created.get('iso') or ''))[:60],
+            'created_iso':fix_text(str(created.get('iso') or ''))[:40],
             'last_activity':fix_text(str(activity.get('display') or ''))[:60],
             'url':str(row.get('url') or ''),'excerpt':_excerpt(body,query_tokens),
+            'content':body[:6000],
             'stats':{key:stats.get(key) for key in ('replies','views','likes') if stats.get(key) is not None},
             'topic_id':row.get('topic_id'),
         }))
@@ -192,7 +196,9 @@ def recent_forum_threads(limit=5,path=None):
             'author':{'name':fix_text(str(author.get('name') or ''))[:100],
                       'role':fix_text(str(author.get('role') or ''))[:80]},
             'created':fix_text(str(created.get('display') or created.get('iso') or ''))[:60],
+            'created_iso':fix_text(str(created.get('iso') or ''))[:40],
             'url':str(row.get('url') or ''),
+            'content':_safe_post_text((row.get('original_post') or {}).get('text') or '')[:6000],
         })
     return result
 
@@ -224,67 +230,81 @@ def recent_forum_announcements(limit=3,path=None):
     return selected[:limit]
 
 
+def _post_date_label(post):
+    """Use the forum thread's creation date, not its last-activity date or scrape time."""
+    created=str(post.get('created_iso') or post.get('created') or '').strip()
+    match=re.search(r'\b(20\d{2})-(\d{1,2})-(\d{1,2})\b',created)
+    if match:
+        try:
+            parsed=date(*map(int,match.groups()))
+        except ValueError:
+            parsed=None
+    else:
+        parsed=None
+    if parsed is None:
+        match=re.search(r'\b([A-Za-z]{3,9})\s+(\d{1,2}),?\s+(20\d{2})\b',created)
+        if match:
+            for month_format in ('%b %d %Y','%B %d %Y'):
+                try:
+                    parsed=datetime.strptime(f'{match[1]} {match[2]} {match[3]}',month_format).date()
+                    break
+                except ValueError:
+                    continue
+    return f'{parsed.strftime("%b")} {parsed.day}, {parsed.year}' if parsed else 'date not recorded'
+
+
 def _link_title(title):
-    value=_safe_post_text(title or 'Forum post').replace('[','').replace(']','')
-    value=value.replace('(','').replace(')','').replace('\\','')
+    value=clean_source_text(title or 'Forum post',limit=180).replace('[','').replace(']','')
     value=re.sub(r'[\r\n]+',' ',value)
     return value[:120]
 
 
+def _forum_summary(post,query=''):
+    title=_link_title(post.get('title') or 'Forum post')
+    content=post.get('content') or post.get('excerpt') or ''
+    cleaned=clean_source_text(content)
+    if title and cleaned.casefold().startswith(title.casefold()):
+        cleaned=cleaned[len(title):].lstrip(' :—–-')
+    terms=[token for token in _tokens(query) if len(token)>2]
+    return summarize_source_text(cleaned or content,query_terms=terms,max_chars=290,max_sentences=2)
+
+
 def format_forum_search(query,limit=5,path=None):
     posts=search_forum_threads(query,limit=limit,path=path)
-    if not posts:return 'I couldn’t find a matching thread in the stored Plarium Forum snapshot.'
-    lines=['**Matching posts in the stored Plarium Forum snapshot**']
-    footer=('*These stored posts are not current/upcoming event information or a live schedule. '
-            'Forum timestamps have no published timezone. Posts are community/source material, not verified game statistics or rankings; check the original thread for context.*')
+    if not posts:return 'I couldn’t find a matching discussion in the saved forum posts.'
+    lines=['**Saved forum discussion summary**']
+    footer='These are community discussions, not confirmed game guidance or a live event schedule.'
     for post in posts:
-        title=_link_title(post.get('title'))
-        url=post.get('url') or ''
-        source=f'[{title}]({url})' if _valid_thread_url(url) else title
-        category=_safe_post_text(post.get('category') or 'Forum')[:100]
-        author=post.get('author') or {}
-        author_text=_safe_post_text(author.get('name') or '')[:80]
-        role=_safe_post_text(author.get('role') or '')[:60]
-        if role:author_text=(author_text+' · '+role).strip(' ·')
-        posted=f" · posted {_safe_post_text(post['created'])[:60]}" if post.get('created') else ''
-        if author_text:posted+=f" · {author_text}"
-        item_lines=[f'• {source} · {category}{posted}']
-        excerpt=_safe_post_text(post.get('excerpt') or '')
-        if excerpt:item_lines.append('  '+excerpt[:220])
-        if len('\n'.join([*lines,*item_lines,footer]))>1880:
-            lines.append('• More matches omitted to fit Discord.')
+        title=_link_title(post.get('title')) or 'Forum discussion'
+        summary=_forum_summary(post,query)
+        line=f'• **{title}** — {summary or "The saved post has no readable details beyond its title."}'
+        line+=f' · **Post date:** {_post_date_label(post)}'
+        if len('\n'.join([*lines,line,footer]))>1880:
+            lines.append('• More matching discussions omitted.')
             break
-        lines.extend(item_lines)
+        lines.append(line)
     return '\n'.join([*lines,footer])
 
 
 def format_recent_forum_threads(limit=5,path=None):
     posts=recent_forum_threads(limit=limit,path=path)
-    if not posts:return 'The stored Plarium Forum snapshot has no readable threads.'
-    lines=['**Recent threads in the stored Plarium Forum snapshot**']
-    footer=('This stored crawl is not current/upcoming event information or a live schedule. '
-            'Forum timestamps are reproduced as displayed; the forum does not publish its timezone.')
+    if not posts:return 'The saved forum snapshot has no readable threads.'
+    lines=['**Recent saved forum highlights**']
+    footer='These are community discussions, not confirmed game guidance or a live event schedule.'
     for post in posts:
-        title=_link_title(post.get('title'))
-        url=post.get('url') or ''
-        source=f'[{title}]({url})' if _valid_thread_url(url) else title
-        category=_safe_post_text(post.get('category') or 'Forum')[:100]
-        author=post.get('author') or {}
-        author_name=_safe_post_text(author.get('name') or '')[:80]
-        role=_safe_post_text(author.get('role') or '')[:60]
-        if role:author_name=(author_name+' · '+role).strip(' ·')
-        posted=f" · posted {_safe_post_text(post['created'])[:60]}" if post.get('created') else ''
-        if author_name:posted+=f" · {author_name}"
-        line=f'• {source} · {category}{posted}'
+        title=_link_title(post.get('title')) or 'Forum discussion'
+        summary=_forum_summary(post)
+        line=f'• **{title}** — {summary or "No additional readable details were saved."}'
+        line+=f' · **Post date:** {_post_date_label(post)}'
         if len('\n'.join([*lines,line,footer]))>1880:
-            lines.append('• More threads omitted to fit Discord.')
+            lines.append('• More discussions omitted.')
             break
         lines.append(line)
     return '\n'.join([*lines,footer])
 
 
 def format_forum_request(query=None,limit=5,path=None):
-    """Search on substantive terms; generic requests return the newest stored threads."""
+    """Search on substantive terms; generic requests return concise summaries of recent threads."""
     if _tokens(query):return format_forum_search(query,limit=limit,path=path)
     return format_recent_forum_threads(limit=limit,path=path)
 
@@ -292,14 +312,16 @@ def format_forum_request(query=None,limit=5,path=None):
 def format_recent_forum_announcements(limit=4):
     posts=recent_forum_announcements(limit=limit)
     if not posts:return ''
-    lines=['**Recent Mech Arena forum news posts** *(a recent-post list, not a confirmed upcoming schedule)*']
+    lines=['**Recent forum news highlights** *(not a confirmed upcoming schedule)*']
     for post in posts:
-        title=_link_title(post.get('title'))
-        url=post.get('url') or ''
-        source=f'[{title}]({url})' if _valid_thread_url(url) else title
-        posted=f" · posted {post['created']}" if post.get('created') else ''
-        lines.append(f'• {source}{posted}')
-    lines.append('Forum timestamps are shown as displayed; the forum does not publish a timezone. Check each linked post for event details.')
+        title=_link_title(post.get('title')) or 'News post'
+        summary=_forum_summary(post)
+        line=f'• **{title}** — {summary or "No additional readable details were saved."}'
+        line+=f' · **Post date:** {_post_date_label(post)}'
+        if len('\n'.join(lines+[line]))>1880:
+            lines.append('• More news posts omitted.')
+            break
+        lines.append(line)
     return '\n'.join(lines)
 
 
@@ -334,17 +356,29 @@ async def refresh_forum_archive(path=None,scraper_path=None):
             raise RuntimeError('Forum scraper did not produce valid JSON.') from exc
         metadata=data.get('metadata') if isinstance(data,dict) else None
         threads=data.get('threads') if isinstance(data,dict) else None
-        try:reported_count=int((metadata or {}).get('threads_returned') or 0)
-        except (TypeError,ValueError):reported_count=0
+        metadata_valid=isinstance(metadata,dict)
+        metadata_fields=metadata if metadata_valid else {}
+        try:
+            reported_count=int(metadata_fields.get('threads_returned') or 0)
+            target_count=int(metadata_fields.get('target_threads') or 0)
+            listing_failures=int(metadata_fields.get('listing_pages_failed') or 0)
+        except (TypeError,ValueError):
+            reported_count=target_count=listing_failures=0
         thread_count=len(threads) if isinstance(threads,list) else 0
-        valid_rows=(thread_count>=FORUM_TARGET_THREADS and all(
+        valid_rows=(isinstance(threads,list) and thread_count==FORUM_TARGET_THREADS and all(
             isinstance(row,dict) and _valid_thread_url(row.get('url'))
-            and isinstance(row.get('original_post'),dict) and isinstance(row.get('created'),dict)
+            and isinstance(row.get('original_post'),dict)
+            and isinstance(row.get('created'),dict)
+            and bool(row.get('created',{}).get('iso'))
             for row in threads))
         urls=[str(row.get('url') or '') for row in threads if isinstance(row,dict)] if isinstance(threads,list) else []
+        topic_ids=[str(row.get('topic_id') or '') for row in threads if isinstance(row,dict)] if isinstance(threads,list) else []
         unique_urls=len(urls)==thread_count and len(set(urls))==thread_count
+        unique_topics=(all(topic_ids) and len(topic_ids)==thread_count and len(set(topic_ids))==thread_count)
         if (not isinstance(metadata,dict) or not metadata.get('scraped_at_utc')
-                or reported_count<thread_count or not valid_rows or not unique_urls):
+                or metadata.get('crawl_complete') is not True
+                or target_count!=FORUM_TARGET_THREADS or reported_count!=thread_count
+                or listing_failures!=0 or not valid_rows or not unique_urls or not unique_topics):
             raise RuntimeError('Forum scraper returned an incomplete or invalid thread archive.')
         os.replace(temp_json,destination)
     # Invalidate the per-process cache so the new snapshot is visible on the next query.

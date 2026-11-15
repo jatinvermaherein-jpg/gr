@@ -10,7 +10,7 @@ OPERATORS={1444891876376186901,1442058583129722986}
 MIN_INTERVAL=5
 MAX_DURATION=1800
 MAX_REPEATS=300
-MAX_POOLS_PER_TARGET=3
+MAX_ACTIVE_LOOPS=5
 
 
 def validate(interval,duration):
@@ -21,18 +21,17 @@ def validate(interval,duration):
 
 
 class AlertManager:
-    """Run each loop command as an independent pool, capped at three pools per target."""
+    """Bound loops to one per member/destination and five active pools globally."""
     def __init__(self):self.alerts={}
 
-    def available(self,target_id,mode=None):
-        # Multiple commands may run for the same target and mode. The cap counts all
-        # active channel and DM pools for this Discord user; there is no global cap.
-        return sum(1 for x in self.alerts.values() if x['target']==target_id)<MAX_POOLS_PER_TARGET
+    def available(self,target_id,mode):
+        duplicate=any(x['target']==target_id and x['mode']==mode for x in self.alerts.values())
+        return not duplicate and len(self.alerts)<MAX_ACTIVE_LOOPS
 
     def start(self,target,mode,destination,interval,duration,creator,reason):
         validate(interval,duration)
         if not self.available(target.id,mode):
-            raise ValueError(f'This member already has {MAX_POOLS_PER_TARGET} active loop pools across channel and DM destinations.')
+            raise ValueError('A loop is already active for that target and destination, or the five-loop limit has been reached.')
         key=uuid.uuid4().hex[:8]
         record={'id':key,'target':target.id,'mode':mode,'creator':creator,'stop':asyncio.Event()}
         self.alerts[key]=record
