@@ -422,21 +422,27 @@ class ParserTests(unittest.TestCase):
     def test_identity_credits_and_exact_item_shortcuts(self):
         self.assertIn('ARCHΛNGLE',bot_identity_response('Who are you?'))
         builder=bot_identity_response('Who build you?')
-        self.assertIn('Nub',builder)
         self.assertIn('confirmed code-author',builder)
-        self.assertNotIn('built by Nub',builder)
+        self.assertIn('Nub',builder)
+        self.assertIn('maintains the Mech Arena game database',builder)
+        self.assertIn('MRX',builder)
+        self.assertIn('handles ECR event guides',builder)
+        for user_id in (1442058583129722986,1444891876376186901,1442422409087942678):
+            url=f'https://discord.com/users/{user_id}'
+            self.assertIn(f'[{url}]({url})',builder)
+            self.assertNotIn(f'<@{user_id}>',builder)
         database=bot_identity_response('Who provided your database?')
         self.assertIn('ᧁꪖꪶꪖ𝓽ꫀ𝘳',database)
-        self.assertNotIn('ᧁꪖꪶꪖ𝓽ꫀ𝘘',database)
-        self.assertIn('<@1444891876376186901>',database)
-        self.assertIn('https://discord.com/users/1444891876376186901',database)
+        self.assertIn('[https://discord.com/users/1444891876376186901](https://discord.com/users/1444891876376186901)',database)
+        self.assertNotIn('<@1444891876376186901>',database)
         manager=bot_identity_response('Who runs the bot?')
-        self.assertIn('<@1442058583129722986>',manager)
-        self.assertIn('https://discord.com/users/1442058583129722986',manager)
-        event_credits=bot_identity_response('Who does the ECR event guides?')
+        self.assertIn('[https://discord.com/users/1442058583129722986](https://discord.com/users/1442058583129722986)',manager)
+        self.assertNotIn('<@1442058583129722986>',manager)
+        event_credits=bot_identity_response('Who manages ECR guides?')
         self.assertIn('MRX',event_credits)
-        self.assertIn('separate from ECR event information',event_credits)
-        self.assertNotIn('ECR promo codes',event_credits)
+        self.assertIn('handles ECR event guides',event_credits)
+        self.assertIn('[https://discord.com/users/1442422409087942678](https://discord.com/users/1442422409087942678)',event_credits)
+        self.assertIn('ECR event information is separate from promo codes',event_credits)
         self.assertEqual(direct_item_lookup('please review EM Rifle 10 rank 4 level 2',['EM Rifle 10']),'EM Rifle 10')
         self.assertIsNone(direct_item_lookup('compare EM Rifle 10 with Pulse Cannon 8',['EM Rifle 10']))
 
@@ -708,13 +714,34 @@ class BuildsTests(unittest.TestCase):
                           'https://evil.example/users/42',
                           'https://portico-hq-live.netlify.app/api/mech-arena/avatar/42',
                           'https://portico-hq-live.netlify.app/users/42?embed=true',
-                          'https://portico-hq-live.netlify.app/member/verified'):
+                          'https://portico-hq-live.netlify.app/member/verified',
+                          'https://discord.com/users/not-a-snowflake',
+                          'https://discord.com/users/1442422409087942678?redirect=example'):
             with self.subTest(candidate=candidate):
                 item={'mech':'Surge','author':{**author,'profile_url':candidate}}
                 self.assertEqual(_build_author_profile_url(item),'')
                 result=builds_response({'builds':[item]},mech='Surge',best=True)
                 self.assertIn('Submitted by',result)
                 self.assertNotIn('https://',result)
+
+    def test_build_author_links_require_an_explicit_discord_identity(self):
+        galater={'mech':'Surge','weapon_1':'Revoker 10','author':{'display':'GΛ—ΛTЯ','handle':'@galater'}}
+        self.assertEqual(_build_author_profile_url(galater),'')
+        result=builds_response({'builds':[galater]},mech='Surge',best=True)
+        self.assertIn('GΛ—ΛTЯ (@\u200bgalater)',result)
+        self.assertNotIn('@galater',result)
+        self.assertNotIn('https://discord.com/users/',result)
+        from_api={'mech':'Surge','weapon_1':'Revoker 10',
+                  'author':{'display':'Verified submitter','discord_id':'1442422409087942678'}}
+        url='https://discord.com/users/1442422409087942678'
+        self.assertEqual(_build_author_profile_url(from_api),url)
+        result=builds_response({'builds':[from_api]},mech='Surge',best=True)
+        self.assertIn(f'Verified submitter ([{url}]({url}))',result)
+        self.assertNotIn('<@1442422409087942678>',result)
+        by_profile_url={'author':{'profile_url':'https://discord.com/users/1444891876376186901'}}
+        self.assertEqual(_build_author_profile_url(by_profile_url),'https://discord.com/users/1444891876376186901')
+        # Handles alone, including MRX, do not establish a source author's Discord identity.
+        self.assertEqual(_build_author_profile_url({'author':{'display':'MRX'}}),'')
 
 
 class ArchivePresentationTests(unittest.TestCase):
@@ -1397,7 +1424,7 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         store.conversation_history.assert_not_awaited()
         store.add_conversation_turn.assert_not_awaited()
 
-    async def test_identity_answers_ping_only_the_credited_profiles(self):
+    async def test_identity_answers_use_profile_links_without_pings_or_embeds(self):
         class Catalog:
             weapon_names=[]
             mech_names=[]
@@ -1405,18 +1432,38 @@ class QuestionRoutingTests(unittest.IsolatedAsyncioTestCase):
         bot_user=SimpleNamespace(id=987654321098765432)
         bot._connection.user=bot_user
         author=SimpleNamespace(id=123456789012345678,bot=False)
-        for question,user_id in (('Who maintains your database?',1444891876376186901),
-                                 ('Who runs the bot?',1442058583129722986)):
+        questions=(
+            ('Who maintains your database?',(1444891876376186901,)),
+            ('Who runs the bot?',(1442058583129722986,)),
+            ('Who handles the ECR guides?',(1442422409087942678,)),
+            ('Who built you?',(1442058583129722986,1444891876376186901,1442422409087942678)),
+        )
+        for question,user_ids in questions:
             message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
                 mentions=[bot_user],content=f'<@{bot_user.id}> {question}',reference=None,reply=AsyncMock())
             await bot.on_message(message)
             message.reply.assert_awaited_once()
             reply=message.reply.await_args
-            self.assertIn(f'<@{user_id}>',reply.args[0])
-            self.assertIn(f'https://discord.com/users/{user_id}',reply.args[0])
+            for user_id in user_ids:
+                url=f'https://discord.com/users/{user_id}'
+                self.assertIn(f'[{url}]({url})',reply.args[0])
+                self.assertNotIn(f'<@{user_id}>',reply.args[0])
             allowed=reply.kwargs['allowed_mentions']
-            self.assertEqual([user.id for user in allowed.users],[user_id])
-            self.assertFalse(allowed.everyone or allowed.roles)
+            self.assertFalse(allowed.users or allowed.everyone or allowed.roles)
+            self.assertTrue(reply.kwargs['suppress_embeds'])
+
+    async def test_discord_profile_links_suppress_embeds_on_regular_replies(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+        bot=MechBot(Catalog(),object())
+        message=SimpleNamespace(reply=AsyncMock())
+        url='https://discord.com/users/1442422409087942678'
+        await bot.reply_message(message,f'Submitted by MRX ([{url}]({url}))',mention_author=False)
+        reply=message.reply.await_args
+        self.assertTrue(reply.kwargs['suppress_embeds'])
+        self.assertFalse(reply.kwargs['allowed_mentions'].users)
+        self.assertFalse(reply.kwargs['allowed_mentions'].everyone or reply.kwargs['allowed_mentions'].roles)
 
     async def test_upcoming_response_reads_posts_from_any_configured_channel(self):
         rows=[

@@ -5,7 +5,7 @@ ARCHΛNGLE is an unofficial Mech Arena community helper for weapon, mech, and ve
 **Profile description draft (Discord Developer Portal):**
 > Mech Arena weapon, mech, and pilot lookups · build summaries · reminders · event updates · community tools.<br>
 > Unofficial fan project; not affiliated with Plarium.<br>
-> Powered and managed by [Nub](https://discord.com/users/1442058583129722986) · Game database maintained by [ᧁꪖꪶꪖ𝓽ꫀ𝘳](https://discord.com/users/1444891876376186901) · Promo-code posts and event guides by MRX. ECR event information is separate from promo codes; contact the relevant person for bot, database, or event questions.
+> Powered and managed by [https://discord.com/users/1442058583129722986](https://discord.com/users/1442058583129722986) (Nub) · Game database maintained by [https://discord.com/users/1444891876376186901](https://discord.com/users/1444891876376186901) (ᧁꪖꪶꪖ𝓽ꫀ𝘳) · ECR event guides and promo-code posts by [https://discord.com/users/1442422409087942678](https://discord.com/users/1442422409087942678) (MRX). ECR event information is separate from promo codes; contact the relevant person for bot, database, or event questions.
 
 ## Commands and replies
 

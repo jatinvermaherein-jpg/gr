@@ -584,7 +584,8 @@ class MechBot(commands.Bot):
 
     async def reply_message(self,message,text,with_currency_icons=False,mention_author=True,allowed_user_ids=(),suppress_embeds=False):
         kwargs={}
-        if suppress_embeds:kwargs['suppress_embeds']=True
+        has_discord_profile_link=bool(re.search(r'https://discord\.com/users/\d{17,20}',str(text),re.I))
+        if suppress_embeds or has_discord_profile_link:kwargs['suppress_embeds']=True
         if with_currency_icons and not self.currency_emojis:
             files=self.currency_icon_files()
             if files:kwargs['files']=files
@@ -702,10 +703,8 @@ class MechBot(commands.Bot):
         try:
             identity=bot_identity_response(text)
             if identity:
-                identity_user_ids=[int(user_id) for user_id in re.findall(r'<@!?(\d+)>',identity)
-                                   if int(user_id) in IDENTITY_PROFILE_IDS]
                 await self.reply_message(message,identity,mention_author=not ambient_question,
-                                         allowed_user_ids=identity_user_ids);return
+                                         suppress_embeds=True);return
             if wants_invite_link(text):
                 await self.reply_message(message,f'Invite **ARCHΛNGLE** to a server where you can add bots: {INVITE_URL}',mention_author=not ambient_question);return
             if re.fullmatch(r'(?:stop|cancel)\s+(?:(?:my|the)\s+)?(?:(?:ping|dm|direct[- ]message)\s+)?loops?',text,re.I):
