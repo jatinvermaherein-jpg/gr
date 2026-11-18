@@ -43,14 +43,17 @@ USER_CONFIRMED_PUBLIC_REVIEW_NOTE = (
     'to the pinned archive snapshot.'
 )
 
-# This newer user direction covers only the pinned raw OCR manifest, never its derived stat candidates.
+# This approval covers the pinned raw OCR manifest. The fresh visual pilot/mech stat overlay was
+# separately reviewed and promoted to Supabase; the stale legacy SQLite candidate statuses remain untouched.
 USER_CONFIRMED_DRIVE_OCR_MANIFEST_SHA256 = 'dfc42f5cab6e7ce74526c9700bc1aedd308c2f09f2e356fdb33331cafa5537c5'
 USER_CONFIRMED_DRIVE_OCR_REVIEWER = 'requesting user (chat confirmation)'
 USER_CONFIRMED_DRIVE_OCR_REVIEW_NOTE = (
     'The user explicitly directed that the 90 raw OCR records in the pinned Drive/chat-upload manifest '
-    'be marked verified and available to the bot. This approval covers raw OCR records only; the 523 '
-    'derived stat candidates remain unverified. Gladitor remains user-attributed, not independently '
-    'verified; OCR accuracy, screenshot identity, and game version/date are not independently validated.'
+    'be marked verified and available to the bot. This approval concerns those raw OCR records only. '
+    'The legacy SQLite copy still has 523 derived candidate rows with stale needs_review statuses; a '
+    'separate fresh 84-screenshot visual rebuild (3,520 cells) was user-confirmed and promoted to the '
+    'private Supabase stat overlay. Gladitor remains user-attributed, not independently verified; this '
+    'raw OCR record approval does not attest to its author attribution.'
 )
 USER_CONFIRMED_DRIVE_OCR_DOCUMENTS = {
     'PILOT.zip': {'id': 148, 'source': 'google_drive_archive', 'category': 'pilot_stats_screenshots',
@@ -360,9 +363,9 @@ def apply_user_confirmed_drive_ocr_review(path, *, manifest_sha=USER_CONFIRMED_D
         _set_metadata(db,'drive_ocr_user_reviewed_at_utc',reviewed_at)
         _set_metadata(db,'drive_ocr_user_review',USER_CONFIRMED_DRIVE_OCR_REVIEW_NOTE)
         _set_metadata(db,'drive_ocr_promotion_policy',
-                      'The user approved all 90 raw OCR records for bot lookup. This does not cover the 523 derived stat candidates, which remain needs_review.')
+                      'The user approved all 90 raw OCR records for bot lookup. The 523 legacy derived candidate rows in this SQLite snapshot retain stale needs_review statuses; a separate fresh visual rebuild of 3,520 pilot/mech stat cells was user-confirmed and promoted to the private Supabase overlay.')
         _set_metadata(db,'drive_ocr_ingest',
-                      '84 Drive image OCR records + 6 chat-upload OCR records were user-approved for bot lookup; 523 derived pilot/mech stat-candidate rows remain unverified; Gladitor attribution remains user-attributed and independently unverified.')
+                      '84 Drive image OCR records + 6 chat-upload OCR records were user-approved for bot lookup. The 523 derived pilot/mech candidate rows in this legacy SQLite snapshot retain stale statuses; the separate fresh user-confirmed 3,520-cell visual overlay is retrieved from Supabase. Gladitor attribution remains user-attributed and independently unverified.')
         if db.execute('PRAGMA integrity_check').fetchone()[0]!='ok':raise RuntimeError('OCR promotion failed SQLite integrity check.')
         if db.execute("SELECT count(*) FROM archive_image_ocr WHERE archive_name IN (?,?,?) AND review_status='verified'",
                       tuple(USER_CONFIRMED_DRIVE_OCR_DOCUMENTS)).fetchone()[0]!=90:raise RuntimeError('OCR review status count mismatch.')
@@ -411,7 +414,7 @@ def initialize_snapshot():
         log.warning('Public-source archive did not match its reviewed manifest; new or changed source data remains hidden.')
     drive_ocr_reviewed=apply_user_confirmed_drive_ocr_review(dest)
     if drive_ocr_reviewed:
-        log.info('Loaded %s user-approved raw Drive/chat-upload OCR records; derived stat candidates remain hidden.',drive_ocr_reviewed)
+        log.info('Loaded %s user-approved raw Drive/chat-upload OCR records; legacy derived candidates remain hidden in this SQLite copy (fresh user-confirmed stat cells load separately from Supabase).',drive_ocr_reviewed)
     else:
         log.warning('Raw Drive/chat-upload OCR did not match its pinned user-approved manifest; it remains hidden.')
     return dest
@@ -425,8 +428,159 @@ class Catalog:
         self.mech_names = [r['name'] for r in self.db.execute('SELECT name FROM mechs')]
         self._record_cache = {}
         self._raw_ocr_records_cache=None
+        self._verified_stat_overlay={'mech':{},'pilot':{}}
+        self._verified_stat_overlay_run={}
         self.pilot_names=sorted({str(record.get('name')) for record in self._structured_records('pilot_list')
                                  if record.get('name')},key=str.casefold)
+        self.mod_names=sorted({str(record.get('mod_label') or '').strip()
+                               for record in self._structured_records('mod_list')
+                               if str(record.get('mod_label') or '').strip()},key=str.casefold)
+        self.mod_choices=sorted({f"{str(record.get('mod_label') or '').strip()} ({str(record.get('rarity') or '').title()})"
+                                 for record in self._structured_records('mod_list')
+                                 if record.get('mod_label') and record.get('rarity')},key=str.casefold)
+
+    def load_verified_stat_overlay(self, rows):
+        """Attach the complete, user-confirmed Supabase stat overlay without rewriting values."""
+        rows=list(rows or [])
+        if not rows:
+            self._verified_stat_overlay={'mech':{},'pilot':{}}
+            self._verified_stat_overlay_run={}
+            return 0
+        run_ids={str(row.get('run_id') or '') for row in rows}
+        if len(run_ids)!=1 or '' in run_ids:
+            log.error('Refusing screenshot stat overlay with missing or mixed run IDs.')
+            return 0
+        expected_values={row.get('expected_cell_count') for row in rows if row.get('expected_cell_count') is not None}
+        if len(expected_values)>1:
+            log.error('Refusing screenshot stat overlay with inconsistent run cell counts.')
+            return 0
+        if expected_values:
+            try:expected=int(next(iter(expected_values)))
+            except (TypeError,ValueError):
+                log.error('Refusing screenshot stat overlay with an invalid expected cell count.')
+                return 0
+            if expected!=len(rows):
+                log.error('Refusing incomplete screenshot stat overlay: expected %s cells, received %s.',expected,len(rows))
+                return 0
+        if any(row.get('run_user_confirmed') is not True or row.get('user_confirmed') is not True for row in rows):
+            log.error('Refusing screenshot stat overlay without explicit run and cell confirmation.')
+            return 0
+
+        canonical={
+            'mech':{str(name).strip().casefold():str(name) for name in self.mech_names},
+            'pilot':{str(name).strip().casefold():str(name) for name in self.pilot_names},
+        }
+        grouped={'mech':{},'pilot':{}}
+        seen=set()
+        for row in rows:
+            archive=str(row.get('archive_name') or '')
+            kind={'MA SS.zip':'mech','PILOT.zip':'pilot'}.get(archive)
+            if not kind:
+                log.error('Refusing screenshot stat cell from an unexpected archive: %s.',archive)
+                return 0
+            entity=str(row.get('entity_title') or '').strip()
+            canonical_name=canonical[kind].get(entity.casefold())
+            label=str(row.get('stat_label') or '').strip()
+            raw_value=row.get('value')
+            try:rank=int(row.get('rank_column'))
+            except (TypeError,ValueError):
+                log.error('Refusing screenshot stat cell with an invalid rank column.')
+                return 0
+            if not canonical_name or not label or raw_value is None or not str(raw_value):
+                log.error('Refusing screenshot stat cell without a catalog entity, label, or displayed value.')
+                return 0
+            if any(not row.get(field) for field in ('source_path','source_screenshot_sha256',
+                                                     'source_archive_sha256','card_id','row_key','cell_key')):
+                log.error('Refusing screenshot stat cell without complete source provenance.')
+                return 0
+            if not 1<=rank<=7 or row.get('row_type') not in ('direct','reconstructed'):
+                log.error('Refusing screenshot stat cell with an invalid rank or row type.')
+                return 0
+            if row.get('value_unit') not in ('percentage','as_displayed'):
+                log.error('Refusing screenshot stat cell with an unknown displayed unit.')
+                return 0
+            key=(kind,canonical_name.casefold(),label.casefold(),rank)
+            if key in seen:
+                log.error('Refusing screenshot stat overlay containing duplicate entity/stat/rank cells.')
+                return 0
+            seen.add(key)
+            provenance={
+                'run_id':str(row['run_id']),
+                'archive_name':archive,
+                'source_path':str(row.get('source_path') or ''),
+                'source_screenshot_sha256':str(row.get('source_screenshot_sha256') or ''),
+                'source_archive_sha256':str(row.get('source_archive_sha256') or ''),
+                'card_id':str(row.get('card_id') or ''),
+                'row_key':str(row.get('row_key') or ''),
+                'cell_key':str(row.get('cell_key') or ''),
+                'candidate_row_id':row.get('candidate_row_id'),
+                'reconstruction_id':row.get('reconstruction_id'),
+                'baseline_y':row.get('baseline_y'),
+                'description':row.get('description'),
+                'row_type':str(row.get('row_type') or ''),
+                'cell_status':str(row.get('cell_status') or ''),
+                'reviewed_on':str(row.get('cell_reviewed_on') or row.get('row_reviewed_on') or row.get('run_reviewed_on') or ''),
+                'run_reviewed_on':str(row.get('run_reviewed_on') or ''),
+                'user_confirmed':True,
+                'user_confirmation_note':str(row.get('user_confirmation_note') or ''),
+                'review_notes':str(row.get('review_notes') or ''),
+                'source_fragment_candidate_row_ids':row.get('source_fragment_candidate_row_ids'),
+            }
+            cell={'stat_name':label,'stat_label':label,'rank':rank,'rank_column':rank,'level':None,
+                  'value':str(raw_value),'value_unit':str(row['value_unit']),
+                  'source_type':'verified_screenshot_overlay','provenance':provenance}
+            grouped[kind].setdefault(canonical_name.casefold(),[]).append(cell)
+        first=rows[0]
+        try:
+            direct_expected=int(first.get('direct_verified_cell_count'))
+            reconstructed_expected=int(first.get('reconstructed_cell_count'))
+        except (TypeError,ValueError):
+            direct_expected=reconstructed_expected=None
+        if expected_values and (direct_expected is None or reconstructed_expected is None):
+            log.error('Refusing screenshot stat overlay without direct/reconstructed run counts.')
+            return 0
+        if direct_expected is not None and reconstructed_expected is not None:
+            direct_actual=sum(1 for row in rows if row.get('row_type')=='direct')
+            reconstructed_actual=sum(1 for row in rows if row.get('row_type')=='reconstructed')
+            if (direct_actual!=direct_expected or reconstructed_actual!=reconstructed_expected
+                    or direct_actual+reconstructed_actual!=len(rows)):
+                log.error('Refusing screenshot stat overlay with mismatched direct/reconstructed cell counts.')
+                return 0
+        for kind in grouped:
+            for cells in grouped[kind].values():
+                cells.sort(key=lambda item:(item['stat_name'].casefold(),item['rank']))
+        self._verified_stat_overlay=grouped
+        self._verified_stat_overlay_run={
+            'run_id':str(first.get('run_id') or ''),
+            'reviewed_on':str(first.get('run_reviewed_on') or ''),
+            'user_confirmed':True,
+            'user_confirmation_note':first.get('user_confirmation_note'),
+            'candidate_rows':first.get('candidate_rows'),
+            'screenshot_count':first.get('screenshot_count'),
+            'cell_count':len(rows),
+            'direct_verified_cell_count':first.get('direct_verified_cell_count'),
+            'reconstructed_cell_count':first.get('reconstructed_cell_count'),
+            'combined_overlay_sha256':first.get('combined_overlay_sha256'),
+            'manual_manifest_sha256':first.get('manual_manifest_sha256'),
+            'raw_ocr_manifest_sha256':first.get('raw_ocr_manifest_sha256'),
+            'correction_log_sha256':first.get('correction_log_sha256'),
+            'candidate_jsonl_sha256':first.get('candidate_jsonl_sha256'),
+            'source_archive_sha256':first.get('run_source_archive_sha256'),
+        }
+        return len(rows)
+
+    def screenshot_stats(self, kind, name, rank=None, level=None):
+        """Return exact displayed screenshot values; these columns record rank, not level."""
+        if kind not in self._verified_stat_overlay or level is not None:
+            return []
+        needle=str(name or '').strip().casefold()
+        if not needle:return []
+        records=self._verified_stat_overlay[kind].get(needle,[])
+        if rank is not None:
+            try:rank=int(rank)
+            except (TypeError,ValueError):return []
+            records=[record for record in records if record['rank']==rank]
+        return [dict(record) for record in records]
 
     def close(self):
         self.db.close()
@@ -540,9 +694,10 @@ class Catalog:
             return {'matches': results, 'verified_stats': [], 'candidate_count': 0,
                     'review': None, 'listing': None}
         item = results[0]
-        # Numeric OCR values require a user-verified cell and an accepted screenshot identity.
+        # Values are exposed only after the pinned user confirmation and accepted identity gate.
         sql = '''SELECT sc.stat_name,sc.rank,sc.level,sc.star_color,sc.candidate_value AS value,
-            s.source_path,s.sha256 AS source_sha256,sc.reviewed_by,sc.reviewed_at
+            s.source_path,s.sha256 AS source_sha256,s.identity_status,
+            sc.reviewed_by,sc.reviewed_at,sc.review_note
             FROM weapon_stat_candidates sc JOIN screenshots s ON s.id=sc.screenshot_id
             WHERE s.weapon_id=? AND s.identity_status IN ('exact_catalog_match','user_confirmed_weapon_source_mismatch')
             AND sc.status='verified' '''
@@ -555,6 +710,10 @@ class Catalog:
             params.append(level)
         sql += ' ORDER BY sc.rank,sc.level,sc.stat_name'
         stats = [dict(r) for r in self.db.execute(sql, params)]
+        for stat in stats:
+            stat['source_type']='user_confirmed_weapon_screenshot'
+            stat['provenance']={key:stat.get(key) for key in
+                ('source_path','source_sha256','identity_status','reviewed_by','reviewed_at','review_note')}
         n = self.db.execute("SELECT count(*) FROM weapon_stat_candidates x JOIN screenshots s ON s.id=x.screenshot_id WHERE s.weapon_id=? AND s.identity_status IN ('exact_catalog_match','user_confirmed_weapon_source_mismatch') AND x.status='unverified'", (item['id'],)).fetchone()[0]
         review = self._structured_match('database_weapons', 'name', item['family'])
         listing = self._structured_match('list', 'list', item['name'])
@@ -565,13 +724,15 @@ class Catalog:
     def mech(self, name):
         return self.search(name, 'mech')
 
-    def mech_profile(self, name):
+    def mech_profile(self, name, rank=None):
         matches = self.search(name, 'mech')
         if len(matches) != 1:
-            return {'matches': matches, 'review': None, 'listing': None}
+            return {'matches': matches, 'review': None, 'listing': None,'verified_stats':[]}
+        canonical_name=matches[0]['name']
         return {'matches': matches,
-                'review': self._structured_match('database_mechs', 'name', matches[0]['name']),
-                'listing': self._structured_match('list', 'list', matches[0]['name'])}
+                'review': self._structured_match('database_mechs', 'name', canonical_name),
+                'listing': self._structured_match('list', 'list', canonical_name),
+                'verified_stats':self.screenshot_stats('mech',canonical_name,rank=rank)}
 
     def pilot(self, name, limit=10):
         """Search approved public pilot listings; never load derived OCR stat candidates."""
@@ -585,10 +746,72 @@ class Catalog:
         return [{key:value for key,value in record.items() if not key.startswith('_archive_')}
                 for record in found[:limit]]
 
-    def pilot_profile(self, name):
-        """Return only the matching verified pilot_list record; never attach OCR-derived stats."""
+    def pilot_profile(self, name, rank=None):
+        """Return the verified pilot listing plus the separately user-confirmed stat overlay."""
         matches=self.pilot(name)
-        return {'matches':matches,'listing':matches[0] if len(matches)==1 else None}
+        listing=matches[0] if len(matches)==1 else None
+        return {'matches':matches,'listing':listing,
+                'verified_stats':self.screenshot_stats('pilot',listing.get('name'),rank=rank) if listing else []}
+
+    @staticmethod
+    def _mod_key(value):
+        return re.sub(r'[^a-z0-9]+',' ',str(value or '').casefold()).strip()
+
+    def mod_profile(self, name, rarity=None):
+        """Return verified mod purchase and per-level resource data from the archived calculator."""
+        query=str(name or '').strip()
+        rarity_query=str(rarity or '').strip().casefold()
+        suffix=re.search(r'\s*\((epic|legendary)\)\s*$',query,re.I)
+        if suffix:
+            rarity_query=rarity_query or suffix[1].casefold()
+            query=query[:suffix.start()].strip()
+        prefix=re.match(r'^(epic|legendary)\s+(.+)$',query,re.I)
+        if prefix:
+            rarity_query=rarity_query or prefix[1].casefold()
+            query=prefix[2].strip()
+        needle=self._mod_key(query)
+        if not needle:return {'matches':[]}
+        records=[]
+        for record in self._structured_records('mod_list'):
+            label=str(record.get('mod_label') or '').strip()
+            mod_name=str(record.get('mod_name') or '').strip()
+            record_rarity=str(record.get('rarity') or '').casefold()
+            if rarity_query and rarity_query!=record_rarity:continue
+            if needle not in (self._mod_key(label),self._mod_key(mod_name.replace('_',' '))):continue
+            key=f'{record_rarity}_{mod_name}'.casefold()
+            level_costs={}
+            for row in self._structured_records('mod_cost'):
+                try:level=int(row.get('level'))
+                except (TypeError,ValueError):continue
+                amounts=row.get(key)
+                if isinstance(amounts,dict):
+                    level_costs[level]={resource:int(amounts.get(resource) or 0)
+                                        for resource in ('basic_mod_parts','elite_mod_parts','power')}
+            data={k:v for k,v in record.items() if not k.startswith('_archive_')}
+            data['mod_label']=label
+            data['level_costs']=level_costs
+            data['source']={k:record.get('_archive_'+k) for k in ('source','title','url','date')}
+            records.append(data)
+        records.sort(key=lambda row:(row.get('rarity',''),row.get('mod_label','').casefold()))
+        return {'matches':records}
+
+    def mod_upgrade_cost(self, name, rarity, from_level, to_level):
+        """Sum only the archived level entries for an exact mod rarity/level transition."""
+        try:from_level,to_level=int(from_level),int(to_level)
+        except (TypeError,ValueError):return None
+        if not (1<=from_level<=6 and 1<=to_level<=6 and to_level>=from_level):return None
+        matches=self.mod_profile(name,rarity).get('matches',[])
+        if len(matches)!=1:return None
+        item=matches[0]
+        totals={'basic_mod_parts':0,'elite_mod_parts':0,'power':0}
+        for level in range(from_level+1,to_level+1):
+            amount=item.get('level_costs',{}).get(level)
+            if not isinstance(amount,dict):return None
+            for resource in totals:
+                try:totals[resource]+=int(amount.get(resource) or 0)
+                except (TypeError,ValueError):return None
+        return {'item':item['mod_label'],'rarity':item['rarity'],'from_level':from_level,
+                'to_level':to_level,'cost':totals,'source':item.get('source')}
 
     def upgrade_cost(self, name, from_rank, to_rank, from_level=None, to_level=None):
         """Return verified calculator totals; a rank-only step means max level to next rank."""
@@ -600,6 +823,7 @@ class Catalog:
             return None
         weapon_matches = self.search(name, 'weapon')
         mech_matches = self.search(name, 'mech')
+        pilot_matches = self.pilot(name)
         if len(weapon_matches) == 1 and self._same_name(weapon_matches[0]['name'], name):
             item = weapon_matches[0]
             listing = self._structured_match('list', 'list', item['name'])
@@ -617,6 +841,7 @@ class Catalog:
             rarity = str(listing.get('rarity') or '').casefold()
             cost_key = f'{rarity}_weapon_{listed_energy}'
             item_type = 'weapon'
+            item_name=item['name']
         elif len(mech_matches) == 1 and self._same_name(mech_matches[0]['name'], name):
             listing = self._structured_match('list', 'list', mech_matches[0]['name'])
             if not listing or str(listing.get('type', '')).casefold() != 'mech':
@@ -624,6 +849,13 @@ class Catalog:
             rarity = str(listing.get('rarity') or '').casefold()
             cost_key = f'{rarity}_mech'
             item_type = 'mech'
+            item_name=mech_matches[0]['name']
+        elif len(pilot_matches)==1 and self._same_name(pilot_matches[0].get('name'),name):
+            item=pilot_matches[0]
+            rarity=str(item.get('rarity') or '').casefold()
+            cost_key=rarity
+            item_type='pilot'
+            item_name=str(item['name'])
         else:
             return None
         if not rarity or rarity == 'none':
@@ -646,17 +878,17 @@ class Catalog:
             if to_level < from_level:
                 return None
             if to_level == from_level:
-                return {'item': item['name'] if item_type == 'weapon' else mech_matches[0]['name'],
-                        'item_type': item_type, 'rarity': rarity,
-                        'blueprint_acoins_per_blueprint': BLUEPRINT_ACOINS_PER_RARITY.get(rarity),
-                        'from_rank': from_rank, 'from_level': from_level,
-                        'to_rank': to_rank, 'to_level': to_level,
-                        'cost': {'credits': 0, 'acoins': 0, 'blueprints': 0},
-                        'assumed_rank_transition': False, 'no_op': True}
+                zero_cost={'acoins':0,'marks':0,'xp':0} if item_type=='pilot' else {'credits':0,'acoins':0,'blueprints':0}
+                return {'item':item_name,'item_type':item_type,'rarity':rarity,
+                        'blueprint_acoins_per_blueprint':BLUEPRINT_ACOINS_PER_RARITY.get(rarity),
+                        'from_rank':from_rank,'from_level':from_level,
+                        'to_rank':to_rank,'to_level':to_level,'cost':zero_cost,
+                        'assumed_rank_transition':False,'no_op':True}
+        collection='pilot_upgrade_costs' if item_type=='pilot' else 'mech_upgrade_costs'
         costs = {(int(x['star']), int(x['level'])): x
-                 for x in self._structured_records('mech_upgrade_costs')
+                 for x in self._structured_records(collection)
                  if 'star' in x and 'level' in x}
-        totals = {'credits': 0, 'acoins': 0, 'blueprints': 0}
+        totals = {'acoins':0,'marks':0,'xp':0} if item_type=='pilot' else {'credits':0,'acoins':0,'blueprints':0}
         current_star = from_rank
         current_level_index = from_level - 1
         target_star = to_rank
@@ -686,13 +918,12 @@ class Catalog:
                 return None
         if steps == 0:
             return None
-        return {'item': item['name'] if item_type == 'weapon' else mech_matches[0]['name'],
-                'item_type': item_type, 'rarity': rarity,
-                'blueprint_acoins_per_blueprint': BLUEPRINT_ACOINS_PER_RARITY.get(rarity),
-                'from_rank': from_rank, 'from_level': from_level,
-                'to_rank': to_rank, 'to_level': to_level, 'cost': totals,
-                'assumed_rank_transition': from_rank < to_rank and from_level == 7 and to_level == 1,
-                'no_op': False}
+        return {'item':item_name,'item_type':item_type,'rarity':rarity,
+                'blueprint_acoins_per_blueprint':BLUEPRINT_ACOINS_PER_RARITY.get(rarity),
+                'from_rank':from_rank,'from_level':from_level,
+                'to_rank':to_rank,'to_level':to_level,'cost':totals,
+                'assumed_rank_transition':from_rank<to_rank and from_level==7 and to_level==1,
+                'no_op':False}
 
     def search_confirmed_archive(self, question, entities=(), limit=5):
         """Search confirmed public data plus only the user-approved raw OCR allowlist."""

@@ -87,10 +87,12 @@ CREATE INDEX IF NOT EXISTS conversation_expiry ON mech_bot_app.conversation_turn
 
 
 class Store:
-    def __init__(self, sqlite_path=None, pool=None, supports_announcements=True, supports_conversations=True):
+    def __init__(self, sqlite_path=None, pool=None, supports_announcements=True, supports_conversations=True,
+                 supports_verified_stat_overlay=False):
         self.pool = pool
         self.supports_announcements = bool(supports_announcements)
         self.supports_conversations = bool(supports_conversations)
+        self.supports_verified_stat_overlay = bool(supports_verified_stat_overlay)
         self.lock = asyncio.Lock()
         self.db = None
         if pool is None:
@@ -107,6 +109,7 @@ class Store:
         pool = await asyncpg.create_pool(dsn, min_size=1, max_size=4, statement_cache_size=0, ssl='require' if ssl_required else None, command_timeout=20)
         supports_announcements=False
         supports_conversations=False
+        supports_verified_stat_overlay=False
         try:
             async with pool.acquire() as conn:
                 if auto_migrate:
@@ -116,10 +119,18 @@ class Store:
                     await conn.fetchval('SELECT 1 FROM mech_bot_app.'+table+' LIMIT 1')
                 supports_announcements=bool(await conn.fetchval("SELECT to_regclass('mech_bot_app.announcements') IS NOT NULL"))
                 supports_conversations=bool(await conn.fetchval("SELECT to_regclass('mech_bot_app.conversation_turns') IS NOT NULL"))
+                overlay_tables=('stat_rebuild_runs','stat_rebuild_sources','stat_rebuild_rows','verified_stat_cells')
+                supports_verified_stat_overlay=True
+                for table in overlay_tables:
+                    if not await conn.fetchval("SELECT to_regclass('mech_bot_app."+table+"') IS NOT NULL"):
+                        supports_verified_stat_overlay=False
+                        break
         except Exception:
             await pool.close()
             raise
-        return cls(pool=pool,supports_announcements=supports_announcements,supports_conversations=supports_conversations)
+        return cls(pool=pool,supports_announcements=supports_announcements,
+                   supports_conversations=supports_conversations,
+                   supports_verified_stat_overlay=supports_verified_stat_overlay)
 
     async def close(self):
         if self.pool:
@@ -150,6 +161,33 @@ class Store:
         async with self.lock:
             cur = self.db.execute(sql, args)
             return cur.rowcount
+
+    async def verified_stat_overlay(self):
+        """Load the latest user-confirmed screenshot-stat run with cell and image provenance."""
+        if not self.pool or not self.supports_verified_stat_overlay:return []
+        return await self.fetch('''SELECT u.run_id,u.reviewed_on AS run_reviewed_on,
+                u.user_confirmed AS run_user_confirmed,u.user_confirmation_note,
+                u.candidate_rows,u.screenshot_count,u.combined_cell_count AS expected_cell_count,
+                u.direct_verified_cell_count,u.reconstructed_cell_count,u.combined_overlay_sha256,
+                u.manual_manifest_sha256,u.raw_ocr_manifest_sha256,u.correction_log_sha256,
+                u.candidate_jsonl_sha256,u.source_archive_sha256 AS run_source_archive_sha256,
+                r.archive_name,r.entity_title,r.stat_label,r.row_type,r.row_key,r.card_id,
+                r.candidate_row_id,r.reconstruction_id,r.baseline_y,r.description,
+                r.source_fragment_candidate_row_ids,r.reviewed_on AS row_reviewed_on,
+                c.cell_key,c.rank_column,c.value,c.value_unit,c.cell_status,
+                c.user_confirmed,c.reviewed_on AS cell_reviewed_on,
+                s.source_path,s.source_screenshot_sha256,s.source_archive_sha256,s.review_notes
+            FROM mech_bot_app.verified_stat_cells c
+            JOIN mech_bot_app.stat_rebuild_rows r
+              ON r.rebuild_id=c.rebuild_id AND r.row_key=c.row_key
+            JOIN mech_bot_app.stat_rebuild_sources s
+              ON s.rebuild_id=r.rebuild_id AND s.card_id=r.card_id
+            JOIN mech_bot_app.stat_rebuild_runs u ON u.run_id=c.rebuild_id
+            WHERE u.user_confirmed IS TRUE
+              AND c.rebuild_id=(SELECT run_id FROM mech_bot_app.stat_rebuild_runs
+                                WHERE user_confirmed IS TRUE
+                                ORDER BY reviewed_on DESC,created_at DESC LIMIT 1)
+            ORDER BY r.archive_name,r.entity_title,r.stat_label,c.rank_column''')
 
     async def upsert_announcements(self, records):
         if not self.supports_announcements:raise RuntimeError('The private announcement table has not been migrated.')

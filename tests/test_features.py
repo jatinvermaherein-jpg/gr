@@ -20,8 +20,8 @@ from mechbot.alerts import AlertManager, MAX_ACTIVE_LOOPS, validate
 from mechbot.bot import MechBot, install_commands, OPERATORS, REPLY_MENTIONS, help_text, configured_announcement_channels
 from mechbot.assistant import (wants_invite_link, bot_identity_response, direct_item_lookup, should_answer_unmentioned,
                                parse_natural_calculation, natural_builds_request, builds_response, _archive_attribution,
-                               _archive_fallback, _supported_game_reply, discord_text,
-                               naturalize_discord_reply, weapon_response, mech_response,
+                               _archive_fallback, _supported_game_reply, _comparison_fallback, discord_text,
+                               naturalize_discord_reply, weapon_response, mech_response, mod_response,
                                game_knowledge_context, answer_question_with_brain, upgrade_cost_response, general_ai,
                                parse_build_sp_range, builds_response_parts, natural_builds_request, pilot_response,
                                _build_author_profile_url)
@@ -599,7 +599,7 @@ class ParserTests(unittest.TestCase):
             self.assertTrue(announcement_bot.intents.message_content)
             self.assertFalse(announcement_bot.ambient_channel_chat_enabled)
         commands={x.name for x in bot.tree.get_commands()}
-        expected={'help','invite','worker_setup','worker_time','ping_loop','dm_loop','stop_loop','stop_user_loops','upcoming','forum','ecr','promo_codes','pilot','upgrade_cost'}
+        expected={'help','invite','worker_setup','worker_time','ping_loop','dm_loop','stop_loop','stop_user_loops','upcoming','forum','ecr','promo_codes','pilot','mod','upgrade_cost'}
         self.assertTrue(expected<=commands)
         self.assertFalse(any(name.startswith('emergency') for name in commands))
         guild=SimpleNamespace(id=1509560571563868160)
@@ -612,6 +612,11 @@ class ParserTests(unittest.TestCase):
             params={x.name:x for x in bot.tree.get_command(name).parameters}
             self.assertEqual(params['interval_seconds'].min_value,5)
             self.assertEqual(params['duration_seconds'].max_value,1800)
+        mech_params={x.name:x for x in bot.tree.get_command('mech').parameters}
+        pilot_params={x.name:x for x in bot.tree.get_command('pilot').parameters}
+        self.assertEqual(mech_params['rank'].max_value,7)
+        self.assertEqual(pilot_params['rank'].max_value,7)
+        self.assertIn('mod',commands)
         cost_params={x.name:x for x in bot.tree.get_command('upgrade_cost').parameters}
         self.assertEqual(cost_params['from_rank'].min_value,1)
         self.assertEqual(cost_params['to_rank'].max_value,6)
@@ -1657,6 +1662,88 @@ class CatalogReviewTests(unittest.TestCase):
             self.assertEqual([x['value'] for x in result['verified_stats']],['100'])
             catalog.close()
 
+    def test_verified_screenshot_overlay_preserves_exact_cells_and_provenance(self):
+        with tempfile.TemporaryDirectory() as td:
+            with patch.dict(os.environ,{'SNAPSHOT_PATH':str(Path(td)/'runtime.sqlite3')}):
+                catalog=Catalog(initialize_snapshot())
+            try:
+                common={'run_id':'unit-overlay','run_reviewed_on':'2026-11-10','run_user_confirmed':True,
+                    'expected_cell_count':2,'direct_verified_cell_count':2,'reconstructed_cell_count':0,
+                    'user_confirmation_note':'User confirmed the complete screenshot rebuild.',
+                    'row_type':'direct','cell_status':'visually_matched','user_confirmed':True,
+                    'value_unit':'as_displayed','source_path':'MA SS/Screenshot.png',
+                    'source_screenshot_sha256':'screen-sha','source_archive_sha256':'archive-sha',
+                    'card_id':'card-1','row_key':'row-1','cell_key':'cell-1','review_notes':'Visually compared.',
+                    'cell_reviewed_on':'2026-11-10'}
+                rows=[dict(common,archive_name='MA SS.zip',entity_title='REDOX',stat_label='HP',rank_column=3,
+                           value='169,200',row_key='mech-row',cell_key='mech-cell'),
+                      dict(common,archive_name='PILOT.zip',entity_title='ACANTHA',stat_label='Mech HP',rank_column=1,
+                           value='+4%',value_unit='percentage',source_path='PILOT/Screenshot.png',
+                           source_screenshot_sha256='pilot-sha',row_key='pilot-row',cell_key='pilot-cell')]
+                self.assertEqual(catalog.load_verified_stat_overlay(rows),2)
+                mech=catalog.mech_profile('Redox',rank=3)
+                self.assertEqual([(x['stat_name'],x['rank'],x['value']) for x in mech['verified_stats']],
+                                 [('HP',3,'169,200')])
+                self.assertEqual(mech['verified_stats'][0]['provenance']['source_screenshot_sha256'],'screen-sha')
+                self.assertIn('169,200',mech_response(mech,rank=3))
+                self.assertIn('user-confirmed mech screenshot-stat overlay',mech_response(mech,rank=3))
+                pilot=catalog.pilot_profile('Acantha',rank=1)
+                self.assertEqual(pilot['verified_stats'][0]['value'],'+4%')
+                self.assertIn('+4%',pilot_response(pilot,rank=1))
+                context=game_knowledge_context('What are Redox rank 3 stats?',catalog)
+                fact=next(x for x in context['verified_game_facts'] if x.get('type')=='mech')
+                self.assertEqual(fact['stats'][0]['value'],'169,200')
+                self.assertEqual(fact['stat_sources'][0]['source_screenshot_sha256'],'screen-sha')
+            finally:
+                catalog.close()
+
+    def test_incomplete_or_unconfirmed_overlay_is_not_published(self):
+        with tempfile.TemporaryDirectory() as td:
+            with patch.dict(os.environ,{'SNAPSHOT_PATH':str(Path(td)/'runtime.sqlite3')}):
+                catalog=Catalog(initialize_snapshot())
+            try:
+                row={'run_id':'partial','run_reviewed_on':'2026-11-10','run_user_confirmed':True,
+                     'user_confirmed':True,'expected_cell_count':2,'direct_verified_cell_count':2,
+                     'reconstructed_cell_count':0,'archive_name':'PILOT.zip','entity_title':'ACANTHA',
+                     'stat_label':'Mech HP','rank_column':1,'value':'+4%','value_unit':'percentage',
+                     'row_type':'direct','source_path':'PILOT/image.png','source_screenshot_sha256':'sha',
+                     'source_archive_sha256':'archive','card_id':'card','row_key':'row','cell_key':'cell'}
+                self.assertEqual(catalog.load_verified_stat_overlay([row]),0)
+                self.assertEqual(catalog.pilot_profile('Acantha')['verified_stats'],[])
+                row['expected_cell_count']=1
+                row['user_confirmed']=False
+                self.assertEqual(catalog.load_verified_stat_overlay([row]),0)
+                self.assertEqual(catalog.pilot_profile('Acantha')['verified_stats'],[])
+            finally:
+                catalog.close()
+
+    def test_mod_purchase_level_costs_and_pilot_progression_costs_are_retrievable(self):
+        with tempfile.TemporaryDirectory() as td:
+            with patch.dict(os.environ,{'SNAPSHOT_PATH':str(Path(td)/'runtime.sqlite3')}):
+                catalog=Catalog(initialize_snapshot())
+            try:
+                profile=catalog.mod_profile('Perimeter ML','epic')
+                self.assertEqual(len(profile['matches']),1)
+                mod=profile['matches'][0]
+                self.assertEqual(mod['purchase_cost'],380)
+                self.assertEqual(mod['level_costs'][2]['basic_mod_parts'],130)
+                self.assertIn('380 Basic Mod Parts',mod_response(profile))
+                upgrade=catalog.mod_upgrade_cost('Perimeter ML','epic',1,3)
+                self.assertEqual(upgrade['cost']['basic_mod_parts'],410)
+                self.assertIn('Upgrade L1 → L3: 410 Basic Mod Parts',
+                              mod_response({'matches':[mod],'upgrade_cost':upgrade}))
+                pilot_cost=catalog.upgrade_cost('Acantha',1,1,1,2)
+                self.assertEqual(pilot_cost['item_type'],'pilot')
+                self.assertEqual(pilot_cost['cost'],{'acoins':8,'marks':0,'xp':800})
+                self.assertIn('8 A-Coins',upgrade_cost_response('Acantha',pilot_cost))
+                self.assertIn('800 XP',upgrade_cost_response('Acantha',pilot_cost))
+                context=game_knowledge_context('How much to upgrade Acantha from rank 1 level 1 to rank 1 level 2?',catalog)
+                fact=next(x for x in context['verified_game_facts'] if x.get('type')=='upgrade_cost')
+                self.assertEqual(fact['item_type'],'pilot')
+                self.assertEqual(fact['cost']['xp'],800)
+            finally:
+                catalog.close()
+
 
 class PilotLookupTests(unittest.IsolatedAsyncioTestCase):
     def test_pilot_lookup_uses_only_verified_listings_and_hides_ocr_candidates(self):
@@ -1686,25 +1773,59 @@ class PilotLookupTests(unittest.IsolatedAsyncioTestCase):
             finally:
                 catalog.close()
 
-    async def test_natural_pilot_lookup_skips_ai(self):
+    async def test_natural_pilot_lookup_passes_requested_rank_and_skips_ai(self):
         class Catalog:
             weapon_names=[]
             mech_names=[]
             pilot_names=['Acantha']
-            def pilot_profile(self,name):
+            def __init__(self):self.profile_calls=[]
+            def pilot_profile(self,name,rank=None):
+                self.profile_calls.append((name,rank))
                 return {'matches':[{'name':'Acantha','rarity':'epic','skill':'Assault',
-                                    'cost':{'amount':0,'currency':'Paid'}}]}
-        bot=MechBot(Catalog(),object())
+                                    'cost':{'amount':0,'currency':'Paid'}}],'verified_stats':[]}
+        catalog=Catalog()
+        bot=MechBot(catalog,object())
         bot._connection.user=SimpleNamespace(id=987654321098765432)
         bot.conversation_turn_reply=AsyncMock()
         author=SimpleNamespace(id=123456789012345678,bot=False)
         message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
-            mentions=[bot.user],content=f'<@{bot.user.id}> What are Acantha pilot bonuses?',reference=None)
+            mentions=[bot.user],content=f'<@{bot.user.id}> What are Acantha rank 3 pilot bonuses?',reference=None)
         with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock()) as brain:
             await bot.on_message(message)
         brain.assert_not_awaited()
+        self.assertEqual(catalog.profile_calls,[('Acantha',3)])
         bot.conversation_turn_reply.assert_awaited_once()
         self.assertIn('Acantha',bot.conversation_turn_reply.await_args.args[2])
+
+    async def test_natural_pilot_comparison_continues_to_ai_path(self):
+        class Catalog:
+            weapon_names=[]
+            mech_names=[]
+            pilot_names=['Acantha','Crow']
+            def pilot_profile(self,*args,**kwargs):raise AssertionError('comparison must not be a direct listing lookup')
+        bot=MechBot(Catalog(),object())
+        bot._connection.user=SimpleNamespace(id=987654321098765432)
+        bot.conversation_turn_reply=AsyncMock()
+        author=SimpleNamespace(id=123456789012345678,bot=False)
+        question=f'<@{bot.user.id}> Acantha vs Crow, which should I use?'
+        message=SimpleNamespace(author=author,channel=SimpleNamespace(id=444),guild=SimpleNamespace(id=999),
+            mentions=[bot.user],content=question,reference=None)
+        with patch('mechbot.bot.answer_question_with_brain',new=AsyncMock(return_value='AI comparison.')) as brain:
+            await bot.on_message(message)
+        brain.assert_awaited_once()
+        self.assertIn('Acantha vs Crow',brain.await_args.args[3])
+        self.assertEqual(bot.conversation_turn_reply.await_args.args[2],'AI comparison.')
+
+    def test_comparison_fallback_only_lists_matching_user_confirmed_values(self):
+        context={'verified_game_facts':[
+            {'type':'mech','name':'Redox','stats':[{'stat':'HP','value':'169,200','rank':3,'value_unit':'as_displayed'}]},
+            {'type':'mech','name':'Surge','stats':[{'stat':'HP','value':'188,500','rank':3,'value_unit':'as_displayed'}]},
+        ]}
+        result=_comparison_fallback('Compare Redox and Surge at rank 3',context)
+        self.assertIn('Redox 169,200',result)
+        self.assertIn('Surge 188,500',result)
+        self.assertIn('Higher values are a numeric comparison only',result)
+        self.assertNotIn('higher displayed value: Surge',result)
 
 
 class PublicArchiveTests(unittest.TestCase):
@@ -1753,7 +1874,7 @@ class PublicArchiveTests(unittest.TestCase):
             self.assertEqual(weapon['listing']['cost'],{'amount':7125,'currency':'A-Coins'})
             response=weapon_response(weapon)
             self.assertIn('**Quick review:**',response)
-            self.assertIn('6,774 damage/shot',response)
+            self.assertIn('6774 damage/shot',response)
             self.assertNotIn('rank 2',response.lower())
             cost=catalog.upgrade_cost('Redox',4,5)
             self.assertEqual(cost['cost']['acoins'],2825)
@@ -1813,6 +1934,31 @@ class DataTests(unittest.IsolatedAsyncioTestCase):
         self.store=Store(Path(self.temp.name)/'test.db')
     async def asyncTearDown(self):
         await self.store.close();self.temp.cleanup()
+    async def test_verified_stat_overlay_uses_the_user_confirmed_latest_run_and_keeps_provenance(self):
+        class Connection:
+            def __init__(self):self.sql=''
+            async def fetch(self,sql,*args):
+                self.sql=sql
+                return [{'run_id':'unit-run','source_path':'PILOT/Screenshot.png',
+                         'source_screenshot_sha256':'screen-sha','value':'+4%'}]
+        class Acquire:
+            def __init__(self,connection):self.connection=connection
+            async def __aenter__(self):return self.connection
+            async def __aexit__(self,*args):return False
+        class Pool:
+            def __init__(self):self.connection=Connection()
+            def acquire(self):return Acquire(self.connection)
+        pool=Pool()
+        store=Store(pool=pool,supports_verified_stat_overlay=True)
+        rows=await store.verified_stat_overlay()
+        self.assertEqual(rows[0]['source_screenshot_sha256'],'screen-sha')
+        self.assertIn('JOIN mech_bot_app.stat_rebuild_sources',pool.connection.sql)
+        self.assertIn('u.user_confirmed IS TRUE',pool.connection.sql)
+        self.assertIn('ORDER BY reviewed_on DESC,created_at DESC LIMIT 1',pool.connection.sql)
+        self.assertIn('source_fragment_candidate_row_ids',pool.connection.sql)
+        disabled=Store(pool=pool,supports_verified_stat_overlay=False)
+        self.assertEqual(await disabled.verified_stat_overlay(),[])
+
     async def test_announcement_upsert_and_message_cursor(self):
         base={'channel_id':'100','guild_id':'200','guild_name':'Public Server','channel_name':'news',
               'message_url':'https://discord.com/channels/200/100/1001','edited_at':None,'fetched_at':300}

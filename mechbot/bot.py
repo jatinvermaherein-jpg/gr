@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from .catalog import Catalog, initialize_snapshot
 from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, tzinfo
-from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, weapon_response, mech_response, pilot_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
+from .assistant import GAME_WORDS, find_mentions, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, weapon_response, mech_response, pilot_response, mod_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
 from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INITIAL_BACKFILL_LIMIT, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE
@@ -62,9 +62,10 @@ HELP='''**Mech Arena helper**
 Use `/help` anytime to see this command list.
 • `/invite` — get the link to add me to a server.
 • `/weapon name rank level` — a concise weapon review, key stats, perk and listed purchase price.
-• `/upgrade_cost item from_rank to_rank [from_level to_level] [blueprints_owned]` — calculate upgrade costs and price missing Blueprints; defaults to 0 owned.
-• `/mech name` — a short mech review with key details and listed purchase price.
-• `/pilot name` — a verified pilot listing, weapon specialty, and listed acquisition price; unverified bonus stats are withheld.
+• `/upgrade_cost item from_rank to_rank [from_level to_level] [blueprints_owned]` — calculate mech, weapon or pilot upgrade costs; Blueprint purchases are optional.
+• `/mech name [rank]` — a short mech review with user-confirmed rank stats and listed purchase price.
+• `/pilot name [rank]` — a verified pilot listing and exact stat progression by rank.
+• `/mod name [from_level to_level]` — mod purchase and level-up costs.
 • `/builds [mech] [sp_range]` — browse recent builds or filter all mech builds by your SP range.
 • `/upcoming` — summarize relevant saved forum and announcement posts; event dates are kept distinct from post dates.
 • `/forum [query]` — search and summarize saved Plarium Forum discussions; not a live event schedule.
@@ -694,7 +695,7 @@ class MechBot(commands.Bot):
                     or getattr(message,'mentions',None)):
                 return
             names=(tuple(getattr(self.catalog,'weapon_names',()))+tuple(getattr(self.catalog,'mech_names',()))
-                   +tuple(getattr(self.catalog,'pilot_names',())))
+                   +tuple(getattr(self.catalog,'pilot_names',()))+tuple(getattr(self.catalog,'mod_names',())))
             # Only fully specified natural reminder requests may bypass the ambient question gate;
             # the reminder itself is private and never pings the channel author.
             if (not should_answer_unmentioned(text,names) and not parsed_reminder) or self.ambient_chat_rate_limited(message):return
@@ -850,15 +851,35 @@ class MechBot(commands.Bot):
                 await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             mech_name=direct_item_lookup(text,self.catalog.mech_names)
             if mech_name:
-                out=mech_response(self.catalog.mech_profile(mech_name))
+                rank_match=re.search(r'\b(?:rank|stars?|r)\s*(\d+)\b',text,re.I)
+                rank=int(rank_match[1]) if rank_match else None
+                profile=self.catalog.mech_profile(mech_name,rank=rank)
+                out=mech_response(profile,rank=rank)
                 await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             pilot_name=direct_item_lookup(text,getattr(self.catalog,'pilot_names',()))
             if pilot_name and hasattr(self.catalog,'pilot_profile'):
-                out=pilot_response(self.catalog.pilot_profile(pilot_name))
+                rank_match=re.search(r'\b(?:rank|stars?|r)\s*(\d+)\b',text,re.I)
+                rank=int(rank_match[1]) if rank_match else None
+                out=pilot_response(self.catalog.pilot_profile(pilot_name,rank=rank),rank=rank)
                 await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             pilot_mentions=find_mentions(text,getattr(self.catalog,'pilot_names',()))
-            if pilot_mentions and hasattr(self.catalog,'pilot_profile'):
-                out='\n\n'.join(pilot_response(self.catalog.pilot_profile(name)) for name in pilot_mentions[:3])
+            advanced_pilot_question=bool(re.search(r'\b(?:compare|comparison|versus|vs\.?|better|stronger|difference|recommend|recommendation|best|which|should|worth|viable|good|use|with|against|implant|mod|build|guide|strategy|help)\b',text,re.I))
+            if pilot_mentions and hasattr(self.catalog,'pilot_profile') and not advanced_pilot_question:
+                rank_match=re.search(r'\b(?:rank|stars?|r)\s*(\d+)\b',text,re.I)
+                rank=int(rank_match[1]) if rank_match else None
+                out='\n\n'.join(pilot_response(self.catalog.pilot_profile(name,rank=rank),rank=rank) for name in pilot_mentions[:3])
+                await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
+            mod_mentions=find_mentions(text,getattr(self.catalog,'mod_names',()))
+            advanced_mod_question=bool(re.search(r'\b(?:compare|comparison|versus|vs\.?|better|stronger|difference|recommend|recommendation|best|which|should|worth|viable|good|use|with|against|build|guide|strategy|help)\b',text,re.I))
+            if mod_mentions and hasattr(self.catalog,'mod_profile') and not advanced_mod_question:
+                rarities=set(re.findall(r'\b(epic|legendary)\b',text,re.I))
+                rarity=next(iter(rarities)).casefold() if len(rarities)==1 else None
+                mod_name=mod_mentions[0]
+                profile=self.catalog.mod_profile(mod_name,rarity)
+                level_pair=re.search(r'\b(?:level|lvl|lv|l)\s*(\d+)\s*(?:to|→|->|-)\s*(?:level|lvl|lv|l)?\s*(\d+)\b',text,re.I)
+                if level_pair and rarity and re.search(r'\b(?:upgrade|cost|price)\b',text,re.I):
+                    profile['upgrade_cost']=self.catalog.mod_upgrade_cost(mod_name,rarity,int(level_pair[1]),int(level_pair[2]))
+                out=mod_response(profile)
                 await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             conversation_history=await self.conversation_history_for(message)
             reply=await answer_question_with_brain(os.getenv('AI_BASE_URL','https://api.openai.com/v1'),
@@ -1098,26 +1119,55 @@ def install_commands(bot):
 
     @upgrade_cost.autocomplete('item')
     async def upgrade_cost_autocomplete(i:discord.Interaction,current:str):
-        names=sorted(set(bot.catalog.weapon_names+bot.catalog.mech_names),key=str.casefold)
+        names=sorted(set(bot.catalog.weapon_names+bot.catalog.mech_names+getattr(bot.catalog,'pilot_names',[])),key=str.casefold)
         return [app_commands.Choice(name=n,value=n) for n in names if current.casefold() in n.casefold()][:25]
 
-    @tree.command(name='mech',description='Get a short mech review and key details')
-    async def mech(i:discord.Interaction,name:str):
-        await i.response.send_message(mech_response(bot.catalog.mech_profile(name)),ephemeral=True)
+    @tree.command(name='mech',description='Get a mech review and user-confirmed rank stats')
+    @app_commands.describe(name='Mech name',rank='Optional screenshot-stat rank, 1–7')
+    async def mech(i:discord.Interaction,name:str,rank:app_commands.Range[int,1,7]=None):
+        await i.response.send_message(mech_response(bot.catalog.mech_profile(name,rank=rank),rank=rank),ephemeral=True)
 
     @mech.autocomplete('name')
     async def mech_autocomplete(i:discord.Interaction,current:str):
         return [app_commands.Choice(name=n,value=n) for n in bot.catalog.mech_names if current.casefold() in n.casefold()][:25]
 
-    @tree.command(name='pilot',description='Look up a pilot’s verified listing; unverified bonus stats are withheld')
-    async def pilot(i:discord.Interaction,name:str):
-        await i.response.send_message(pilot_response(bot.catalog.pilot_profile(name)),ephemeral=True,
+    @tree.command(name='pilot',description='Look up a pilot, bonus stats, and rank progression')
+    @app_commands.describe(name='Pilot name',rank='Optional screenshot-stat rank, 1–7')
+    async def pilot(i:discord.Interaction,name:str,rank:app_commands.Range[int,1,7]=None):
+        await i.response.send_message(pilot_response(bot.catalog.pilot_profile(name,rank=rank),rank=rank),ephemeral=True,
                                       allowed_mentions=discord.AllowedMentions.none())
 
     @pilot.autocomplete('name')
     async def pilot_autocomplete(i:discord.Interaction,current:str):
         return [app_commands.Choice(name=n,value=n) for n in bot.catalog.pilot_names
                 if current.casefold() in n.casefold()][:25]
+
+    @tree.command(name='mod',description='Look up mod purchase and level-up costs')
+    @app_commands.describe(name='Mod name and rarity',from_level='Optional current level',to_level='Optional target level')
+    async def mod(i:discord.Interaction,name:str,from_level:app_commands.Range[int,1,6]=None,
+                  to_level:app_commands.Range[int,1,6]=None):
+        if (from_level is None)!=(to_level is None):
+            await i.response.send_message('Provide both levels for an upgrade-cost calculation, or leave both blank for the full mod cost table.',ephemeral=True);return
+        profile=bot.catalog.mod_profile(name)
+        matches=profile.get('matches',[])
+        if from_level is not None:
+            if to_level<from_level:
+                await i.response.send_message('The target level cannot be lower than the current level.',ephemeral=True);return
+            replies=[]
+            for item in matches:
+                cost=bot.catalog.mod_upgrade_cost(item.get('mod_label'),item.get('rarity'),from_level,to_level)
+                if cost:replies.append(mod_response({'matches':[item],'upgrade_cost':cost}))
+            if not replies:
+                await i.response.send_message('I could not resolve a confirmed cost for that exact mod, rarity, and level transition.',ephemeral=True);return
+            out='\n\n'.join(replies)
+        else:
+            out=mod_response(profile)
+        await i.response.send_message(discord_text(out),ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
+
+    @mod.autocomplete('name')
+    async def mod_autocomplete(i:discord.Interaction,current:str):
+        choices=getattr(bot.catalog,'mod_choices',[])
+        return [app_commands.Choice(name=n,value=n) for n in choices if current.casefold() in n.casefold()][:25]
 
     @tree.command(name='timezone',description='Set your timezone for reminder scheduling')
     async def set_timezone(i:discord.Interaction,zone:str):
@@ -1252,7 +1302,20 @@ async def main():
         log.warning('Local SQLite selected; Railway container storage is not durable.')
     else:raise RuntimeError('Set DATABASE_URL for durable storage, or explicitly ALLOW_LOCAL_STORAGE=1 for development only.')
     try:
-        catalog=Catalog(initialize_snapshot());bot=MechBot(catalog,store);install_commands(bot)
+        catalog=Catalog(initialize_snapshot())
+        if getattr(store,'supports_verified_stat_overlay',False):
+            try:
+                overlay_rows=await store.verified_stat_overlay()
+                loaded=catalog.load_verified_stat_overlay(overlay_rows)
+                if loaded:
+                    log.info('Loaded %s user-confirmed pilot/mech screenshot-stat cells from the latest reviewed overlay.',loaded)
+                else:
+                    log.error('Supabase screenshot-stat overlay returned no complete, validated user-confirmed cells.')
+            except Exception as exc:
+                log.exception('Could not load the user-confirmed pilot/mech screenshot-stat overlay (%s).',type(exc).__name__)
+        else:
+            log.error('The private Supabase screenshot-stat overlay tables are not installed or unavailable to this runtime role.')
+        bot=MechBot(catalog,store);install_commands(bot)
     except Exception:
         await store.close();raise
     async with bot:await bot.start(token)
