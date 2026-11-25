@@ -20,6 +20,7 @@ from .store import Store
 from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, needs_wall_clock, tzinfo
 from .pipeline import (understand, format_reply, correct_names, engine_answer, normalise_understanding,
                        guard_figures, fuzzy_mentions, FUZZY_CUTOFF)
+from .api import DataApi
 from .advising import (wants_advisor, answer as advisor_answer, advisor_subject, carried_question,
                        thread_follow_up, route as advisor_route,
                         remember_question)
@@ -213,6 +214,7 @@ class MechBot(commands.Bot):
         self.catalog=catalog;self.store=store;self.workers=WorkerStore(store);self.payouts=PayoutTracker(store);self.alerts=AlertManager();self._last_payout_note=None
         self.runner=None;self.worker_runner=None;self.payout_runner=None;self.announcement_runner=None;self.conversation_runner=None
         self.forum_archive_runner=None;self.emoji_runner=None;self.command_sync_task=None
+        self.data_api=None
         self.worker_setup_lock=asyncio.Lock();self.announcement_access={}
         self.ai_session=None;self.currency_emojis={};self.ambient_last_reply={};self.pending_build_requests={}
         # Per-turn flags for the reply audit: set at the top of every message and read at its end.
@@ -256,6 +258,17 @@ class MechBot(commands.Bot):
         else:
             log.info('Automated Plarium Forum scraping is disabled by FORUM_SYNC_ENABLED.')
         self.emoji_runner=asyncio.create_task(self.application_emoji_setup_loop())
+        # The data API is the bot's collector seen from the other side: the same rows the channel answers
+        # are built from, published read-only. A port clash must never cost the bot its Discord session,
+        # so a failure here is a log line and the rest of the process keeps running.
+        try:
+            api=DataApi(self)
+            url=await api.start()
+            self.data_api=api if url else None
+            if url:log.info('Read-only data API is live at %s — announcements, facts, ECR views and the forum crawl.',url)
+        except Exception as exc:
+            self.data_api=None
+            log.warning('The data API could not start (%s); the bot keeps running without it.',type(exc).__name__)
 
     async def sync_guild_commands(self,guild_id):
         target=discord.Object(id=int(guild_id))
@@ -383,6 +396,8 @@ class MechBot(commands.Bot):
             if task:
                 try:await task
                 except asyncio.CancelledError:pass
+        if self.data_api:
+            await self.data_api.stop();self.data_api=None
         if self.ai_session and not self.ai_session.closed:await self.ai_session.close()
         await self.store.close();self.catalog.close();await super().close()
 
@@ -2162,6 +2177,33 @@ def install_commands(bot):
         lines.append(f'*{total} facts total · last dump status: `{ai_state}` · '
                      + ('AI extraction is configured' if bot.fact_extraction_enabled() else 'AI extraction is off'))
         await i.followup.send(discord_text('\n'.join(lines)),ephemeral=True,allowed_mentions=discord.AllowedMentions.none())
+
+    @tree.command(name='data_api',description='Show the read-only data API: what it serves, how much, how fresh')
+    async def data_api(i:discord.Interaction):
+        await i.response.defer(ephemeral=True)
+        api=bot.data_api
+        if not api:
+            await i.followup.send(discord_text('The data API is not running. Set `DATA_API_ENABLED=true` and a '
+                'port (`PORT` or `DATA_API_PORT`), and the bot serves it from this same process. Optional: '
+                '`DATA_API_TOKEN` to require a reader token, `DATA_API_ALLOW_ORIGIN` to limit browser access, '
+                '`DATA_API_HOST` to bind a different address.'),ephemeral=True,
+                allowed_mentions=discord.AllowedMentions.none());return
+        view=await api.summary()
+        counts=view['counts']
+        lines=['**Data API** · read-only, no private player data',f"Index: `{view['base_url']}`",
+               f"• announcements **{counts['announcements']}** · facts **{counts['facts']}** · "
+               f"ECR posts **{counts['ecr']}** · events **{counts['events']}**",
+               f"• forum threads **{counts['forum_threads']}** · tracker history rows **{counts['ecr_history']}** "
+               f"· rotations **{counts['rotations']}** · channels **{counts['channels']}**",
+               f"• backend: `{counts['database']}` · readers: **{view['readers']}** · up to "
+               f"**{view['page_ceiling']} rows** per page · cached for **{view['cache_seconds']}s**",
+               '*Routes:* `/announcements` `/facts` `/ecr` `/ecr/current` `/ecr/history` `/ecr/rotations` '
+               '`/events` `/forum` `/forum/meta` `/stats` `/export`']
+        if view['ingestion']:
+            lines.append('*Collector:* '+', '.join(f'{key} — {value}' for key,value in
+                                                   list(view['ingestion'].items())[:6]))
+        await i.followup.send(discord_text('\n'.join(lines)),ephemeral=True,
+                              allowed_mentions=discord.AllowedMentions.none())
 
     @tree.command(name='facts_refresh',description='Re-read every saved announcement and rebuild the curated fact table')
     @app_commands.describe(full='Clear the stored facts first instead of updating them in place',
