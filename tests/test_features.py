@@ -2448,7 +2448,11 @@ class AnnouncementFactTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(stats['facts_written'],2)          # both messages are stored as facts
         reply=fact_layer.format_fact_list(fact_layer.search_facts(facts,None,('promo_code',)),'🧾 Promo codes',
                                           show_codes=True)
-        self.assertEqual(reply.count('• '),1)                # the answer states it once
+        # The code is printed once, in its own bullet, and is not also left inside the
+        # summary sentence - which made a one-code post read as though it carried two.
+        block=reply.split('**LIVE OR OUTDATED**')[0]
+        bullets=[line for line in block.split('\n') if line.strip().startswith('\u2022')]
+        self.assertEqual(sum('D1SCORD150K' in line for line in bullets),1)
         self.assertEqual(reply.count('`D1SCORD150K`'),1)
         newest=[fact for fact in facts if fact['message_id']=='1573307343691710504'][0]
         self.assertEqual(newest['details']['also_announced_in'][0]['message_id'],'1573305410721415280')

@@ -1385,56 +1385,82 @@ def _fact_standing(fact, now=None):
     return 'Live — the saved post carries no date, so its age cannot be checked.'
 
 
+def _strip_codes(line, codes):
+    """Remove the codes themselves from a line that will print them separately."""
+    value = str(line or '')
+    for code in codes:
+        value = re.sub(rf'\bcode\b\s*[-\u2013\u2014:=]?\s*`?{re.escape(code)}`?', ' ', value, flags=re.I)
+        value = re.sub(rf'`?{re.escape(code)}`?', ' ', value)
+    value = re.sub(r'\s{2,}', ' ', value).strip(' \u2022-\u2013\u2014:')
+    return f'\u2022 {value}' if value else ''
+
+
 def format_fact_list(facts, heading, limit=6, show_codes=False, note=None, now=None):
-    """Plain answer block for a fact-backed lookup: headline, what the post said, source date."""
+    """Saved announcements as numbered blocks with a standing, then a roll-up.
+
+    This was one bullet per post with its summary, its entities, its stated window, its source
+    link and a bracketed aside all packed underneath - and the one thing a player needs to know,
+    whether the post still describes the game as it is now, arrived as an italic afterthought on
+    some categories and not at all on others. It now reads like the ECR answer: what the post
+    said, and then its own single-line standing.
+    """
+    now = _now_epoch(now)
     shown = dedupe_facts(refresh_ecr_status(facts, now=now))[:max(1, int(limit))]
     if not shown:
         return None
     lines = [f'**{heading}**']
-    for fact in shown:
+    rows = []
+    for number, fact in enumerate(shown, start=1):
         details = fact.get('details') or {}
         title = _label(fact.get('title'), 90) or 'Announcement'
         when = _date_label(int(fact.get('posted_at') or 0))
-        age = age_label(int(fact.get('posted_at') or 0), _now_epoch(None))
-        line = f"• {title} · {when} ({age})"
-        # One status word for every kind of announcement, so an event, a patch and a rotation are
-        # all judged the same way: is this still true of the game as it stands, or is it archive?
+        age = age_label(int(fact.get('posted_at') or 0), now)
         standing = _fact_standing(fact, now=now)
-        if standing:
-            line += f'\n  **Status:** {standing}'
+        state = 'live' if str(standing or '').lower().startswith('live') else 'outdated'
+        block = [f'{number}. **{title}**', f'{when} ({age})',
+                 f'**Status:** {standing}' if standing else '**Status:** Standing not stated.']
         items = [entry for entry in (details.get('entries') or []) if not entry.get('section')]
         if fact.get('category') == 'ecr' and items:
-            # Same one-line-per-item reading as the current-ECR reply. This listing used to
+            # Same one-line-per-item reading as the current-ECR reply: this listing used to
             # print the raw note run-together, then a verdict block that named the items a
             # second time, so one post read as three partial answers.
             for entry in items[:3]:
                 item_line = _ecr_item_line(entry, width=190)
                 if item_line:
-                    line += '\n  ' + item_line.lstrip('• ')
+                    block.append(item_line)
         else:
             summary = _label(_without_title(fact.get('summary'), title), 240)
             if summary and summary.casefold() != title.casefold():
-                line += f'\n  {summary}'
+                block.append(f'\u2022 {summary}')
         codes = [str(value) for value in (details.get('codes') or [])]
+        if show_codes and codes:
+            # The code is printed once, in its own bullet. It was also sitting inside the
+            # summary sentence, so a one-code post read as though it carried two codes.
+            block[-1] = _strip_codes(block[-1], codes)
+            if not block[-1].strip('• ').strip():
+                block.pop()
         entities = [str(value) for value in (fact.get('entities') or [])
                     if str(value).strip() and str(value).casefold() not in {code.casefold() for code in codes}]
         if entities:
-            line += "\n  Items: " + ', '.join(_label(value, 45) for value in entities[:4])
-        if show_codes:
-            codes = details.get('codes') or []
-            if codes:
-                line += '\n  ' + ', '.join(f'`{code}`' for code in codes[:3]) + ' *(redemption not verified)*'
+            block.append('\u2022 Items: ' + ', '.join(_label(value, 45) for value in entities[:4]))
+        if show_codes and codes:
+            block.append('\u2022 ' + ', '.join(f'`{code}`' for code in codes[:3])
+                         + ' *(redemption not verified)*')
         stated = details.get('stated_dates') or []
         if stated:
             # "Nov 24, Nov 27" is a window; say so, and do not append "(stated in post)" to a
             # line whose label already says where it came from.
             joined = ' \u2192 '.join(stated[:2]) if len(stated) >= 2 else stated[0]
-            label = 'Window' if len(stated) >= 2 else 'Date'
-            line += f'\n  {label} in the post: {joined}'
+            block.append(f'\u2022 {"Window" if len(stated) >= 2 else "Date"} in the post: {joined}')
         url = str(fact.get('message_url') or '')
         if url.startswith('http'):
-            line += f'\n  Source: <{url[:120]}>'
-        lines.append(line)
+            block.append(f'\u2022 Source: <{url[:120]}>')
+        lines.append('\n'.join(block))
+        rows.append((title, state))
+    if len(rows) > 1:
+        rollup = ['**LIVE OR OUTDATED**', 'Post | Standing']
+        rollup.extend(f'{title} | {"Live" if state == "live" else "Outdated"}' for title, state in rows)
+        lines.append('\n'.join(rollup))
     if note:
         lines.append(note)
     text = '\n\n'.join(lines)
