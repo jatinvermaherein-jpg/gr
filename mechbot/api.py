@@ -637,7 +637,7 @@ class DataApi:
              'params': 'limit, offset, order, since, until, category, ecr_kind, status, channel_id, extractor, '
                        'q, fields, format'},
             {'path': API_PATH + '/ecr', 'gives': 'ECR posts with one block per featured item, the guide’s own buy/skip line, live status',
-             'rows': counts['ecr'], 'params': 'limit, offset, kind, status, since, until, q, fields, format'},
+             'rows': counts['ecr'], 'params': 'limit, offset, kind, status, state, since, until, q, fields, format'},
             {'path': API_PATH + '/ecr/current', 'gives': 'the newest saved ECR of each kind', 'rows': None,
              'params': '—'},
             {'path': API_PATH + '/ecr/history', 'gives': 'the vendored Crate Rush tracker history, verbatim',
