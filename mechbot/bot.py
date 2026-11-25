@@ -33,6 +33,8 @@ from .source_summaries import combined_source_summary, wants_patch_bug_lookup
 from .voice import EmojiBook, humanise_cost, spell_it_out, assume_note, missing_fact
 from .facts import (ai_extract_facts, build_facts, facts_prompt_bundle, merge_ai_facts, format_ecr_reply, format_fact_list, search_facts, wants_older_ecr, refresh_ecr_status)
 from .ecr_digest import ecr_answer as ecr_digest_answer, promo_digest
+from . import ecr_summary as ecr_render
+from .ecr_digest import resolve_item as ecr_digest_resolve
 from . import compound
 
 log=logging.getLogger('mechbot')
@@ -783,21 +785,39 @@ class MechBot(commands.Bot):
             log.warning('Compound announcement answer failed (%s); using the single-answer path.',type(exc).__name__)
             return None
 
-    def ecr_shipped_history(self,query=None):
-        """Answer an ECR question from the vendored history, or None when it cannot.
+    def ecr_shipped_history(self,query=None,ingested_facts=()):
+        """Answer an ECR question from the vendored history plus anything ingested since.
 
-        Returns None on any failure so the caller keeps its existing explanation path.
+        One renderer serves both sources, so a rotation announced on Discord reads exactly
+        like a rotation from the tracker file. Live facts are placed first: if an ingested
+        rotation is current, it is what the player means.
         """
         try:
             rows=getattr(getattr(self,'advisor_data',None),'ecr',None)
             if not rows:
                 from .advisor import load
                 rows=load().ecr
-            if not rows:return None
-            return ecr_digest_answer(query or '',rows)
+            records=[ecr_render.from_tracker_row(row) for row in (rows or ())]
+            for fact in ingested_facts or ():
+                try:
+                    records.extend(ecr_render.from_fact(fact))
+                except Exception:
+                    continue
+            if not records:return None
+            name=ecr_digest_resolve(query,records)
+            if name:
+                single=ecr_render.render_one(records,name)
+                if single:return single
+            return ecr_render.render(records,title=self._ecr_title(ingested_facts))
         except Exception as exc:
             log.warning('Shipped ECR history could not be read (%s).',type(exc).__name__)
             return None
+
+    def _ecr_title(self,ingested_facts=()):
+        base='**Crate Rush (ECR)**'
+        if ingested_facts:
+            return base+' · announced rotations plus the recorded history'
+        return base+' · from the recorded history — no live announcement has been ingested'
 
     async def ecr_response(self,query=None):
         answer=await self.announcement_facts_answer('ecr',query)
@@ -807,7 +827,13 @@ class MechBot(commands.Bot):
         # Nothing has been ingested into the announcement store, but the repository ships a
         # 261-row ECR history. Lead with that and keep the storage diagnostic underneath, so
         # the user gets a real answer and an operator still sees why the live view is empty.
-        shipped=self.ecr_shipped_history(query)
+        facts=[]
+        try:
+            if kind := 'ecr':
+                facts=refresh_ecr_status(await self._announcement_fact_rows(('ecr',)),now=int(time.time()))
+        except Exception as exc:
+            log.warning('Ingested ECR facts could not be read (%s).',type(exc).__name__)
+        shipped=self.ecr_shipped_history(query,ingested_facts=facts or ())
         if not shipped:return text
         return f'{shipped}\n\n---\n*No ECR announcement has been ingested, so there is no live '               f'event view to add to the history above.*\n{text}'
 

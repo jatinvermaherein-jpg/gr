@@ -36,7 +36,10 @@ _LINK = re.compile(r'https?://\S+')
 _DECOR = re.compile(r'^[\s#*_`>~•·|\-–—=:.✨🎁🔥⚡🏆🚀🧩👾😹💀🔫💥🕶️❄️🤖⛑️🚨❤️‍🔥🎃👻🧛⏎]+$')
 _STUB = re.compile(r'^(?:image|images|gif|video|attachment|attachments|media|file|embed)\s*(?:[-–—:.]?\s*\d+)?$', re.I)
 _PROMO_HEADLINE = re.compile(r'\bpromo\b|\bpromocode\b|\bredeem\b|\bcodes?\b', re.I)
-_ECR_MENTION = re.compile(r'\becr\b|event\s+crate\s+rush', re.I)
+# "Crate Rush" is the in-game name for the ECR, and current announcements use it without
+# ever writing "ECR". Matching only \becr\b filed those posts as category 'other', which
+# is why a brand-new rotation never reached the ECR summary.
+_ECR_MENTION = re.compile(r'\becrs?\b|\bcrate\s*rush(?:es)?\b', re.I)
 _ONSLAUGHT = re.compile(r'\bonslaught\b', re.I)
 _GEAR_HUB = re.compile(r'\bin\s+gear\s*hub\b|gear\s*hub\s*(?:update|updates|stock|price|prices)'
                        r'|new\s+items?\s+in\s+gear|available\s+in\s+(?:game\s+)?currency', re.I)

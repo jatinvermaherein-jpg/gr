@@ -268,3 +268,90 @@ class CompoundQuestionTests(unittest.TestCase):
     def test_topic_labels_cover_every_topic(self):
         for topic, _ in self.compound.TOPIC_PATTERNS:
             self.assertIn(topic, self.compound.TOPIC_LABELS)
+
+
+class EcrSummaryRendererTests(unittest.TestCase):
+    """One renderer for tracker rows and ingested announcements."""
+
+    def setUp(self):
+        from mechbot import ecr_summary
+        self.S = ecr_summary
+
+    def _tracker(self):
+        return [self.S.from_tracker_row(r) for r in ECR_ROWS]
+
+    def test_tracker_row_shape(self):
+        rec = self.S.from_tracker_row({'name': 'Parasite', 'type': 'mech', 'start': '2026-08-24',
+                                       'end': '2026-08-26', 'items': 20, 'cps': '350 ac',
+                                       'rank': 4, 'skewed': False})
+        self.assertEqual(rec['name'], 'Parasite')
+        self.assertEqual(rec['price'], '350 A-Coins')
+        self.assertEqual(rec['pool'], 20)
+        self.assertEqual(rec['rank'], 4)
+
+    def test_unpadded_dates_parse(self):
+        self.assertEqual(str(self.S._date('2026-12-7')), '2026-12-07')
+
+    def test_currency_kinds_are_not_conflated(self):
+        self.assertEqual(self.S._price_from_cps('30000 cr')[0], '30,000 Credits')
+        self.assertEqual(self.S._price_from_cps('$1')[0], '$1 cash')
+        self.assertEqual(self.S._price_from_cps('inf'), ('', ''))
+
+    def test_render_states_freshness_for_every_rotation(self):
+        text = self.S.render(self._tracker(), now=__import__('datetime').date(2026, 11, 25))
+        self.assertIn('ended 3 Sep 2026', text)
+        self.assertIn('83 days ago', text)
+
+    def test_scheduled_rotation_is_not_called_live(self):
+        text = self.S.render(self._tracker(), now=__import__('datetime').date(2026, 11, 25))
+        self.assertIn('scheduled from', text)
+        self.assertNotIn('scheduled from 24 Dec 2026 · live', text)
+
+    def test_unnamed_rotations_are_described_not_invented(self):
+        text = self.S.render(self._tracker(), now=__import__('datetime').date(2026, 11, 25))
+        self.assertIn('logged without item names', text)
+        self.assertIn('cannot say what was in them', text)
+
+    def test_single_item_rotation_does_not_repeat_its_name(self):
+        text = self.S.render(self._tracker(), now=__import__('datetime').date(2026, 11, 25))
+        tailsting = [block for block in text.split('\n\n') if 'Tailsting' in block][0]
+        self.assertEqual(tailsting.count('Tailsting'), 1, 'the name should appear once, in the heading')
+
+    def test_item_view_reports_a_price_move(self):
+        text = self.S.render_one(self._tracker(), 'Parasite')
+        self.assertIn('Price moved', text)
+        self.assertIn('300 A-Coins', text)
+        self.assertIn('350 A-Coins', text)
+
+    def test_item_view_of_an_item_never_in_a_rush_is_none(self):
+        self.assertIsNone(self.S.render_one(self._tracker(), 'Not A Real Mech'))
+
+    def test_ingested_announcement_renders_in_the_same_format(self):
+        import time
+        from mechbot import facts
+        post = ('# Crate Rush: Blizzfrost\n## Blizzfrost\n### Defensive brawler\n'
+                'Blizzfrost returns. Rank 3. 250 A-Coins per spin.\n'
+                '## Storm Racks\nStorm Racks is the weapon pick. Rank 5. 350 A-Coins per spin.\n'
+                '## Buy or skip\nWorth it if you do not own Blizzfrost.\n')
+        now = int(time.time())
+        built, _ = facts.build_facts([{'message_id': '9', 'channel_id': '1', 'channel_name': 'e',
+                                       'guild_name': 'g', 'message_url': 'u', 'content': post,
+                                       'posted_at': now, 'kind': 'post'}], now=now)
+        records = self.S.from_fact(built[0])
+        names = [r['name'] for r in records]
+        self.assertIn('Blizzfrost', names)
+        self.assertIn('Storm Racks', names)
+        self.assertNotIn('Buy or skip', names, 'the verdict is not a third item')
+        text = self.S.render(records, title='**Crate Rush**')
+        self.assertIn('Buy or skip:', text)
+
+    def test_crate_rush_without_the_word_ecr_is_still_an_ecr(self):
+        """This was the ingestion bug: modern posts say 'Crate Rush' and never 'ECR'."""
+        from mechbot import facts
+        for title in ('Crate Rush: Parasite', 'CRATE RUSH IS HERE', 'Crate Rush: Blizzfrost'):
+            category, kind, _ = facts.classify(title)
+            self.assertEqual(category, 'ecr', f'{title!r} must classify as an ECR announcement')
+
+    def test_an_unrelated_post_is_still_other(self):
+        from mechbot import facts
+        self.assertEqual(facts.classify('Just chatting about nothing')[0], 'other')
