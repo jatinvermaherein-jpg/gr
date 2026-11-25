@@ -27,6 +27,8 @@ ONE_DAY_GRACE_SECONDS = 4 * 3600
 STUB_MERGE_WINDOW_SECONDS = 240
 MAX_SUMMARY = 300
 MAX_NOTE = 220
+# An ECR guide post carries a full strategy; 220 characters cut the useful half off.
+ECR_NOTE_LIMIT = 1200
 
 _MEMBER = re.compile(r'\[member\]', re.I)
 _MENTION = re.compile(r'@(?:\\u200b)?(?:everyone|here)|<[@!][#&]?\d{15,20}>')
@@ -194,6 +196,10 @@ KIND_TITLES = {'weekly': 'Weekly ECR', 'one_day': 'One-day ECR', 'seasonal': 'Se
 def _clean_line(line):
     """Strip Discord markup, attachment placeholders and decorative glyphs from one line."""
     value = str(line or '')
+    # Mentions and custom emoji first: a role ping on its own bullet otherwise ended up
+    # appended to the line above it and inside the item label.
+    value = re.sub(r'<a?:[A-Za-z0-9_]+:\d+>', ' ', value)
+    value = re.sub(r'<@[!&]?\d+>|<#\d+>', ' ', value)
     value = re.sub(r'\[[A-Za-z]+\s*[-–]\s*\d+\]', ' ', value, flags=re.I)
     value = re.sub(r'[#*`>~]+', ' ', value)
     value = re.sub(r'[・·|│┃═─━]+', ' ', value)
@@ -213,9 +219,21 @@ def entry_lines(text):
     return [line.strip() for line in lines if str(line or '').strip()]
 
 
+# Headings that are advice for a situation, not a featured item.
+_CONDITION_HEAD = re.compile(
+    r'^(?:if\s+you|if\s+i|when\s+you|for\s+(?:new|returning|free|paying)|'
+    r'already\s+own|don.?t\s+own|do\s+not\s+own|already\s+have)\b', re.I)
+_VERDICT_HEAD = re.compile(
+    r'^(?:buy\s*(?:or|\/)\s*skip|get\s+or\s+skip|skip\s+it|verdict|worth\s+it|is\s+it\s+worth|'
+    r'my\s+recommendation|recommendation|tl;?dr|summary|should\s+you)\b', re.I)
+
+
 def title_from(text, category='other', ecr_kind='unknown', blocks=None, limit=110):
     """Short, markup-free label; for ECR posts the featured item names lead the title."""
-    items = [block for block in (blocks or []) if not block.get('section')]
+    items = [block for block in (blocks or [])
+             if not block.get('section')
+             and not _CONDITION_HEAD.match(str(block.get('label') or ''))
+             and not _VERDICT_HEAD.match(str(block.get('label') or ''))]
     names = ', '.join(str(block.get('label') or '')[:40] for block in items[:2]).strip(', ')
     if not names:
         for line in entry_lines(text):
@@ -266,12 +284,16 @@ def summary_from(text, blocks=None, category='other', limit=MAX_SUMMARY):
     return (out or body[:limit]).strip()[:limit]
 
 
-def entries(text):
+def entries(text, note_limit=MAX_NOTE):
     """Pull the featured-item blocks out of an ECR guide post.
 
     A `##` line names an item; the `###` hook and bullets under it become that item's note. A block
     whose heading is only decoration (prize-pool banner, "Stay updated!") keeps its note so nothing
     is lost, but is flagged `section` so titles and pick-lists ignore it.
+
+    `bullets` keeps the lines separately. The flattened `note` is fine for a one-clause summary
+    but destroys a guide post, where each bullet is a different instruction and the useful
+    figure ("70 spins = 3,500 Playoff Points") sits at the end, past the clamp.
     """
     found, current = [], None
     for line in entry_lines(text):
@@ -288,7 +310,8 @@ def entries(text):
             if re.search(r'mech arena|stay updated|stay ahead', label, re.I):
                 current = None
                 continue
-            current = {'label': label[:90], 'note': '', 'section': bool(_SECTION_LABEL.search(label))}
+            current = {'label': label[:90], 'note': '', 'bullets': [],
+                       'section': bool(_SECTION_LABEL.search(label))}
             found.append(current)
             continue
         piece = _clean_line(line)
@@ -296,7 +319,9 @@ def entries(text):
             continue
         if re.search(r'stay updated|stay ahead|mech arena', piece, re.I):
             continue
-        current['note'] = (current['note'] + ' ' + piece).strip()[:MAX_NOTE]
+        current['note'] = (current['note'] + ' ' + piece).strip()[:note_limit]
+        if len(current['bullets']) < 40:
+            current['bullets'].append(piece[:400])
     for item in found:
         item['note'] = re.sub(r'\s+', ' ', item['note']).strip()
         verdict = advice_for(item['note'])
@@ -528,7 +553,7 @@ def build_facts(rows, now=None):
             noise += 1
             continue
         posted = _posted(item)
-        blocks = entries(text) if category == 'ecr' else []
+        blocks = entries(text, note_limit=ECR_NOTE_LIMIT) if category == 'ecr' else []
         found_codes = codes_in(text) if category == 'promo_code' else []
         dates = stated_dates(text)
         # A one-day notice has no reward list; sentences like "Only 23 Hours More!!" are not items.

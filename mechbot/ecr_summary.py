@@ -147,6 +147,20 @@ def from_tracker_row(row):
             'note': '', 'advice': '', 'source': 'tracker'}
 
 
+def fact_source_text(fact):
+    """The fullest text build_facts kept for a post.
+
+    The stored quote is clamped to 400 characters, which cuts off the strategy and the
+    spin maths in a long guide. The bullets are not clamped, so they are rejoined here and
+    the quote is used only when there are no bullets.
+    """
+    details = fact.get('details') or {}
+    bullets = [b for entry in (details.get('entries') or ()) for b in (entry.get('bullets') or [])]
+    if bullets:
+        return ' '.join(bullets)
+    return str(details.get('quote') or fact.get('summary') or '')
+
+
 def from_fact(fact):
     """Shape one ingested announcement fact into the same rotation records.
 
@@ -166,9 +180,12 @@ def from_fact(fact):
         label = str(entry.get('label') or '').strip()
         if not label:
             continue
-        if _ADVICE_LABEL.match(label):
+        if _ADVICE_LABEL.match(label) or _VERDICT_HEAD.match(label):
             # "Buy or skip" is the post's verdict on the rotation, not a third item.
             advice = (str(entry.get('note') or '').strip() or label)
+            continue
+        if _CONDITION_HEAD.match(label):
+            # "If you already own Ingrid" is strategy, not an item slot.
             continue
         note = str(entry.get('note') or '').strip()
         rank = _rank_in(note)
@@ -416,3 +433,288 @@ def render_one(records, name, *, now=None):
         out.append('*Some of these are flagged as skewed pricing, meaning the Crate Rush was '
                    'poor value against the Gear Hub that week.*')
     return '\n'.join(out)
+
+
+# =====================================================================================
+# Guide-post support
+#
+# Real announcements are not a list of two items with a price. The two samples below show
+# the two shapes that actually occur, and neither was readable by the first renderer:
+#
+#   "## VORTEX (R4)" + "• Max Credits - 800K" + "• Get or Skip, it's your choice!"
+#   "## INGRID MEGA ECR" + "## If you already own Ingrid:" + a bulleted strategy
+#
+# The block below adds: hero-item detection (the item is named in the heading, not the
+# heading alone), structured extraction of the handful of facts these posts actually carry
+# (max credits, whether it is in the Gear Hub, the verdict word, the spin maths), and
+# conditional sections that are rendered as guidance rather than as an item.
+# =====================================================================================
+
+# Headings that introduce advice for a condition rather than an item.
+_CONDITION_HEAD = re.compile(
+    r'^(?:if\s+you|if\s+i|when\s+you|for\s+(?:new|returning|free|paying)|'
+    r'already\s+own|don.?t\s+own|do\s+not\s+own|already\s+have|without\b)', re.I)
+
+# Headings that are the post's verdict rather than an entry.
+_VERDICT_HEAD = re.compile(
+    r'^(?:buy\s*(?:or|\/)\s*skip|get\s+or\s+skip|skip\s+it|verdict|worth\s+it|is\s+it\s+worth|'
+    r'my\s+recommendation|recommendation|tl;?dr|summary|should\s+you)\b', re.I)
+
+_ITEM_TYPE_WORD = re.compile(r'\b(mech|weapon|pilot|skin|implant|mod)\b', re.I)
+
+# "800K" / "800,000" / "1.2M"
+_K_AMOUNT = re.compile(r'\b(\d[\d,]*(?:\.\d+)?)\s*([KkMm])\b')
+
+_GEAR_HUB = re.compile(r'\bgear\s*hub\b', re.I)
+_TOKEN_WORD = re.compile(r'\bfree\s+token|token\b', re.I)
+_ACOIN_WORD = re.compile(r'\ba-?coins?\b', re.I)
+_SPIN_MATH = re.compile(r'\b(\d+)\s*spins?\s*[=x\u00d7]\s*([\d,]+)\s*(?:playoff\s+)?points?\b', re.I)
+_POINTS_PER_SPIN = re.compile(r'\beach\s+(?:ecr\s+|mega\s+)?spin\s+(?:gives?|is\s+worth)\s+([\d,]+)\s*(?:playoff\s+)?points?\b', re.I)
+# The figure usually precedes the word: "you receive 2,500 A-Coins as duplicate compensation".
+_DUPLICATE_COMP = re.compile(r'([\d,]{3,})\s*a-?coins?[^.]{0,60}?duplicate|duplicate[^.]{0,60}?([\d,]{3,})\s*a-?coins?', re.I)
+_LOGIN_DAY = re.compile(r'\b(\d+)(?:st|nd|rd|th)[- ]day\s+(?:daily\s+)?login', re.I)
+
+_VERDICT_GOOD = re.compile(r'\bworth\s+(?:the\s+)?(?:purchase|credits|picking|it|getting|buying)\b|'
+                           r'\bgood\s+(?:mech|weapon|pick|buy)\b|\bget\s+it\b|\bpick\s+it\s+up\b', re.I)
+_VERDICT_BAD = re.compile(r"\bdon'?t\s+spend\b|\bdon'?t\s+buy\b|\bskip\b|\bnot\s+worth\b|"
+                          r'\bavoid\b|\bwaste\b', re.I)
+_VERDICT_MIXED = re.compile(r'\byour\s+choice\b|\bget\s+or\s+skip\b|\bdepends\b|\bup\s+to\s+you\b', re.I)
+_BEYOND_META = re.compile(r'\bfar\s+from\s+(?:the\s+)?meta\b|\bnot\s+meta\b|\boff[- ]meta\b', re.I)
+
+
+def _expand_amounts(text):
+    """'800K' -> '800,000', '1.2M' -> '1,200,000'. Presentation only; nothing is inferred."""
+    def swap(match):
+        try:
+            value = float(match[1].replace(',', ''))
+        except ValueError:
+            return match[0]
+        value *= 1000 if match[2].lower() == 'k' else 1_000_000
+        return f'{int(round(value)):,}'
+    return _K_AMOUNT.sub(swap, text or '')
+
+
+def _rank_in_label(label):
+    match = re.search(r'\(\s*R\s*(\d{1,2})\s*\)|\bR\s*(\d{1,2})\b|\brank\s*(\d{1,2})\b', label or '', re.I)
+    if not match:
+        return None
+    return int(next(g for g in match.groups() if g))
+
+
+def _strip_rank_from_name(label):
+    """'VORTEX (R4)' -> 'VORTEX'; the rank is reported separately."""
+    return re.sub(r'\s*\(\s*R\s*\d{1,2}\s*\)\s*$', '', str(label or '')).strip()
+
+
+def _type_for(label, note=''):
+    match = _ITEM_TYPE_WORD.search(label or '')
+    if match:
+        return match[1].lower()
+    match = _ITEM_TYPE_WORD.search(note or '')
+    return match[1].lower() if match else ''
+
+
+def _verdict_of(bullets, note=''):
+    """Read the post's own verdict. Returns (word, quote) or ('', '').
+
+    Judged bullet by bullet rather than on the flattened note: the bullets are separate
+    sentences, and joining them first made the quoted verdict the entire note.
+    """
+    candidates = list(bullets or ()) or [str(note or '')]
+    for clean in (str(b).strip(' •-—') for b in candidates):
+        if not clean:
+            continue
+        if _VERDICT_MIXED.search(clean):
+            return 'mixed', clean
+        if _VERDICT_BAD.search(clean) and not _VERDICT_GOOD.search(clean):
+            return 'avoid', clean
+        if _VERDICT_GOOD.search(clean):
+            return 'worth', clean
+    return '', ''
+
+
+def _credit_figures(bullets):
+    """Credit figures the post states, expanded.
+
+    The bullet may put the word first ("Max Credits - 800K") or the figure first
+    ("worth 800,000 Credits"), so both orders are read. Anything else is left alone: a
+    bare number with no currency word next to it is not assumed to be credits.
+    """
+    found = []
+    for bullet in bullets or ():
+        expanded = _expand_amounts(bullet)
+        for match in re.finditer(r'(\d[\d,]{2,})\s*(?:credits?|cr)\b', expanded, re.I):
+            value = _num(match[1])
+            if value and value not in found:
+                found.append(value)
+        for match in re.finditer(r'\bcredits?\b[^\d]{0,20}(\d[\d,]{2,})', expanded, re.I):
+            value = _num(match[1])
+            if value and value not in found:
+                found.append(value)
+    return found
+
+
+def guide_sections(entries):
+    """Split parsed entries into (hero item, other items, conditional sections, verdict).
+
+    A conditional section is a ``##`` block whose heading is advice for a situation
+    ("If you already own Ingrid") rather than an item. Treating those as items, which the
+    first renderer did, produced three fake mechs in one rotation.
+    """
+    hero, items, conditions, verdict = None, [], [], ''
+    for entry in entries or ():
+        label = str(entry.get('label') or '').strip()
+        if not label:
+            continue
+        bullets = list(entry.get('bullets') or [])
+        if _VERDICT_HEAD.match(label) or _ADVICE_LABEL.match(label):
+            verdict = ' '.join(bullets) or str(entry.get('note') or '')
+            continue
+        if _CONDITION_HEAD.match(label):
+            conditions.append({'heading': label, 'bullets': bullets})
+            continue
+        record = {'name': _strip_rank_from_name(label), 'label': label,
+                  'rank': _rank_in_label(label), 'kind': _type_for(label, entry.get('note')),
+                  'bullets': bullets, 'note': str(entry.get('note') or ''),
+                  'credits': _credit_figures(bullets),
+                  'gear_hub': bool(_GEAR_HUB.search(entry.get('note') or '')),
+                  'token': bool(_TOKEN_WORD.search(entry.get('note') or '')),
+                  'acoins': bool(_ACOIN_WORD.search(entry.get('note') or '')),
+                  'beyond_meta': bool(_BEYOND_META.search(entry.get('note') or '')),
+                  'verdict': _verdict_of(bullets, entry.get('note') or '')}
+        if hero is None and _ITEM_TYPE_WORD.search(label):
+            hero = record
+        else:
+            items.append(record)
+    if hero is None and items:
+        hero = items.pop(0)
+    return hero, items, conditions, verdict
+
+
+def _verdict_line(record):
+    word, quote = record.get('verdict') or ('', '')
+    if not word:
+        return ''
+    label = {'worth': 'worth it', 'avoid': 'skip', 'mixed': 'your call'}[word]
+    return f'Verdict: **{label}** — "{quote[:160]}"'
+
+
+def render_guide(entries, *, heading='', now=None, verbose=True, limit_bullets=8):
+    """Render one guide post: the item(s) it names, then any conditional strategy."""
+    hero, items, conditions, verdict = guide_sections(entries)
+    if not hero and not items and not conditions:
+        return None
+    out = []
+    if heading:
+        out.append(heading)
+
+    for record in ([hero] if hero else []) + items:
+        head = [f'**{record["name"] or record["label"]}**']
+        if record.get('kind'):
+            head.append(record['kind'])
+        if record.get('rank'):
+            head.append(f'rank {record["rank"]}')
+        if record.get('credits'):
+            head.append(' · '.join(f'{v:,} Credits' for v in record['credits'][:2]))
+        lines = [' · '.join(head)]
+        # The hook line (### under the item) is the post's own subject sentence.
+        hook = next((b for b in record['bullets'] if b.endswith('?')), '')
+        if verbose and hook:
+            lines.append(f'_{hook[:180]}_')
+        shown = [b for b in record['bullets'] if b != hook][:limit_bullets]
+        for bullet in shown:
+            lines.append(f'• {_expand_amounts(bullet)[:240]}')
+        flags = []
+        if record.get('gear_hub'):
+            flags.append('in the Gear Hub')
+        if record.get('token'):
+            flags.append('free token available')
+        if record.get('beyond_meta'):
+            flags.append('far from the meta')
+        if flags:
+            lines.append(f'• *{" · ".join(flags)}*')
+        verdict_line = _verdict_line(record)
+        if verdict_line:
+            lines.append(f'• {verdict_line}')
+        out.append('\n'.join(lines))
+
+    for section in conditions[:3]:
+        lines = [f'**{section["heading"]}**']
+        for bullet in section['bullets'][:limit_bullets]:
+            lines.append(f'• {_expand_amounts(bullet)[:260]}')
+        out.append('\n'.join(lines))
+
+    if verdict:
+        out.append(f'**Buy or skip:** {_expand_amounts(re.sub(chr(10), " ", verdict))[:400]}')
+    return '\n\n'.join(out)
+
+
+def render_post(entries, *, title='', now=None, verbose=True):
+    """Render one announcement post, choosing the shape its parser output implies."""
+    if not entries:
+        return None
+    kind = classify_entry_set(entries)
+    if kind == 'item':
+        return render_guide(entries, heading=title, now=now, verbose=verbose)
+    return render_guide(entries, heading=title, now=now, verbose=verbose)
+
+
+def classify_entry_set(entries):
+    """'item' when the post names a typed item, else 'guide'."""
+    for entry in entries or ():
+        if _ITEM_TYPE_WORD.search(str(entry.get('label') or '')):
+            return 'item'
+    return 'guide'
+
+
+def post_facts(text_or_entries):
+    """The handful of real figures a guide post states, pulled out and labelled.
+
+    Announcements are written for humans, so the numbers that matter are buried in prose:
+    "70 spins = 3,500 Playoff Points", "Each ECR spin gives 50 Playoff Points",
+    "2,500 A-Coins as duplicate compensation", "120th-day daily login reward". Each is
+    reported with the phrase it came from so the reader can check it, and nothing is
+    calculated — 70 x 50 is left as the two stated numbers, not as a new one.
+    """
+    if isinstance(text_or_entries, str):
+        text = text_or_entries
+    else:
+        text = ' '.join(b for entry in (text_or_entries or ())
+                        for b in (entry.get('bullets') or []) + [entry.get('label') or ''])
+        text = _expand_amounts(text)
+    facts = []
+    for match in _POINTS_PER_SPIN.finditer(text):
+        facts.append(('Per spin', f'{_num(match[1]):,} Playoff Points'))
+    for match in _SPIN_MATH.finditer(text):
+        facts.append(('Spin maths', f'{match[1]} spins = {_num(match[2]):,} Playoff Points'))
+    for match in _DUPLICATE_COMP.finditer(text):
+        facts.append(('Duplicate', f'{_num(match[1]):,} A-Coins if already owned'))
+    for match in _LOGIN_DAY.finditer(text):
+        facts.append(('Daily login', f'also a day-{match[1]} login reward'))
+    for match in _K_AMOUNT.finditer(text or ''):
+        context = text[max(0, match.start() - 40):match.end() + 40]
+        if re.search(r'\bcredits?\b', context, re.I):
+            value = _expand_amounts(match[0])
+            entry = ('Max credits', f'{value} Credits')
+            if entry not in facts:
+                facts.append(entry)
+    # de-duplicate while keeping the order they appear in the post
+    seen, unique = set(), []
+    for label, value in facts:
+        if (label, value) in seen:
+            continue
+        seen.add((label, value))
+        unique.append((label, value))
+    return unique[:8]
+
+
+def render_announcement(entry_list, *, title='', text='', now=None, verbose=True):
+    """Full render for one ingested post: heading, items or strategy, then stated figures."""
+    body = render_post(entry_list, title=title, now=now, verbose=verbose)
+    if not body:
+        return None
+    figures = post_facts(text or entry_list)
+    if figures:
+        body += '\n\n**Figures the post states**\n' + '\n'.join(
+            f'• {label}: {value}' for label, value in figures)
+    return body

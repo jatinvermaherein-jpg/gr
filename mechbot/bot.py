@@ -798,17 +798,38 @@ class MechBot(commands.Bot):
                 from .advisor import load
                 rows=load().ecr
             records=[ecr_render.from_tracker_row(row) for row in (rows or ())]
+            # Ingested posts get their own block, because a real guide carries strategy and
+            # stated figures that a rotation table cannot express. They come first: if a
+            # rotation has just been announced, that is what the player is asking about.
+            blocks=[]
             for fact in ingested_facts or ():
                 try:
-                    records.extend(ecr_render.from_fact(fact))
+                    entries=(fact.get('details') or {}).get('entries') or []
+                    if not entries:continue
+                    block=ecr_render.render_announcement(entries,
+                        title='**'+str(fact.get('title') or 'Crate Rush')+'**',
+                        text=ecr_render.fact_source_text(fact))
+                    if block:
+                        blocks.append(block)
+                    else:
+                        # Only a post with no renderable block needs a rotation-table row;
+                        # otherwise the same post would appear twice in one answer.
+                        records.extend(ecr_render.from_fact(fact))
                 except Exception:
+                    log.warning('An ingested ECR post could not be rendered; skipping it.',exc_info=True)
                     continue
-            if not records:return None
+            if not records and not blocks:return None
             name=ecr_digest_resolve(query,records)
             if name:
                 single=ecr_render.render_one(records,name)
                 if single:return single
-            return ecr_render.render(records,title=self._ecr_title(ingested_facts))
+            history=ecr_render.render(records,title=None) if records else None
+            parts=[]
+            if blocks:parts.append('\n\n'.join(blocks))
+            if history:parts.append(history)
+            if not parts:return None
+            head=self._ecr_title(ingested_facts)
+            return head+'\n\n'+'\n\n---\n\n'.join(parts)
         except Exception as exc:
             log.warning('Shipped ECR history could not be read (%s).',type(exc).__name__)
             return None

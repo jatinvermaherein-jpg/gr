@@ -355,3 +355,104 @@ class EcrSummaryRendererTests(unittest.TestCase):
     def test_an_unrelated_post_is_still_other(self):
         from mechbot import facts
         self.assertEqual(facts.classify('Just chatting about nothing')[0], 'other')
+
+
+class RealAnnouncementTests(unittest.TestCase):
+    """The two announcement formats that actually get posted to the channel.
+
+    Both fixtures are verbatim copies of real posts. They broke the first renderer in five
+    places, and each of those is pinned here.
+    """
+
+    FIXTURES = Path(__file__).resolve().parent / 'fixtures'
+
+    def _parse(self, name):
+        from mechbot import facts
+        text = (self.FIXTURES / name).read_text(encoding='utf-8')
+        blocks = facts.entries(text, note_limit=facts.ECR_NOTE_LIMIT)
+        return text, blocks
+
+    def test_role_mentions_do_not_leak_into_notes(self):
+        _, blocks = self._parse('announcement_weekly_ecr.txt')
+        for block in blocks:
+            self.assertNotIn('<@&', block['note'])
+            self.assertNotIn('<@&', block['label'])
+
+    def test_bullets_are_kept_separately(self):
+        _, blocks = self._parse('announcement_weekly_ecr.txt')
+        self.assertTrue(blocks[0]['bullets'], 'each • line must survive as its own bullet')
+        self.assertIn('Max Credits - 800K', blocks[0]['bullets'])
+
+    def test_rank_in_the_heading_is_extracted(self):
+        from mechbot import ecr_summary as S
+        _, blocks = self._parse('announcement_weekly_ecr.txt')
+        hero, items, _, _ = S.guide_sections(blocks)
+        self.assertEqual(hero['name'], 'VORTEX')
+        self.assertEqual(hero['rank'], 4)
+        self.assertEqual(items[0]['name'], 'SUPPRESSOR 10')
+
+    def test_hero_is_recognised_as_a_mech_not_a_new_item(self):
+        from mechbot import ecr_summary as S
+        _, blocks = self._parse('announcement_weekly_ecr.txt')
+        hero, _, _, _ = S.guide_sections(blocks)
+        self.assertEqual(hero['kind'], 'mech')
+
+    def test_condition_headings_are_strategy_not_items(self):
+        from mechbot import ecr_summary as S
+        _, blocks = self._parse('announcement_mega_ecr.txt')
+        hero, items, conditions, _ = S.guide_sections(blocks)
+        self.assertEqual(hero['name'], 'INGRID MEGA ECR')
+        self.assertEqual(items, [], 'no second item exists in this post')
+        self.assertEqual(len(conditions), 2)
+        self.assertIn('If you already own Ingrid', conditions[0]['heading'])
+
+    def test_condition_headings_never_reach_the_title(self):
+        from mechbot import facts
+        text, blocks = self._parse('announcement_mega_ecr.txt')
+        category, kind, _ = facts.classify(text)
+        title = facts.title_from(text, category, kind, blocks)
+        self.assertIn('INGRID', title)
+        self.assertNotIn('If you', title)
+
+    def test_verdict_is_read_per_bullet_not_from_the_whole_note(self):
+        from mechbot import ecr_summary as S
+        _, blocks = self._parse('announcement_weekly_ecr.txt')
+        hero, items, _, _ = S.guide_sections(blocks)
+        word, quote = hero['verdict']
+        self.assertEqual(word, 'worth')
+        self.assertLess(len(quote), 120, 'the quote must be the sentence, not the whole note')
+
+    def test_credit_figure_is_expanded(self):
+        from mechbot import ecr_summary as S
+        _, blocks = self._parse('announcement_weekly_ecr.txt')
+        hero, _, _, _ = S.guide_sections(blocks)
+        self.assertEqual(hero['credits'], [800000])
+        self.assertIn('800,000', S.render_post(blocks))
+
+    def test_playoff_maths_is_extracted(self):
+        from mechbot import ecr_summary as S
+        text, blocks = self._parse('announcement_mega_ecr.txt')
+        facts_found = dict(S.post_facts(S.fact_source_text({'details': {'entries': blocks}})))
+        self.assertEqual(facts_found.get('Per spin'), '50 Playoff Points')
+        self.assertEqual(facts_found.get('Spin maths'), '70 spins = 3,500 Playoff Points')
+
+    def test_duplicate_compensation_is_extracted(self):
+        from mechbot import ecr_summary as S
+        found = S.post_facts('If you obtain Ingrid while already owning her, you can '
+                             'receive  2,500 A-Coins as duplicate compensation.')
+        self.assertIn(('Duplicate', '2,500 A-Coins if already owned'), found)
+
+    def test_guide_post_renders_strategy_and_figures(self):
+        from mechbot import ecr_summary as S
+        text, blocks = self._parse('announcement_mega_ecr.txt')
+        body = S.render_announcement(blocks, title='**Mega ECR**',
+                                     text=S.fact_source_text({'details': {'entries': blocks}}))
+        self.assertIn('If you already own Ingrid', body)
+        self.assertIn('Figures the post states', body)
+        self.assertIn('3,500 Playoff Points', body)
+
+    def test_neither_post_is_classified_as_other(self):
+        from mechbot import facts
+        for name in ('announcement_weekly_ecr.txt', 'announcement_mega_ecr.txt'):
+            text = (self.FIXTURES / name).read_text(encoding='utf-8')
+            self.assertEqual(facts.classify(text)[0], 'ecr', f'{name} must classify as ECR')
