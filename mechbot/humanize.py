@@ -177,15 +177,24 @@ def _digits(text):
 
 
 def _strip_residue(text):
-    """Remove chatbot wrapper phrases without eating the fact sitting next to them."""
-    kept = []
-    for sentence in re.split(r'(?<=[.!?])\s+', str(text or '')):
-        if not _RESIDUE.search(sentence):
-            kept.append(sentence)
-            continue
-        remainder = re.sub(r'\s+', ' ', _RESIDUE.sub(' ', sentence)).strip(' !.,;:')
-        kept.append(remainder if len(remainder) >= 16 else '')
-    return ' '.join(part for part in kept if part)
+    """Remove chatbot wrapper phrases without eating the fact sitting next to them.
+
+    Line breaks are structure in a Discord reply - a bullet list, a heading line - so this walks
+    each line and rejoins the lines the way it found them. Rebuilding the whole message with
+    `' '.join` flattened every bullet into one paragraph, which is how a formatted answer arrived
+    in the channel as an unbroken wall of text.
+    """
+    lines = []
+    for line in str(text or '').split('\n'):
+        kept = []
+        for sentence in re.split(r'(?<=[.!?])\s+', line):
+            if not _RESIDUE.search(sentence):
+                kept.append(sentence)
+                continue
+            remainder = re.sub(r'\s+', ' ', _RESIDUE.sub(' ', sentence)).strip(' !.,;:')
+            kept.append(remainder if len(remainder) >= 16 else '')
+        lines.append(' '.join(part for part in kept if part))
+    return '\n'.join(lines)
 
 
 def polish(text, *, allow_empty=True):
@@ -240,6 +249,18 @@ def polish(text, *, allow_empty=True):
     out = re.sub(r'(\.\s*)\.(?!\s*\w)', r'\1', out)
     out = re.sub(r'^\s*[•*]\s*\*{2}([A-Z][a-z]+(?: \w+){0,3})[:\-]\*\*\s*', r'• \1: ', out, flags=re.M)
     out = '\n'.join(line.rstrip() for line in out.split('\n'))
+    # A markdown heading with nothing under it is a label, not a sentence - "**Tier note:**" arrived
+    # in Discord exactly as "**Tier note:**". A label with nothing to label is deleted, but a label
+    # that introduces a bullet list is doing a job, so it stays.
+    lines = out.split('\n')
+    kept = []
+    for index, line in enumerate(lines):
+        bare = re.fullmatch(r'\s*\*\*[^*\n]{1,40}\*\*\s*:?\s*', line)
+        follows = lines[index + 1].strip() if index + 1 < len(lines) else ''
+        if bare and not follows.startswith(('•', '-', '*')):
+            continue
+        kept.append(line)
+    out = '\n'.join(kept)
     out = re.sub(r'\n{3,}', '\n\n', out).strip()
     if not out or (not allow_empty and not out):
         out = body

@@ -633,3 +633,133 @@ class PipelineUsesRankAndSubstanceTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('kept', why)
         ok, _ = guard_substance(engine, engine)
         self.assertTrue(ok, 'the engine answer always passes its own guard')
+
+
+class CompareReplyFormatTests(unittest.TestCase):
+    """The comparison reply a player complained about: leaked weights, one wall of text, hedged twice.
+
+    The engine's own weighted score is a number about our arithmetic - "a balanced weight of 0.82
+    against Gemini 10's 0.71" was the whole second half of the reply - so none of it may reach the
+    channel. What a player gets instead is one bold verdict, the figures that separate the two items,
+    and one line for what the data cannot settle.
+    """
+
+    QUESTION = 'which is better gemini 10 or charge rocket 10'
+
+    @classmethod
+    def setUpClass(cls):
+        from mechbot import advising
+        cls.advising = advising
+        cls.reply = advising.answer(cls.QUESTION)['reply']
+
+    def test_no_internal_scoring_reaches_the_reply(self):
+        import re
+        self.assertIsNone(re.search(r'\b0\.\d{2,}\b', self.reply),
+                          'a weighted score leaked into player text')
+        for phrase in ('balanced weight', 'cost-efficiency', 'cost efficiency', 'weighted',
+                       'dmgPerEnergy', 'profile'):
+            self.assertNotIn(phrase, self.reply)
+        self.assertNotRegex(self.reply, r'\b0\.\d+\b')
+
+    def test_the_reply_is_layered_not_one_paragraph(self):
+        lines = [line for line in self.reply.split('\n') if line.strip()]
+        self.assertGreaterEqual(len(lines), 4, 'the answer arrived as a single block of prose')
+        self.assertIn('**', lines[0], 'the verdict line is not emphasised')
+        self.assertTrue(any(line.startswith('• ') for line in lines), 'no figure list')
+        self.assertTrue(all(line.count('**') % 2 == 0 for line in lines), 'unbalanced bold markers')
+
+    def test_the_pick_is_stated_once_and_measured(self):
+        self.assertIn('**Charge Rocket 10** over **Gemini 10**', self.reply)
+        self.assertIn('650,000 Credits', self.reply)
+        self.assertIn('712,500 Credits', self.reply)
+        self.assertEqual(self.reply.count('Charge Rocket 10 is better'), 0)
+
+    def test_the_losing_side_gets_a_figure_not_a_hedge(self):
+        self.assertNotIn('still suit your build', self.reply)
+        self.assertIn('**The case for Gemini 10:**', self.reply)
+
+    def test_the_provenance_line_is_compact_and_closes_the_answer(self):
+        self.assertIn('community catalog', self.reply)
+        self.assertLess(self.reply.count('Tiers and dmg-per-energy'), 1,
+                        'the long provenance paragraph is back')
+
+    def test_the_same_layout_for_a_mech_comparison(self):
+        import re
+        reply = self.advising.answer('which is better redox or voidghost')['reply']
+        self.assertIsNone(re.search(r'\b\d\.\d{2,}\b', reply))
+        self.assertNotIn('wins stats', reply)
+        self.assertIn('**', reply.split('\n')[0])
+
+    def test_both_reply_paths_agree(self):
+        """The model path and the ladder path render the same answer, so a player cannot tell them apart."""
+        from mechbot import advising
+        once = advising.answer(self.QUESTION)['reply']
+        twice = advising.answer(self.QUESTION)['reply']
+        self.assertEqual(once, twice, 'the renderer is not deterministic')
+
+    def test_line_breaks_survive_the_style_pass(self):
+        from mechbot.humanize import polish
+        text = '**Pick:** one.\n• a figure\n• another figure'
+        styled, _ = polish(text)
+        self.assertIn('\n• ', styled, 'polish flattened the reply into one paragraph')
+
+
+class FollowUpThreadTests(unittest.TestCase):
+    """"i have rosa and gemini implant" after a comparison is a follow-up, not a new store question.
+
+    Before this, the second sentence named gear, so it was routed as a store ranking and answered
+    with Charge Rocket 6 priced at 600,000 Credits - to a player who had just been told about two
+    missiles. The thread keeps the decision alive for a few minutes so the reply can continue it.
+    """
+
+    SCOPE = ('thread-tests', 'channel', 'player')
+
+    def setUp(self):
+        from mechbot import advising
+        self.advising = advising
+        advising._THREAD.clear()
+        self.first = advising.answer('which is better gemini 10 or charge rocket 10', scope=self.SCOPE)
+
+    def test_the_decision_is_remembered(self):
+        thread = self.advising.last_decision(self.SCOPE)
+        self.assertIsNotNone(thread)
+        self.assertEqual(thread['winner'], 'Charge Rocket 10')
+        self.assertEqual(thread['picks'], ['Gemini 10', 'Charge Rocket 10'])
+
+    def test_a_follow_up_is_answered_against_the_comparison(self):
+        reply = self.advising.answer('i have rosa (guided pilot) and gemini implant', scope=self.SCOPE)
+        self.assertEqual(reply['capability'], 'thread')
+        self.assertIn('Following up on **Gemini 10 vs Charge Rocket 10**', reply['reply'])
+        self.assertIn('Charge Rocket 10', reply['reply'])
+        self.assertNotIn('Charge Rocket 6 is where I would put it', reply['reply'],
+                         'the follow-up was answered as a fresh store ranking')
+
+    def test_the_pilot_is_read_from_the_catalog_not_invented(self):
+        reply = self.advising.answer('i have rosa (guided pilot) and gemini implant', scope=self.SCOPE)['reply']
+        self.assertIn('Rosa is a guided pilot', reply)
+        self.assertIn('Gemini 10', reply)
+
+    def test_what_the_player_owns_is_not_sold_back_to_them(self):
+        reply = self.advising.answer('i have rosa and gemini, what should i do next', scope=self.SCOPE)['reply']
+        self.assertIn('not a purchase', reply)
+        self.assertIn('What I would do', reply)
+
+    def test_a_new_comparison_is_not_swallowed_by_the_thread(self):
+        reply = self.advising.answer('storm racks or charge rockets better?', scope=self.SCOPE)
+        self.assertEqual(reply['capability'], 'compare')
+        self.assertNotIn('Following up on', reply['reply'])
+
+    def test_a_lookup_is_never_swallowed_by_an_open_thread(self):
+        """"what are Acantha rank 3 pilot bonuses" needs the stat row, not a continuation."""
+        from mechbot import advising
+        scope = ('thread-lookup', 'channel', 'player')
+        advising._THREAD.clear()
+        advising.answer('which is better gemini 10 or charge rocket 10', scope=scope)
+        self.assertIsNone(advising.thread_follow_up(scope, 'what are acantha rank 3 pilot bonuses'))
+
+    def test_the_thread_expires(self):
+        thread = self.advising.last_decision(self.SCOPE)
+        thread['expires'] = 0
+        self.assertIsNone(self.advising.last_decision(self.SCOPE))
+        reply = self.advising.answer('i have rosa and gemini implant', scope=self.SCOPE)
+        self.assertNotEqual(reply['capability'], 'thread')

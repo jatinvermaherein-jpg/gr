@@ -21,6 +21,7 @@ from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, need
 from .pipeline import (understand, format_reply, correct_names, engine_answer, normalise_understanding,
                        guard_figures, fuzzy_mentions, FUZZY_CUTOFF)
 from .advising import (wants_advisor, answer as advisor_answer, advisor_subject, carried_question,
+                       thread_follow_up,
                         remember_question)
 from .assistant import GAME_WORDS, find_mentions, message_chunks, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, read_screenshot, screenshot_images, game_knowledge_context, weapon_response, mech_response, pilot_response, mod_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text, naturalize_discord_reply
 from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes
@@ -583,9 +584,11 @@ class MechBot(commands.Bot):
             return mech_response(profile,rank=rank) if profile else None
 
         def advisor_text(question):
-            # engine_answer passes the plain question string, already normalised.
+            # engine_answer passes the plain question string, already normalised. The scope travels
+            # with it so a follow-up to a comparison is answered against that comparison instead of
+            # being routed from scratch as a fresh store question.
             try:
-                verdict=advisor_answer(question or text,[])
+                verdict=advisor_answer(question or text,[],scope=scope)
             except Exception:
                 log.exception('Advisor comparison failed inside the understanding pipeline')
                 return None
@@ -623,7 +626,10 @@ class MechBot(commands.Bot):
         # A verified cost is arithmetic, and `humanise_cost` already writes it as the sentence
         # a person would say. Sending it through the formatter only ever added the chance of a
         # receipt, so for this one intent the engine's sentence is the reply.
-        formatted=(None if understood['intent']=='upgrade_cost'
+        # The comparison answer is already a formatted block - a bold verdict, a figure list, two
+        # "case for" lines. Sending it through the formatter only gives a model the chance to re-flow
+        # it into the unbroken paragraph a player complained about, so it ships as the engine wrote it.
+        formatted=(None if understood['intent'] in ('upgrade_cost','compare')
                    else await format_reply(base,key,model,understood,engine['text'],history=history,session=self.ai_session))
         # The formatter is a model, and a model re-lays the answer out however it likes: this
         # path used to send its output straight to Discord, so a cost question came back as a
@@ -642,12 +648,16 @@ class MechBot(commands.Bot):
         """
         carried = carried_question(scope, text) if scope else None
         question = carried or text
-        if not force and not carried and not wants_advisor(question):
+        # A sentence that continues the comparison this player was just reading is the advisor's,
+        # even when it opens no new comparison of its own: "i have rosa and gemini implant" says
+        # nothing about a store, yet it is the only sensible follow-up to "which is better X or Y".
+        followed = thread_follow_up(scope, text) if (scope and not carried) else None
+        if not force and not carried and not followed and not wants_advisor(question):
             return None
         facts = await self._announcement_fact_rows(('ecr','promo_code','event','balance_change','gear_hub',
                                                     'store_offer','community'), limit=40)
         try:
-            verdict = advisor_answer(question, facts)
+            verdict = advisor_answer(question, facts, scope=scope)
         except Exception as exc:
             log.warning('Advisor path failed (%s); falling back to the normal answer.', type(exc).__name__)
             return None
@@ -1423,6 +1433,16 @@ class MechBot(commands.Bot):
                 if shot_answer:
                     await self.conversation_turn_reply(message,text,shot_answer,ambient=ambient_question)
                     return
+            # A sentence that continues the decision this player is still reading is answered from
+            # that decision before anything else can claim it. "i have rosa and gemini implant" used
+            # to be answered as a Rosa pilot listing - a name in the sentence won the ladder - and
+            # never as the follow-up to the comparison it clearly was.
+            thread_question=thread_follow_up(build_scope,text) if build_scope else None
+            if thread_question and not images:
+                verdict=await self.advisor_verdict(text,scope=build_scope)
+                if verdict and verdict.get('capability')=='thread':
+                    await self.conversation_turn_reply(message,text,discord_text(verdict['reply']),
+                                                       ambient=ambient_question);return
             pipeline_out=await self.pipeline_answer(text,message,scope=build_scope)
             if pipeline_out:
                 # Say what was corrected, so the answer never looks like mind reading.

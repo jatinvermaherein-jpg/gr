@@ -1473,6 +1473,12 @@ def _archive_is_machine_artifact(entry):
                 or re.search(r'\b[\w.-]+\.(?:json|csv|zip|sqlite|db)\b',title,re.I))
 
 
+def _closed_sentence(text):
+    """A clause from the archive, ending in a full stop. The data has no punctuation of its own."""
+    body=str(text or '').strip().rstrip('.;')
+    return (body + '.') if body else ''
+
+
 def _archive_attribution(entry):
     url=str(entry.get('url') or '').strip()
     source=str(entry.get('source') or '')
@@ -1588,14 +1594,37 @@ def _archive_fallback(context):
         return discord_text(f"**Text from a user-provided screenshot:** {excerpt}")
     data=first.get('data') or {}
     preferred=('name','rarity','tier','energyLevels','energy','perk','perkDesc','strengths','weaknesses','reasoning','ability','cost','cps','rank','start','end')
+    # This used to print "name: Rosa; cost: {"amount": 1040, "currency": "A coins"}" - the archive's
+    # own field names and a JSON blob. A player gets a sentence: what it is, what it does, what it costs.
+    name=safe_text(data.get('name') or '',80)
+    rarity=safe_text(data.get('rarity') or '',40)
+    skill=safe_text(data.get('skill') or '',40)
+    tier=safe_text(data.get('tier') or '',10)
+    bits=[]
+    if name:bits.append(f'**{name}**')
+    if rarity:bits.append(f'{rarity.title()} {safe_text(data.get("kind") or "entry",20)}'.strip())
+    if skill:bits.append(f'{skill} specialty' if data.get('skill') else '')
+    if tier:bits.append(f'tier {tier}')
+    lead=', '.join(bit for bit in bits if bit)
     details=[]
-    for key in preferred:
-        if key in data and data[key] not in (None,''):
-            value=data[key]
-            if isinstance(value,(dict,list)):value=json.dumps(value,ensure_ascii=False)
-            details.append(f"{key}: {safe_text(value,180)}")
-    if not details:return None
-    return discord_text('Here’s the matching entry: '+'; '.join(details[:6])+_archive_attribution(first))
+    if data.get('perk') and not isinstance(data.get('perk'),(dict,list)):
+        details.append(f'Perk: {safe_text(data["perk"],120)}')
+    if data.get('strengths') and not isinstance(data.get('strengths'),(dict,list)):
+        details.append(_closed_sentence(safe_text(data['strengths'],200)))
+    cost=data.get('cost')
+    if isinstance(cost,dict):
+        amount=cost.get('amount');currency=safe_text(cost.get('currency') or '',40)
+        if str(amount).strip() in ('$','Paid') or currency.casefold()=='paid':
+            details.append('Listed as a paid offer, with no numeric price.')
+        elif amount not in (None,'') and currency:
+            details.append(f'Listed at {_display_number(amount)} {currency}.')
+    elif cost not in (None,'') and not isinstance(cost,(dict,list)):
+        details.append(f'Listed at {safe_text(cost,60)}.')
+    if not (lead or details):return None
+    body=' · '.join(part for part in (lead,) if part)
+    tail=' '.join(details[:3])
+    reply=(f'{body}. {tail}'.strip() if body else tail)
+    return discord_text(reply+_archive_attribution(first))
 
 
 def _quotes_verified_cost(text,context):

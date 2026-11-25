@@ -356,7 +356,10 @@ class MentionPath(unittest.IsolatedAsyncioTestCase):
         bot.conversation_turn_reply.assert_awaited_once()
         reply = bot.conversation_turn_reply.await_args.args[2]
         self.assertIn('Savant 10', reply)
-        self.assertIn('community list', reply)
+        # The tier is named against the community list, and the same provenance closes the answer
+        # in one compact line instead of the long form under every comparison.
+        self.assertIn('tier A in the community list', reply)
+        self.assertIn('community catalog', reply)
         self.assertLessEqual(len(reply), advising.MAX_ANSWER)
 
 
