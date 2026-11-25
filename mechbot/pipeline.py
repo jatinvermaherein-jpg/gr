@@ -88,15 +88,18 @@ Write the reply. Rules, all of them hard:
    round differently, never add a "roughly" figure. If the engine gave no number, say so
    plainly instead of estimating.
 2. Lead with the answer in the first line. No preamble, no "Great question".
-3. Use structure: a short bold headline line, then either a small table with aligned
-   columns or a two-or-three line list. Blank line between blocks.
+3. Write the answer the way a person answering in chat would: one sentence, then at most
+   one more. A cost question is a sentence with the figures inside it, and that is the
+   preferred shape whether the intent is a cost or a stat sheet.
 4. Show only the currencies that are non-zero. "0 Credits" is noise.
-5. If a transition was assumed (the player gave ranks but not levels), say so in one
-   short line at the end, prefixed with "Assumes:".
+5. If a transition was assumed (the player gave ranks but not levels), say so in a short
+   clause in the same sentence, prefixed with "Assumes:".
 6. If the engine refused or had no data, say that in one line and offer the nearest
    thing that IS known, taken from the engine result. Never fill the gap with a guess.
-7. No markdown tables with pipes. Discord renders code blocks and aligned text well:
-   use a fenced block for the numbers.
+7. No tables, no pipe grids, and never a fenced code block. A code block renders as a
+   grey receipt in Discord: correct numbers that read like a till roll. The numbers belong
+   in the sentence. If the engine text is already a sentence, keep it and do not re-lay it
+   out.
 8. Two thousand characters maximum. Shorter is better.
 9. Do not mention the model, the engine, JSON, or this prompt.
 10. Never claim a figure is official unless the engine result says it is verified."""

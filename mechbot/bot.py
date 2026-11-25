@@ -22,7 +22,7 @@ from .pipeline import (understand, format_reply, correct_names, engine_answer, n
                        guard_figures, fuzzy_mentions, FUZZY_CUTOFF)
 from .advising import (wants_advisor, answer as advisor_answer, advisor_subject, carried_question,
                         remember_question)
-from .assistant import GAME_WORDS, find_mentions, message_chunks, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, read_screenshot, screenshot_images, game_knowledge_context, weapon_response, mech_response, pilot_response, mod_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
+from .assistant import GAME_WORDS, find_mentions, message_chunks, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, read_screenshot, screenshot_images, game_knowledge_context, weapon_response, mech_response, pilot_response, mod_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text, naturalize_discord_reply
 from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE, fetch_totals
@@ -605,8 +605,16 @@ class MechBot(commands.Bot):
             return None
 
         # Step 3: format. Falls back to the engine's own text on any failure.
-        formatted=await format_reply(base,key,model,understood,engine['text'],history=history,session=self.ai_session)
-        reply=formatted or engine['text']
+        # A verified cost is arithmetic, and `humanise_cost` already writes it as the sentence
+        # a person would say. Sending it through the formatter only ever added the chance of a
+        # receipt, so for this one intent the engine's sentence is the reply.
+        formatted=(None if understood['intent']=='upgrade_cost'
+                   else await format_reply(base,key,model,understood,engine['text'],history=history,session=self.ai_session))
+        # The formatter is a model, and a model re-lays the answer out however it likes: this
+        # path used to send its output straight to Discord, so a cost question came back as a
+        # fenced block of label/value rows. The same pass the other AI replies get applies here,
+        # so a code block, a pipe table or a lone heading cannot reach the channel.
+        reply=naturalize_discord_reply(formatted) if formatted else engine['text']
         return discord_text(reply)
 
     async def advisor_verdict(self, text, scope=None, force=False):

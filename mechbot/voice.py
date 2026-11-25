@@ -141,21 +141,14 @@ def humanise_cost(name, transition, costs, emoji, *, assumed='', no_op=False, pu
     if not spent:
         return f"{label}: I don't have a confirmed price for {transition} yet, so I won't guess one.{assumed}"
 
-    head = random.choice([
-        f'{label} — {transition} costs ',
-        f'Taking {label} through {transition} costs ',
-        f'For {label}, {transition} comes to ',
-    ])
+    # One shape, on purpose. This was three randomly-chosen openers plus a remark about which
+    # currency "gates" or is "the scarce half", and the reply a player actually got was
+    # "Redox - rank 4 L1 -> rank 5 L1 costs 2,825 A-Coins ... Blueprints are the part that gates
+    # this one." The figures were right and the commentary was ours, not the game's. The target
+    # format is the plain sentence: subject, then the costs, and nothing after them.
     body = ' · '.join(spent)
-    # One short human remark after the figures. No numbers in it, on purpose.
-    if b:
-        tail = ' Blueprints are the part that gates this one.'
-    elif a and c:
-        tail = ' A-Coins are the scarce half of that.'
-    else:
-        tail = ''
     note = f' {purchase}' if purchase else ''
-    return f'{head}**{body}**.{tail}{assumed}{note}'
+    return f'For {label}, the {transition} upgrade costs **{body}**.{assumed}{note}'
 
 
 def _spend_line(a, c, b, emoji):

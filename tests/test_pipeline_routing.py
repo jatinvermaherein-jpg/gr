@@ -284,3 +284,98 @@ class ScreenshotPingTests(unittest.IsolatedAsyncioTestCase):
                                          env={'AI_API_KEY': '', 'AI_MODEL': ''})
         self.assertIn('vision model', reply)
         self.assertEqual(seen, {}, 'no reader call is made without credentials')
+
+
+class CostReplyShapeTests(unittest.IsolatedAsyncioTestCase):
+    """The cost reply as it reached the channel: a fenced block of label/value rows.
+
+    Reported twice from live screenshots. First as a pipe table, then - after that was fixed -
+    as a grey code block, because FORMAT_PROMPT rule 7 asked for exactly that layout and this
+    path sent the model's output to Discord without the pass every other AI reply gets.
+    """
+
+    FORMATTED = ('**Upgrade cost for Redox rank 4 L1 \u2192 rank 5 L1**\n\n'
+                 '```\nA-Coins    2,825\nCredits    265,000\nBlueprints 10\n```')
+    UNDERSTOOD = {'intent': 'upgrade_cost', 'mechs': ['Redox'], 'weapons': [], 'pilots': [], 'mods': [],
+                  'from_rank': 4, 'from_level': 1, 'to_rank': 5, 'to_level': 1,
+                  'question': 'upgrade cost redox rank 4 l1 to rank 5 l1', 'unclear': False}
+
+    async def asyncSetUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': str(Path(self.tmp.name) / 'r.sqlite3')}):
+            self.catalog = Catalog(initialize_snapshot())
+
+    async def asyncTearDown(self):
+        self.catalog.close()
+        self.tmp.cleanup()
+
+    async def _cost_reply(self, formatter_text):
+        bot = MechBot(self.catalog, object())
+        bot._connection.user = SimpleNamespace(id=987654321098765432)
+        bot.conversation_history_for = AsyncMock(return_value=[])
+        bot.reply_message = AsyncMock()
+        bot.private_reply = AsyncMock()
+
+        async def fake_chat(base, key, model, system, user, **kwargs):
+            if 'ONE JSON object' in system:
+                return json.dumps(self.UNDERSTOOD)
+            return formatter_text
+        message = SimpleNamespace(author=SimpleNamespace(id=1, bot=False), channel=SimpleNamespace(id=44),
+                                  guild=None, mentions=[bot._connection.user], reference=None, attachments=[],
+                                  content='upgrade cost redox rank 4 l1 to rank 5 l1')
+        with patch.dict(os.environ, {'AI_API_KEY': 'k', 'AI_MODEL': 'm'}), \
+                patch('mechbot.pipeline._chat', new=fake_chat):
+            await bot.on_message(message)
+        return bot.reply_message.await_args.args[1]
+
+    # ---------------------------------------------------------------- the reply itself
+    async def test_a_cost_reply_is_one_sentence_not_a_receipt(self):
+        reply = await self._cost_reply(self.FORMATTED)
+        self.assertNotIn('```', reply, 'a fenced block is a till roll, not an answer')
+        self.assertNotIn('\n', reply, 'one sentence, so no label rows')
+        self.assertIn('2,825 A-Coins', reply)
+        self.assertIn('265,000 Credits', reply)
+        self.assertIn('10 Blueprints', reply)
+        self.assertIn('rank 4 L1 \u2192 rank 5 L1', reply)
+        self.assertIn('costs', reply)
+
+    async def test_the_cost_reply_never_grows_commentary(self):
+        """It shipped once as "... Blueprints are the part that gates this one." """
+        reply = await self._cost_reply(self.FORMATTED)
+        for remark in ('gates this one', 'scarce half', 'Straight answer', 'Here you go'):
+            self.assertNotIn(remark, reply)
+        self.assertTrue(reply.rstrip().endswith('.'), reply)
+
+    async def test_a_formatter_that_adds_a_figure_cannot_change_the_answer(self):
+        reply = await self._cost_reply('**Redox** costs 2,825 A-Coins, 265,000 Credits and 10 Blueprints. '
+                                       'Buy 4 more for 9,999 A-Coins.')
+        self.assertNotIn('9,999', reply, 'guard_figures rejects the formatting and the engine text survives')
+
+    # ---------------------------------------------------------------- the prompt that caused it
+    def test_the_prompt_does_not_ask_for_a_code_block(self):
+        from mechbot.pipeline import FORMAT_PROMPT
+        self.assertNotIn('use a fenced block', FORMAT_PROMPT)
+        self.assertIn('never a fenced code block', FORMAT_PROMPT)
+
+    # ---------------------------------------------------------------- the flattener
+    def test_a_fenced_row_block_becomes_a_sentence(self):
+        from mechbot.assistant import naturalize_discord_reply
+        out = naturalize_discord_reply(self.FORMATTED)
+        self.assertNotIn('```', out)
+        self.assertEqual(out, '**Upgrade cost for Redox rank 4 L1 \u2192 rank 5 L1**: '
+                              '2,825 A-Coins \u00b7 265,000 Credits \u00b7 10 Blueprints')
+
+    def test_a_fence_around_prose_is_only_unfenced(self):
+        from mechbot.assistant import naturalize_discord_reply
+        out = naturalize_discord_reply('```\nRedox is a tier A attacker.\n```')
+        self.assertNotIn('```', out)
+        self.assertIn('Redox is a tier A attacker.', out)
+
+    def test_the_one_shape_of_a_cost_sentence(self):
+        from mechbot.voice import humanise_cost
+        em = {'acoins': 'A', 'credits': 'C', 'blueprints': 'B'}
+        costs = {'acoins': 2825, 'credits': 265000, 'blueprints': 10}
+        for _ in range(10):
+            line = humanise_cost('Redox', 'rank 4 L1 \u2192 rank 5 L1', costs, em)
+            self.assertEqual(line, 'For **Redox**, the rank 4 L1 \u2192 rank 5 L1 upgrade costs '
+                                   '**A 2,825 A-Coins \u00b7 C 265,000 Credits \u00b7 B 10 Blueprints**.')

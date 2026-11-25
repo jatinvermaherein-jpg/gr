@@ -985,6 +985,39 @@ def _strip_table_rows(text):
     return re.sub(r'\n{3,}', '\n\n', '\n'.join(out))
 
 
+_COST_ROW = re.compile(r"^\s*([A-Za-z][A-Za-z ()-]{2,24}?)\s*[:\u2014-]?\s*([\d][\d,]*(?:\.\d+)?[KkMm]?)\s*$")
+_COST_HEADING = re.compile(r"\b(?:upgrade\s+cost|costs?|price)\b", re.I)
+
+
+def _strip_code_block(value):
+    """Turn a fenced cost block into the one sentence it should have been.
+
+    A reply of the form
+
+        **Upgrade cost for Redox rank 4 L1 -> rank 5 L1**
+
+        ```
+        A-Coins    2,825
+        Credits    265,000
+        Blueprints 10
+        ```
+
+    is a receipt, not an answer: the numbers are right and nothing about it reads as
+    speech. The prompt used to ask for exactly this layout, so it arrived from the model
+    whatever the engine produced. Only label/value rows are rewritten; a fenced block that
+    holds anything else is left alone and only its fence is removed.
+    """
+    def flatten(match):
+        lines = [line for line in match.group(1).splitlines() if line.strip()]
+        rows = [(_COST_ROW.match(line)) for line in lines]
+        if not lines or not all(rows):
+            return '\n'.join(lines)
+        pairs = [(row.group(1).strip(' :\u2014-'), row.group(2)) for row in rows]
+        said = ' \u00b7 '.join(f"{amount} {label}" for label, amount in pairs)
+        return said
+    return re.sub(r"```[a-zA-Z0-9]*\s*\n(.*?)\n?```", flatten, value, flags=re.S)
+
+
 def naturalize_discord_reply(text):
     """Keep a chat answer plain: no decoration, no table grid, no curly quotes.
 
@@ -994,7 +1027,14 @@ def naturalize_discord_reply(text):
     original = str(text).strip()
     value = re.sub(r'^(?:certainly|of course|absolutely|sure|great question)[,:!\s]+', '', original, count=1, flags=re.I).strip()
     value = re.sub(r"\s*(?:hope (?:that )?this helps[.!]?|let me know if you(?:'d| would) like anything else[.!]?)\s*$", '', value, flags=re.I).strip()
+    value = _strip_code_block(value)
     value = _strip_table_rows(value)
+    # "**Upgrade cost for Redox rank 4 L1 → rank 5 L1**" sitting alone above the figures is a
+    # heading, not a sentence. Join it to the figures it labels.
+    value = re.sub(r'^\*\*([^*\n]+)\*\*\s*\n\s*\n?((?:[^\n*|]+·[^\n]+|[^\n]*\d[^\n]*))\s*$',
+                   lambda m: f"**{m.group(1).strip()}**: {m.group(2).strip()}"
+                   if _COST_HEADING.search(m.group(1)) else m.group(0),
+                   value.strip(), count=1)
     # Give each currency mark its own placeholder so a pass-through cannot collapse them
     # into one another (every 💎 silently becoming 🪙 was the first attempt at this).
     for index, mark in enumerate(_CURRENCY_EMOJI):
