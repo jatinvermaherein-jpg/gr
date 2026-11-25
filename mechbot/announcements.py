@@ -351,7 +351,8 @@ def _post_summary(text,title='',limit=250):
                                  max_chars=limit,max_sentences=2)
 
 
-_EVENT_DATE_SUBJECT=r'(?:event\s+crate\s+rush|ecr|battle\s+pass|event|tournament|season|challenge)'
+_EVENT_DATE_SUBJECT=(r'(?:event\s+crate\s+rush|ecr|battle\s+pass|event|tournament|season|challenge|'
+                     r'playoff|playoffs|onslaught|festival|celebration|crate\s+rush)')
 _EVENT_DATE_MARKER=r'(?:date|schedule|scheduled|on|from|until|through|starts?|begins?|starting|launch(?:es)?|opens?|runs?|ends?|held|occurred)'
 _EVENT_DATE_CUE=re.compile(
     r'\b(?:date|schedule|scheduled|starts?|begins?|starting|launch(?:es)?|opens?|runs?|ends?|'
@@ -387,6 +388,37 @@ def _has_event_date_context(text,position,length=0):
     if re.search(rf'{subject}.{{0,45}}{_EVENT_DATE_MARKER}\b',clause_after,flags=re.I):
         return True
     return False
+
+
+_NO_YEAR_DATE = re.compile(
+    r"\b(?P<month>Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?"
+    r"|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+"
+    r"(?P<day>\d{1,2})(?:st|nd|rd|th)?\b(?!\s*[,]?\s*20\d{2})", re.I)
+
+
+def _no_year_date_label(text, today):
+    """The first stated month-and-day the post gives without a year, as a label; '' if none.
+
+    Only a date the post actually printed is used, and only where the sentence is about when
+    the event runs - the same clause gate the dated case uses. The year it belongs to is read
+    from the post's own clock: this year, or the next one when that day has clearly gone by,
+    which is how a post written in December reads "Jan 5".
+    """
+    for match in _NO_YEAR_DATE.finditer(str(text or '')):
+        if not _has_event_date_context(text, match.start(), len(match.group(0))):
+            continue
+        month_name = match['month']
+        month = _MONTH_NAMES.get(month_name.casefold(), _MONTH_NAMES.get(month_name.casefold()[:3]))
+        if not month:
+            continue
+        for year in (today.year + 1, today.year):
+            try:
+                parsed = date(year, month, int(match['day']))
+            except ValueError:
+                continue
+            if (parsed - today).days >= -31:
+                return f'{month_name} {int(match["day"])}'
+    return ''
 
 
 def _explicit_event_dates(text):

@@ -349,6 +349,23 @@ class ForumArchiveTests(unittest.TestCase):
         self.assertIn('Outdated', reply)
         self.assertIn('months ago', reply)   # 400 days reads as months, never as 'recent'
 
+    def test_the_event_answer_says_which_posts_still_describe_the_game(self):
+        """A saved post describes the game as it was, so each one carries its own standing."""
+        from mechbot.source_summaries import _record_standing, combined_source_summary
+        now = 1795320000
+        live = {'source_kind': 'announcement', 'posted_at': now - 2 * 86400,
+                'raw_text': 'A crash on the hangar screen is fixed.'}
+        stale = {'source_kind': 'announcement', 'posted_at': now - 500 * 86400,
+                 'raw_text': 'Voidghost is now the best mech in the game.'}
+        self.assertTrue(_record_standing(live, 'issues', now=now).startswith('Live'))
+        self.assertIn('Outdated', _record_standing(stale, 'issues', now=now))
+        self.assertIn('describes the game as it stood then', _record_standing(stale, 'issues', now=now))
+        rows = [{'channel_id': 1, 'message_id': '1', 'posted_at': live['posted_at'],
+                 'content': '# Patch notes\nA crash on the hangar screen is fixed.'}]
+        reply = combined_source_summary('patch notes', rows, topic='issues', now=now)
+        self.assertIn('1. **Patch notes**', reply)
+        self.assertIn('**Status:** Live', reply)
+
     def test_forum_lookup_detection_is_explicit_and_ambient_safe(self):
         for query in ('latest forum posts','What is the forum saying about Skystrike?',
                       'what are players saying about Surge?','forum build guides'):

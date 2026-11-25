@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 from .announcements import (
     _PROMO_CODE_LABEL, _PROMO_EXPIRED, _codes_from_promo_line,
-    _explicit_event_dates, _explicit_partial_event_date, _posted_timestamp,
+    _explicit_event_dates, _explicit_partial_event_date, _no_year_date_label, _posted_timestamp,
     _title_from_content, event_like, post_date_label,
 )
 from .forum_archive import search_forum_threads
@@ -117,6 +117,12 @@ def _event_date(text, today):
         return future[3], 'dated', future[2]
     if dates:
         return dates[0][3], 'past', dates[0][2]
+    # A stated month and day with no year ("ends Nov 30") is a date the post did print. It is
+    # dated in from the post's own clock, not invented: the current year, or the next one when
+    # that day has clearly gone by. Without this, a two-week window read as "date not stated".
+    stated = _no_year_date_label(str(text or ''), today)
+    if stated:
+        return stated, 'partial', None
     partial = _explicit_partial_event_date(str(text or ''))
     if partial:
         return partial, 'partial', None
@@ -296,6 +302,72 @@ def _promo_mentions(records):
     return sorted(mentions.values(), key=lambda item: item['sort_date'], reverse=True)
 
 
+# A saved post that describes the game as it was is not a description of the game as it is. The
+# event answer prints that difference as one line per post, so an old thread cannot be read as a
+# live schedule - the same judgement the forum and ECR answers make.
+_LIVE_CLAIM = re.compile(r'\b(?:is|are)\s+(?:currently|now)\b|\bcurrently\b|\bright\s+now\b|'
+                         r'\b(?:today|this\s+week|this\s+patch|this\s+update)\b', re.I)
+_STANDING_WINDOW_DAYS = {'events': 45, 'issues': 120}
+
+
+def _record_days_old(record, now):
+    """Days since the post was made, from whichever field this record type carries it in."""
+    def from_iso(value):
+        match = re.match(r'(20\d{2})-(\d{1,2})-(\d{1,2})', str(value or ''))
+        if not match:
+            return None
+        try:
+            year, month, day = map(int, match.groups())
+            return datetime(year, month, day, tzinfo=timezone.utc).timestamp()
+        except (TypeError, ValueError):
+            return None
+
+    stamp = 0.0
+    if record.get('source_kind') == 'announcement':
+        try:
+            stamp = float(record.get('posted_at') or 0)
+        except (TypeError, ValueError):
+            stamp = 0.0
+    else:
+        # The forum record is flattened: the date lives in created_iso, and only sometimes in a
+        # nested created dict. Reading the wrong one made every thread look undated.
+        stamp = from_iso(record.get('created_iso')) or from_iso(
+            (record.get('created') or {}).get('iso') if isinstance(record.get('created'), dict)
+            else record.get('created')) or 0.0
+    if not stamp:
+        return None
+    return max(0.0, (float(now) - stamp) / 86400)
+
+
+def _record_standing(record, topic, now=None):
+    """One line: is this saved post a statement about the live game, and why."""
+    current = datetime.now(timezone.utc).timestamp() if now is None else float(now)
+    if topic == 'events':
+        status = record.get('event_date_status') or 'missing'
+        label = record.get('event_date_label') or ''
+        if status == 'dated' and label:
+            return f'Live — the post states the event date: {label}.'
+        if status == 'past':
+            return 'Outdated — the date the post states has passed.'
+    age = _record_days_old(record, current)
+    window = _STANDING_WINDOW_DAYS.get(topic, 90)
+    if age is None:
+        return 'Live — the saved post carries no date, so its age cannot be checked.'
+    if age < 1:
+        return 'Live — posted today, so it describes the game as it stands.'
+    if age <= window:
+        return (f'Live — posted {int(round(age))} day{"s" if round(age) != 1 else ""} ago, '
+                f'inside the window this kind of post stays current.')
+    months = int(age // 30)
+    age_words = f'{months} month{"s" if months != 1 else ""} ago' if months else 'weeks ago'
+    claim = bool(_LIVE_CLAIM.search(str(record.get('raw_text') or record.get('text') or '')))
+    if claim:
+        return (f'Outdated — posted {age_words}, and it describes the game as it stood then. '
+                f'Later patches are not reflected in it.')
+    return (f'Outdated — posted {age_words}, so it is an archived post rather than a statement '
+            f'about the current build.')
+
+
 def combined_source_summary(question, announcement_rows=(), *, topic=None, now=None, limit=4):
     """Summarize matching source material from saved announcements and forum posts."""
     value = str(question or '').strip()
@@ -326,23 +398,40 @@ def combined_source_summary(question, announcement_rows=(), *, topic=None, now=N
     heading = '**Event summary**' if selected_topic == 'events' else '**Patch and bug summary**'
     lines = [heading]
     count = max(1, min(int(limit), 6))
-    for record in records[:count]:
+    standings = []
+    for number, record in enumerate(records[:count], start=1):
         title = clean_source_text(record.get('title') or 'Saved post', limit=120).replace('[', '').replace(']', '')
+        # The event date is read off this record's own text, not carried on it: a post that
+        # states "starts Nov 24, ends Nov 30" was being printed as "event date not stated".
+        source = '\n'.join(part for part in (title, str(record.get('raw_text') or record.get('text') or '')) if part)
+        event_label, event_status, _event_end = _event_date(source, _today(current))
+        record = dict(record, event_date_label=event_label, event_date_status=event_status)
         detail = _summarize_record(record, value, selected_topic)
         if not detail:
             detail = 'The saved post has no readable details beyond its title.'
-        lines.append(f'• **{title}** — {detail}')
+        # Numbered blocks, one per post, in the same shape as the ECR and forum answers: the
+        # detail, the dates, and then whether the post still speaks for the live game.
+        lines.append(f'{number}. **{title}**')
+        lines.append(f'\u2022 {detail}')
         if selected_topic == 'events':
             event_label = record.get('event_date_label') or ''
             status = record.get('event_date_status') or 'missing'
             posted = _post_date(record)
             if status == 'dated' and event_label:
-                date_line = f'  **Event date:** {event_label} · **Post date:** {posted}'
+                lines.append(f'\u2022 **Event date:** {event_label} · **Post date:** {posted}')
             elif status == 'partial' and event_label:
-                date_line = f'  **Event date mentioned:** {event_label} (year not stated) · **Post date:** {posted}'
+                lines.append(f'\u2022 **Event date mentioned:** {event_label} (year not stated) · '
+                             f'**Post date:** {posted}')
             else:
-                date_line = f'  **Event date not stated · Post date:** {posted} *(publication date, not the event date)*'
-            lines.append(date_line)
+                lines.append(f'\u2022 **Event date not stated · Post date:** {posted} '
+                             f'*(publication date, not the event date)*')
         elif record.get('sort_date'):
-            lines[-1] += f" · posted {_post_date(record)}"
-    return '\n'.join(lines)
+            lines.append(f'\u2022 **Post date:** {_post_date(record)}')
+        standing = _record_standing(record, selected_topic, now=current)
+        lines.append(f'**Status:** {standing}')
+        standings.append((title, standing.lower().startswith('live')))
+    if len(standings) > 1:
+        rollup = ['**LIVE OR OUTDATED**', 'Post | Standing']
+        rollup.extend(f'{title} | {"Live" if live else "Outdated"}' for title, live in standings)
+        lines.append('\n'.join(rollup))
+    return '\n\n'.join(lines)
