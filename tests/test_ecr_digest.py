@@ -552,3 +552,193 @@ class ReportedReplyDefectTests(unittest.TestCase):
                                                        'excerpt': self.SHEET}]})
         self.assertIn('HP', out)
         self.assertIn('227300', out)
+
+
+class EcrReplyReadingTests(unittest.TestCase):
+    """The ECR answer as a player reads it, judged on the real weekly guide.
+
+    The reported reply printed the guide's opening question as the item description, dropped
+    the only price in the post ("Max Credits - 800K"), and then printed a separate verdict line
+    per item that said the wrong thing: a clear "pick it up in the Gear Hub, don't spend A-Coins
+    on it" came out as "only if it fits your build". Every test here is a line of that reply.
+    """
+
+    NOW = 1795350000
+    DAY = 86400
+
+    def _reply(self, extra_rows=(), **kwargs):
+        from mechbot import facts
+        weekly = (Path(__file__).parent / 'fixtures' / 'announcement_weekly_ecr.txt').read_text(encoding='utf-8')
+        rows = [{'channel_id': 1, 'message_id': 'weekly', 'posted_at': self.NOW - 90000, 'edited_at': None,
+                 'channel_name': 'x', 'guild_name': 'Mech Arena', 'message_url': '', 'content': weekly}]
+        rows.extend(extra_rows)
+        built, _ = facts.build_facts(rows, now=self.NOW)
+        return facts.format_ecr_reply(built, now=self.NOW, **kwargs), built
+
+    # ---------------------------------------------------------------- the verdict
+    def test_the_only_price_in_the_post_is_in_the_reply(self):
+        reply, _ = self._reply()
+        self.assertIn('800K', reply, '"Max Credits - 800K" is the number the purchase turns on')
+
+    def test_a_free_route_is_not_read_as_a_skip(self):
+        """"Don't spend A-Coins on it - worth picking it up from the Gear Hub" is one yes."""
+        from mechbot import facts
+        verdict, _ = facts.advice_for("Available for Credits in the Gear Hub! Great opportunity to get it "
+                                      "for FREE via free token Don't spend A-Coins on it Worth picking up "
+                                      "from the Gear Hub!")
+        self.assertEqual(verdict, 'worth_it')
+        reply, _ = self._reply()
+        self.assertIn('SUPPRESSOR 10', reply)
+        self.assertNotIn('SUPPRESSOR 10: **only if it fits your build**', reply)
+
+    def test_it_is_your_choice_is_not_a_verdict(self):
+        from mechbot import facts
+        self.assertIsNone(facts.advice_for("Get or Skip, it's your choice!"))
+        # ...and when the post does advise, the choice line is not quoted as the advice
+        self.assertTrue(facts.advice_for("Worth the Credits cz it's available for A-coins in Gear Hub "
+                                        "Good mech, but very far from meta Get or Skip, it's your choice!"))
+
+    def test_a_caveat_and_a_price_both_survive_on_one_line(self):
+        reply, _ = self._reply()
+        line = next(text for text in reply.split('\n') if 'VORTEX' in text)
+        self.assertIn('800K', line)
+        self.assertIn('worth the spend', line)
+        self.assertIn('far from meta', line, 'the caveat is the other half of the advice')
+
+    def test_each_item_is_named_once(self):
+        reply, _ = self._reply()
+        self.assertEqual(reply.count('VORTEX (R4)'), 1, 'the item was named twice, once per block')
+        self.assertEqual(reply.count('SUPPRESSOR 10'), 1)
+
+    def test_the_reply_never_quotes_a_fragment(self):
+        reply, _ = self._reply()
+        for bad in ('Skip,!', '— “Credits”', '“Don\'t”', '…'):
+            self.assertNotIn(bad, reply)
+
+    # ---------------------------------------------------------------- the closed window
+    def test_an_expired_rotation_is_one_line_not_three(self):
+        rows = [{'channel_id': 1, 'message_id': 'one', 'posted_at': self.NOW - 3 * self.DAY,
+                 'edited_at': None, 'channel_name': 'x', 'guild_name': 'Mech Arena', 'message_url': '',
+                 'content': '# Credits ECR is here!! \U0001F4B0\n## The one-day rush starts now [member]'}]
+        reply, _ = self._reply(rows)
+        block = reply.split('**Earlier**')[1]
+        self.assertIn('window has passed', block)
+        self.assertNotIn('No buy or skip advice', block, 'a closed window is not worth three lines')
+        self.assertNotIn('one-day ECR · one-day ECR', reply, 'the kind was printed twice in the heading')
+
+    def test_the_tail_names_what_is_hidden(self):
+        # Old enough to be history against the weekly rhythm, so they belong behind the door.
+        seasonal = [{'channel_id': 1, 'message_id': f'seasonal{index}', 'posted_at': self.NOW - age * self.DAY,
+                     'edited_at': None, 'channel_name': 'x', 'guild_name': 'Mech Arena', 'message_url': '',
+                     'content': f'# Seasonal ECR\n## {name} \U0001F47E (R4)\n### Tracker\n'
+                                '\u2022 Just skip and save your A-coins.'}
+                    for index, (age, name) in enumerate(((70, 'ORACLE 16'), (95, 'SAVANT 10')))]
+        reply, built = self._reply(seasonal)
+        self.assertIn('earlier ECR post(s) are saved but hidden', reply)
+        self.assertIn('ORACLE 16', reply, 'five unnamed posts is a door with nothing written on it')
+        self.assertIn('ask for \u201cprevious ECRs\u201d', reply)
+
+
+class SavedEcrListingTests(unittest.TestCase):
+    """The listing path (format_fact_list) was worse than the reply: one post read as three."""
+
+    NOW = 1795350000
+    DAY = 86400
+
+    def _listing(self):
+        from mechbot import facts
+        weekly = (Path(__file__).parent / 'fixtures' / 'announcement_weekly_ecr.txt').read_text(encoding='utf-8')
+        built, _ = facts.build_facts([{'channel_id': 1, 'message_id': 'weekly',
+                                       'posted_at': self.NOW - 90000, 'edited_at': None,
+                                       'channel_name': 'x', 'guild_name': 'Mech Arena',
+                                       'message_url': '', 'content': weekly}], now=self.NOW)
+        return facts.format_fact_list(built, '\U0001F381 Saved ECR posts', limit=4, now=self.NOW)
+
+    def test_the_listing_says_the_verdict_once_per_item(self):
+        listing = self._listing()
+        self.assertEqual(listing.count('worth the spend'), 2, 'once for VORTEX, once for SUPPRESSOR 10')
+        self.assertIn('800K', listing)
+
+    def test_bold_emphasis_is_not_listed_as_an_item(self):
+        listing = self._listing()
+        items_line = next(line for line in listing.split('\n') if 'Items:' in line)
+        self.assertNotIn('FREE', items_line)
+        self.assertNotIn("Don't", items_line)
+        self.assertIn('VORTEX', items_line)
+
+    def test_the_guides_emoji_never_reaches_a_sentence(self):
+        listing = self._listing()
+        self.assertNotIn('\U0001FAE0', listing)      # 🫠 mid-sentence read as a glitch
+        self.assertNotIn('\U0001F914', listing)      # 🤔
+
+
+class EventRotationTests(unittest.TestCase):
+    """Schedules rotate; an expired one must not read as something running now."""
+
+    NOW = 1795350000   # Nov 22, 2026
+    DAY = 86400
+
+    def _facts(self, *posts):
+        from mechbot import facts
+        rows = [{'channel_id': 1, 'message_id': f'e{index}', 'posted_at': self.NOW - age * self.DAY,
+                 'edited_at': None, 'channel_name': 'x', 'guild_name': 'Mech Arena',
+                 'message_url': '', 'content': body}
+                for index, (age, body) in enumerate(posts)]
+        built, _ = facts.build_facts(rows, now=self.NOW)
+        return facts, built
+
+    def test_a_stated_window_is_read_as_a_window(self):
+        from mechbot import facts
+        self.assertEqual(facts.stated_dates('Starts Nov 24, ends Nov 27.'), ['Nov 24', 'Nov 27'])
+        self.assertEqual(facts.stated_dates('Playoff runs Nov 24 - Nov 27'), ['Nov 24 - Nov 27'])
+
+    def test_a_post_that_states_a_window_is_an_event_not_other(self):
+        facts, built = self._facts((3, '# Arena Playoff is here!\nStarts Oct 12, ends Oct 18. Play to earn points.'))
+        self.assertEqual(built[0]['category'], 'event')
+        self.assertEqual(facts._window_state(built[0], self.NOW), 'over')
+
+    def test_an_expired_event_says_so_and_a_future_one_says_that(self):
+        facts, built = self._facts((3, '# Arena Playoff is here!\nStarts Oct 12, ends Oct 18.'),
+                                   (2, '# New Event: Accolade Challenge!\nStarts Nov 24, ends Nov 27.'))
+        reply = facts.format_announcement_reply(built, now=self.NOW)
+        self.assertIn('this window has passed', reply)
+        self.assertIn('starts later', reply)
+        self.assertLess(reply.index('Accolade'), reply.index('Playoff'), 'what shuts next comes first')
+
+    def test_a_rebalance_is_balance_news_not_an_event(self):
+        facts, built = self._facts((1, '# Rebalance 7th Wave is now live\nOnyx EMP reduced to 2s, Outlaw nerfed.'))
+        self.assertEqual(built[0]['category'], 'balance_change')
+
+    def test_a_summary_does_not_repeat_the_title(self):
+        facts, built = self._facts((1, '# Rebalance 7th Wave is now live\nOnyx EMP reduced to 2s, Outlaw nerfed.'))
+        reply = facts.format_announcement_reply(built, now=self.NOW)
+        self.assertIn('Onyx EMP reduced to 2s', reply)
+        self.assertNotIn('is now live Onyx EMP', reply)
+
+
+class RotationScheduleTests(unittest.TestCase):
+    """A rotation that has not started is not running, and a schedule question is not an item one."""
+
+    def _records(self):
+        from mechbot import ecr_summary as S
+        return [S.from_tracker_row({'start': '2026-12-24', 'end': '2026-12-27', 'type': 'pilot',
+                                    'name': '?', 'rank': '', 'cps': '', 'items': '', 'chances': ''}),
+                S.from_tracker_row({'start': '2026-11-23', 'end': '2026-11-25', 'type': 'mech',
+                                    'name': 'Tailsting', 'rank': '3', 'cps': '100',
+                                    'items': 'inf', 'chances': '1%'})]
+
+    def test_a_future_rotation_is_not_listed_as_running(self):
+        from datetime import date
+        from mechbot import ecr_summary as S
+        text = S.render(self._records(), now=date(2026, 11, 24))
+        running = text.split('**Running now**')[1].split('**Scheduled next**')[0]
+        self.assertNotIn('24 Dec', running, 'a December rotation was printed under Running now')
+        self.assertIn('Scheduled next', text)
+        self.assertIn('24 Dec', text.split('**Scheduled next**')[1])
+
+    def test_a_schedule_question_is_not_answered_with_one_item(self):
+        from mechbot.bot import _wants_one_item
+        for question in ('ecr', 'current ecr', 'previous ecrs', 'whats the next ecr'):
+            self.assertFalse(_wants_one_item(question), question)
+        for question in ('when was tailsting in the ecr', 'tailsting history'):
+            self.assertTrue(_wants_one_item(question), question)

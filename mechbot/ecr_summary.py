@@ -373,9 +373,16 @@ def render(records, *, now=None, limit=3, title=None):
     rotations = group(records)
     if not rotations:
         return None
-    live = [r for r in rotations if r['end_date'] and r['end_date'] >= today]
+    # A rotation that has not started yet is not running. Testing only the end date put a
+    # rotation scheduled for 24 December under "Running now" in November, which is the one
+    # thing a reader would act on.
+    live = [r for r in rotations
+            if r['end_date'] and r['end_date'] >= today and not (r['start_date'] and r['start_date'] > today)]
+    soon = [r for r in rotations if r['start_date'] and r['start_date'] > today]
     named = [r for r in rotations if r['named']]
     unnamed = [r for r in rotations if not r['named']]
+    live_ids = {id(r) for r in live}
+    soon_ids = {id(r) for r in soon}
 
     out = []
     if title:
@@ -384,7 +391,11 @@ def render(records, *, now=None, limit=3, title=None):
         out.append('**Running now**')
         for rotation in live[:2]:
             out.append(_rotation_block(rotation, today))
-    shown = [r for r in named if r not in live][:max(1, int(limit))]
+    if soon:
+        out.append('**Scheduled next**')
+        for rotation in soon[:2]:
+            out.append(_rotation_block(rotation, today))
+    shown = [r for r in named if id(r) not in live_ids and id(r) not in soon_ids][:max(1, int(limit))]
     if shown:
         if any(r['start_date'] or r['end_date'] for r in shown):
             heading = '**Most recent completed rotations**'
@@ -393,11 +404,14 @@ def render(records, *, now=None, limit=3, title=None):
         out.append(heading)
         for rotation in shown:
             out.append(_rotation_block(rotation, today))
+    # A rotation already shown above is not part of the "further" count, and one rotation takes
+    # "was", not "were".
+    unnamed = [r for r in unnamed if id(r) not in live_ids and id(r) not in soon_ids]
     if unnamed:
         kinds = sorted({r.get('kind') for r in unnamed for r in r['rows'] if r.get('kind')})
         span = f'{_fmt_date(unnamed[-1]["start"])} – {_fmt_date(unnamed[0]["end"] or unnamed[0]["start"])}'
         out.append(f'*{len(unnamed)} further rotation{"" if len(unnamed) == 1 else "s"} '
-                   f'({span}) were logged without item names'
+                   f'({span}) {"was" if len(unnamed) == 1 else "were"} logged without item names'
                    + (f' — {_and_list(kinds)} slots only' if kinds else '')
                    + ', so I cannot say what was in them.*')
     return '\n\n'.join(out)

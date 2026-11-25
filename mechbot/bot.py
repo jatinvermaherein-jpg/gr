@@ -141,6 +141,19 @@ def calculate(expr):
     except (ZeroDivisionError,OverflowError):raise ValueError('Cannot calculate that expression.')
 
 
+# A question about one item names it; a question about the schedule does not. Without this,
+# "current ecr" fuzzy-matched a mech name and the whole answer became that one old rotation.
+_ONE_ITEM_WORDS = re.compile(r'\b(?:when|last|history|appearances?|times|ever|was|did)\b', re.I)
+_SCHEDULE_WORDS = re.compile(r'\b(?:current|now|running|next|upcoming|latest|today|schedule)\b', re.I)
+
+
+def _wants_one_item(query):
+    text = str(query or '')
+    if _SCHEDULE_WORDS.search(text):
+        return False
+    return bool(_ONE_ITEM_WORDS.search(text))
+
+
 class MechBot(commands.Bot):
     def __init__(self, catalog, store):
         # Ambient channel questions and announcement ingestion both require the privileged
@@ -851,8 +864,12 @@ class MechBot(commands.Bot):
                     log.warning('An ingested ECR post could not be rendered; skipping it.',exc_info=True)
                     continue
             if not records and not blocks:return None
+            # "what happened to Tailsting" is a question about the history, so the digest name
+            # wins when there is one. But "current ecr" also resolves to whatever name the word
+            # 'current' fuzzy-matches, which answered a question about now with one old item and
+            # nothing else. A digest answer only stands when the question is about an item.
             name=ecr_digest_resolve(query,records)
-            if name:
+            if name and _wants_one_item(query):
                 single=ecr_render.render_one(records,name)
                 if single:return single
             history=ecr_render.render(records,title=None) if records else None

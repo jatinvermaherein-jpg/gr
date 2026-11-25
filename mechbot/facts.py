@@ -48,7 +48,12 @@ _GEAR_HUB = re.compile(r'\bin\s+gear\s*hub\b|gear\s*hub\s*(?:update|updates|stoc
 _STORE_OFFER = re.compile(r'plarium\s+store|new\s+offer|free\s+gift|claim\s+the\s+free|store\s*!?\)', re.I)
 _BALANCE = re.compile(r'patch\s+notes|rebalance|nerf(?:ed|f)?\b|buff(?:ed)?\b|revert\s+the\s+fix|version\s+3\.\d+', re.I)
 _SURVEY = re.compile(r'\bsurvey\b', re.I)
-_EVENT = re.compile(r'new\s+(?:event|feature|mech|skin)|is\s+now\s+live|has\s+arrived|update\s+has\s+arrived|event\s+kicks\s+off', re.I)
+# A post that states when it runs is an event, whatever it calls itself. "Arena Playoff is here!
+# Starts Oct 12, ends Oct 18" matched nothing and was filed as Other, so a live window never
+# reached the events answer at all.
+_EVENT = re.compile(r'new\s+(?:event|feature|mech|skin)|is\s+now\s+live|has\s+arrived|update\s+has\s+arrived|'
+                    r'event\s+kicks\s+off|\bplayoff\b|\baccolade\b|\bchallenge\b|'
+                    r'\b(?:starts?|begins?|runs)\b[^.!?]{0,30}\b(?:ends?|until|through)\b', re.I)
 _WEEKLY_HEAD = re.compile(r'(?:current\s+)?(?:weekly\s+)?ecr\s+guide|\becr\s+guide\b', re.I)
 _ONE_DAY = re.compile(r'\b(?:a[-\s]?coins?|credits?|credit|mods?)\s+(?:rush\s+)?ecr\b|\becr\b[^.]{0,40}?\b(?:rush)\b|'
                       r'\b(?:surprise|crazy|flash)\s+ecr\b|\b(?:only\s+)?\d{1,2}\s*hours?\s*(?:more|left)?\b|\b24\s*h(?:ou?rs?)?\b', re.I)
@@ -58,10 +63,17 @@ _GRAND_PRIZE = re.compile(r'\bgrand\s+prizes?\b', re.I)
 _CODE_ASSIGN = re.compile(r'\bcode\b\s*[-–—:=]?\s*\n?\s*#*\s*([A-Z0-9][A-Z0-9_-]{3,31})\b', re.I)
 _PROMOCODE_DASH = re.compile(r'\bpromo-?code\b\s*[-–—:=]?\s*([A-Z0-9][A-Z0-9_-]{3,31})\b', re.I)
 _RANK_NOTE = re.compile(r'\(\s*(R\d{1,2})\s*\)|\b(R\d{1,2})\b')
-_MONTHS = 'January|February|March|April|May|June|July|August|September|October|November|December'
-_STATED_DATE = re.compile(rf'\b(?:(?:{_MONTHS})\.?\s+\d{{1,2}}(?:,?\s+20\d{{2}})?'
-                          r'|(?:\d{{1,2}}\.?\s+(?:{_MONTHS})(?:,?\s+20\d{{2}})?)'
-                          r'|20\d{{2}}-\d{{2}}-\d{{2}})\b', re.I)
+# The channel writes "Nov 24", not "November 24". Requiring the full month name meant no
+# announcement ever reported a date it stated, so an event posted in October with "ends Oct 18"
+# in it was still being listed as current in late November.
+_MONTHS = ('January|February|March|April|May|June|July|August|September|October|November|December'
+           '|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept|Sep|Oct|Nov|Dec')
+_ONE_DATE = rf'(?:(?:{_MONTHS})\.?\s+\d{{1,2}}(?:,?\s+20\d{{2}})?' \
+            rf'|(?:\d{{1,2}}\.?\s+(?:{_MONTHS})(?:,?\s+20\d{{2}})?)' \
+            rf'|20\d{{2}}-\d{{2}}-\d{{2}})'
+# A window is one fact: "Nov 24 – Nov 27" must not arrive as two unrelated dates.
+_STATED_DATE = re.compile(rf'\b(?:{_ONE_DATE}\s*(?:-|\u2013|\u2014|to|until|through)\s*{_ONE_DATE}'
+                          rf'|{_ONE_DATE})\b', re.I)
 # Banners inside a guide post (prize-pool overview, tips): they inform details, never the title.
 _SECTION_LABEL = re.compile(r'prize pool|overview|official tip|rewards? worth|worth priorit|how to\b|'
                             r'chances|advice|\btips?\b|stay (?:updated|ahead)|current(?:ly)? (?:running )?(?:ecr|events)|'
@@ -180,7 +192,11 @@ def classify(text):
         return 'gear_hub', 'unknown', 'gear hub price or stock listing'
     if _STORE_OFFER.search(low):
         return 'store_offer', 'unknown', 'store offer or free-gift link'
-    if _EVENT.search(low) and not re.search(r'patch notes', low, re.I):
+    if _BALANCE.search(low):
+        # Before the event rule: "Rebalance 7th Wave is now live" is a balance change that
+        # happens to use the word live, and filing it under events hid it beside schedules.
+        return 'balance_change', 'unknown', 'patch/balance wording'
+    if _EVENT.search(low):
         return 'event', 'unknown', 'event/feature release wording'
     if _BALANCE.search(low):
         return 'balance_change', 'unknown', 'patch/balance wording'
@@ -335,9 +351,17 @@ _ITEM_NOISE = re.compile(r'\bis\s+here\b|\b(?:hours?|mins?)\s+(?:more|left)\b|st
                          r'\bschedule\b|\bnew\s+event\b|\bonslaught\b|\bredeem\b|\bavailable\s+for\b', re.I)
 
 
+# Words that appear bold in a guide for emphasis and are not items: "**FREE**", "**Don't** spend
+# A-Coins". Both were listed under Items in a saved-ECR listing because the post bolded them.
+_NOT_AN_ITEM = re.compile(r"^(?:free|don['\u2019]?t|do not|worth|skip|buy|get|credits|a-?coins?"
+                          r"|blueprints?|tokens?|max|only|now|new|yes|no|it|this|that)$", re.I)
+
+
 def item_like(label):
     value = _clean_line(label)
     if not value or len(value) < 3 or _ITEM_NOISE.search(value):
+        return False
+    if _NOT_AN_ITEM.match(value.strip(' .,!:')):
         return False
     return len(value.split()) <= 5
 
@@ -361,8 +385,18 @@ def bold_entities(text):
 ADVICE_WORDS = {'skip': 'skip it', 'worth_it': 'worth the spend', 'depends': 'only if it fits your build'}
 
 # The guides are formulaic about money, so the verdict is only ever their own wording, never ours.
+# "Don't spend A-Coins on it - worth picking it up from the Gear Hub" is one recommendation, not
+# two: what it says don't buy is the route, not the item. Left in the skip pattern, the phrase
+# cancelled the "worth picking up" beside it and every route advice averaged out to a shrug.
 _ADVICE_SKIP = re.compile(r"\bskip\b|\btrash\b|\bnot worth\b|\bdon['\u2019]?t (?:buy|get|spend)\b|\bavoid\b|\bpass on\b|"
                           r"\bwait for\b|\bsave your\b|\bdon\u2019?t spend\b", re.I)
+_ADVICE_SKIP_ROUTE = re.compile(r"\bdon['\u2019]?t\s+spend\b[^.!?]{0,30}?\bon (?:it|them|this|that)\b", re.I)
+
+# The author declining to advise - "Get or Skip, it's your choice!", "you decide", "up to you" -
+# is not a verdict. Read as one, it printed as the bot's own recommendation, and the writer's real
+# advice ("worth the credits, it's A-Coins in the Gear Hub") was lost.
+_ADVICE_DECLINED = re.compile(r"\bget or skip\b|\bit['\u2019]?s your (?:choice|call|decision)\b|\byour (?:choice|call)\b|"
+                              r"\bup to you\b|\byou decide\b|\bdon['\u2019]?t know what (?:you|to)\b", re.I)
 _ADVICE_GO = re.compile(r"\bgo for it\b|\bmust (?:buy|get)\b|\bworth (?:it|buying|the (?:spend|credits))\b|"
                         r"\bsuggested to go\b|\bbest value\b|\bget it\b|\bgrab (?:it|the)\b|"
                         r"\bcheaper than (?:in |the )?gear hub\b|\brecommended\b", re.I)
@@ -371,17 +405,33 @@ _ADVICE_CONDITION = re.compile(r"\bif you (?:have|need|run|play)\b|\bunless you 
 
 
 def advice_for(text):
-    """(verdict, quote) from the post's own buy/skip wording, or None when it says nothing either way."""
+    """(verdict, quote) from the post's own buy/skip wording, or None when it says nothing either way.
+
+    Two things in the real guides are not verdicts, and reading them as ones is what turned a
+    clear "pick it up in the Gear Hub, don't spend A-Coins on it" into "only if it fits your
+    build": the author declining to advise ("Get or Skip, it's your choice!") and a warning
+    about the route rather than the item ("don't spend A-Coins on it" when the free token path
+    is right there). Both are removed before the wording is judged.
+    """
     body = re.sub(r'\s+', ' ', str(text or '')).strip()
     if not body:
+        return None
+    body = _ADVICE_SKIP_ROUTE.sub(' ', body)
+    body = _ADVICE_DECLINED.sub(' ', body)
+    body = re.sub(r'\s+', ' ', body).strip(' ,;:-')
+    if _ADVICE_DECLINED.search(str(text or '')) and not _ADVICE_GO.search(body):
+        # The post's only advice was "it's your choice", so the post advised nothing.
         return None
     skip, go = bool(_ADVICE_SKIP.search(body)), bool(_ADVICE_GO.search(body))
     if not skip and not go:
         return None
     ask = re.search(r'\bworth\b[^.?!]{0,40}\?', body, re.I)
     skipped = _ADVICE_SKIP.search(body)
-    if ask and go and not skip:
+    answered = _ADVICE_GO.search(body)
+    if ask and go and not skip and answered and answered.start() < ask.start():
         verdict = 'depends'                      # "worth the purchase?" asks; it does not advise
+    elif ask and go and not skip:
+        verdict = 'worth_it'                     # ...but "worth the Credits cz..." answers it
     elif skip and go and skipped and ask and skipped.start() > ask.start():
         verdict = 'depends'                       # the later wording answers the question
     elif skip and go and re.search(r'skip\b[^.!?]{0,60}\bunless\b', body, re.I):
@@ -689,25 +739,100 @@ def wants_older_ecr(text):
 
 
 def _label(value, limit=90):
-    """One clean line for a reply, cut at a word boundary so nothing reads as a fragment."""
-    text = re.sub(r'\s+', ' ', str(value or '')).strip()
+    """One clean line for a reply, cut at a word boundary so nothing reads as a fragment.
+
+    Runs the same emoji strip as `_plain`: a listing carried the guide's 🫠 into the middle of a
+    summary sentence, which reads as a glitch rather than as the channel's punctuation.
+    """
+    text = re.sub(r'[\U0001F300-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D]+', ' ', str(value or ''))
+    text = re.sub(r'\s+', ' ', text).strip()
     if len(text) <= limit:
         return text
     return _fit(text, limit)
 
 
-def _entry_lines(fact, limit=3):
-    """One line per featured item: what it is, then the post's own note, kept to one clause."""
-    details = fact.get('details') or {}
-    out = []
-    for entry in [e for e in (details.get('entries') or []) if not e.get('section')][:limit]:
-        label = _plain(entry.get('label'), 60)
-        if not label:
+_ECR_AMOUNT = re.compile(r"\d[\d,.]*\s?(?:[km]\b|credits?|a-?coins?|blueprints?|bp\b|tokens?|parts?)\b"
+                         r"|\b\d{1,3}(?:,\d{3})+\b|\b\d{3,}\b", re.I)
+_ECR_ROUTE = re.compile(r"\bgear hub\b|\bfree token\b|\btoken\b|\bstore\b|\bshop\b|\bevent\b", re.I)
+
+
+def _ecr_quote(text, limit=90):
+    """A bullet as a short quote: the post's words, not ours."""
+    body = _plain(text, limit).strip(' …')
+    body = re.split(r'(?<=[.!?])\s+(?=[A-Z])', body)[0].strip(' …')
+    return body
+
+
+def _words(text):
+    return {word.casefold() for word in re.findall(r"[a-z]+", str(text or '').lower()) if len(word) > 3}
+
+
+def _overlaps(snippet, spoken, threshold=0.5):
+    """True when a bullet says nothing the line has not already said."""
+    have, want = _words(spoken), _words(snippet)
+    return bool(want) and len(want & have) / len(want) >= threshold
+
+
+def _ecr_item_line(entry, width=230):
+    """One ECR item on one line: the price, then the verdict and the clauses that earned it.
+
+    The reply used to print the post's opening question as the item's description and then a
+    second line of verdict, so a guide that said "Max Credits - 800K ... worth the Credits"
+    came out as "A-coins Mech for credits, worth the purchase?" with the 800K nowhere. The
+    figure, the route and the caveat are what a player is deciding on, and they are read off
+    the post in its own words.
+    """
+    label = _plain(entry.get('label'), 60)
+    if not label:
+        return ''
+    bullets = [item for item in (_plain(raw, 160) for raw in (entry.get('bullets') or []))
+               if item and not _ADVICE_DECLINED.search(item)]
+    figures = [item for item in bullets if _ECR_AMOUNT.search(item)]
+    parts = []
+
+    # A price or amount is never dropped for the sake of a shorter line.
+    for item in figures[:2]:
+        parts.append(f'**{_ecr_quote(item, 60)}**')
+
+    verdict = entry.get('advice')
+    quote = _trim_quote(_ecr_quote(entry.get('advice_quote') or '', 80))
+    # The note has no full stops in it, so a fixed-width window runs one clause into the next:
+    # the guide's "worth the Credits cz it's available for A-Coins in Gear Hub" came out
+    # followed by "Good mech, but very far from meta" as though it were one thought. Quote the
+    # bullet the verdict actually came from, and let the caveat stand on its own.
+    # Quote the whole advice bullet, not a window into it: the bullet that carries the verdict
+    # is already one thought, and the window ran it into the next one.
+    advice_bullets = [item for item in bullets
+                      if (_ADVICE_GO if verdict == 'worth_it' else
+                          _ADVICE_CONDITION if verdict == 'depends' else _ADVICE_SKIP).search(item)]
+    matching = [item for item in advice_bullets if _overlaps(quote, item, threshold=0.5)] or advice_bullets
+    if matching:
+        quote = _trim_quote(_ecr_quote(min(matching, key=len), 90)) or quote
+    if quote and not any(_overlaps(quote, part) for part in parts):
+        if verdict in ADVICE_WORDS:
+            parts.append(f'**{ADVICE_WORDS[verdict]}** \u2014 \u201c{quote}\u201d')
+
+    # Then the route and the caveat, in that order: "worth picking it up from the Gear Hub"
+    # is the useful half of the advice when the item is free there, and "far from meta" is
+    # the half a player needs before spending.
+    spoken = ' '.join(parts)
+    ranked = sorted((item for item in bullets if item not in figures),
+                    key=lambda item: (0 if _ECR_ROUTE.search(item) else 1, len(item)))
+    added = 0
+    for item in ranked:
+        if added >= 2 or _overlaps(item, spoken) or _overlaps(item, quote):
             continue
-        note = _plain(entry.get('note'), 90).strip(' …')
-        note = re.split(r'(?<=[.!?])\s+(?=[A-Z])', note)[0].strip(' …')
-        out.append(f'\u2022 **{label}**' + (f' \u2014 {note}' if note else ''))
-    return out
+        snippet = _ecr_quote(item, 60)
+        if not snippet or snippet.casefold() in spoken.casefold():
+            continue
+        if len(label) + len(spoken) + len(snippet) > width:
+            continue
+        parts.append(f'\u201c{snippet}\u201d')
+        spoken = ' '.join(parts)
+        added += 1
+    if not parts:
+        return f'\u2022 **{label}**'
+    return f'\u2022 **{label}**: ' + ' \u00b7 '.join(parts)
 
 
 def format_ecr_reply(facts, now=None, include_older=False):
@@ -727,29 +852,41 @@ def format_ecr_reply(facts, now=None, include_older=False):
         horizon = ecr_cadence_days(facts, kind)[0] * 86400
         stale = ended or (now - int(fact['posted_at'])) > horizon
         head_label = ('Last ECR announcement' if stale and fact is current[0]
-                      else f'Earlier {kind_label}' if stale else
+                      else 'Earlier' if stale else
                       'Current ECR' if fact is current[0] else 'Also running')
         block = [f"**{head_label}** \u00b7 {kind_label} \u00b7 {_date_label(fact['posted_at'])} ({fact.get('age', '')})"]
-        entries = _entry_lines(fact)
-        if entries:
-            block.extend(entries)
-            if details.get('rank_note'):
-                block.append(f"\u2022 Labelled \u201c{_plain(details['rank_note'], 20)}\u201d in the post, unexplained there.")
+        items = [entry for entry in (details.get('entries') or []) if not entry.get('section')]
+        item_lines = [line for line in (_ecr_item_line(entry) for entry in items[:3]) if line]
+        if item_lines:
+            # Each line already carries the item, its price and its verdict, so the separate
+            # spend-check block that repeated the item names is gone. It used to say every
+            # item twice and, on a route advice, say it backwards.
+            block.extend(item_lines)
+            if not any(entry.get('advice') for entry in items[:3]):
+                block.append('\u2022 No buy or skip advice in the post.')
         else:
             summary = _plain(fact.get('summary'), 200).strip(' …')
-            block.append(f'\u2022 {summary}' if summary else '\u2022 No reward list in the saved post.')
-        check = spend_check(fact)
-        if check:
-            block.extend(check.split('\n'))
-        note = ''
-        if ended:
-            note = 'That one-day window has passed; a newer post may replace it.'
+            closed = ended or (kind == 'one_day' and now - int(fact['posted_at'])
+                               >= ONE_DAY_SECONDS + ONE_DAY_GRACE_SECONDS)
+            if closed and summary:
+                # A closed rotation with no item list is one statement, not a paragraph about
+                # a paragraph: what it was, and that its window shut.
+                block[0] += f' \u2014 {summary}'
+            else:
+                block.append(f'\u2022 {summary}' if summary else '\u2022 No reward list in the saved post.')
+                check = spend_check(fact)
+                if check:
+                    block.extend(check.split('\n'))
+        # One line for the window, whichever way it is shut. An expired rotation used to spend
+        # three lines saying it had expired and that it contained no advice.
+        if ended or (kind == 'one_day' and now - int(fact['posted_at'])
+                     >= ONE_DAY_SECONDS + ONE_DAY_GRACE_SECONDS):
+            block.append('\u2022 That window has passed; a newer post may replace it.')
         elif kind == 'one_day' and now - int(fact['posted_at']) < ONE_DAY_SECONDS + ONE_DAY_GRACE_SECONDS:
-            note = 'A one-day event: treat it as ending within 24 hours of the announcement.'
+            block.append('\u2022 One-day event: treat it as ending within 24 hours of the announcement.')
         elif stale:
-            note = 'Nothing newer of this kind is saved and the post states no end date, so it may already be over.'
-        if note:
-            block.append(f'\u2022 {note}')
+            block.append('\u2022 Nothing newer of this kind is saved and the post states no end date, '
+                         'so it may already be over.')
         lines.append('\n'.join(block))
 
     # Rotations that are still current but not shown, plus superseded ones, both wait for an explicit ask.
@@ -769,9 +906,107 @@ def format_ecr_reply(facts, now=None, include_older=False):
         else:
             lines.append('*No other ECR posts are saved, so there is nothing earlier to show.*')
     elif extras:
-        lines.append(f'*{len(extras)} other ECR post(s) are saved but hidden — ask for “previous ECRs” to see them.*')
+        # Naming what is behind the door: five unnamed posts is a door with nothing written on
+        # it, and the count used to include rotations the expanded view never printed.
+        names = []
+        for fact in extras:
+            details = fact.get('details') or {}
+            labels = [entry.get('label') for entry in (details.get('entries') or [])
+                      if not entry.get('section') and entry.get('label')]
+            names.append(_plain(labels[0], 30) if labels else _plain(fact.get('title'), 40))
+        shown = ', '.join(f'{_date_label(fact["posted_at"])}{" — " + name if name else ""}'
+                          for fact, name in zip(extras, names))
+        lines.append(f'*{len(extras)} earlier ECR post(s) are saved but hidden ({shown}) '
+                     f'— ask for “previous ECRs” to see them.*')
     text = '\n\n'.join(lines)
     return text[:1900] + '…' if len(text) > 1900 else text
+
+
+# An event window is short and its post stops being true the moment it shuts. Reported under
+# "Events & new content" without a date, an expired schedule reads as something running now.
+_EVENT_WINDOW_DAYS = 21
+
+
+def _event_is_over(fact, now):
+    if fact.get('category') != 'event':
+        return False
+    if fact.get('status') in ('ended', 'superseded'):
+        return True
+    if _first_stated_window(fact):
+        return _window_state(fact, now) == 'over'
+    return (_now_epoch(now) - int(fact.get('posted_at') or 0)) > _EVENT_WINDOW_DAYS * 86400
+
+
+_DATE_IN_POST = re.compile(rf'\b(?:{_MONTHS})\.?\s+(\d{{1,2}})(?:\s*,?\s*(20\d{{2}}))?', re.I)
+_MONTH_INDEX = {name.casefold(): index for index, names in enumerate(
+    [('january', 'jan'), ('february', 'feb'), ('march', 'mar'), ('april', 'apr'), ('may',),
+     ('june', 'jun'), ('july', 'jul'), ('august', 'aug'), ('september', 'sept', 'sep'),
+     ('october', 'oct'), ('november', 'nov'), ('december', 'dec')], start=1) for name in names}
+
+
+def _first_stated_window(fact):
+    """(start, end) epoch for the dates the post states, or None when it states none.
+
+    Used for ordering only: what a player needs first is whatever shuts next, and a window whose
+    end date has already gone by is history however recently it was posted.
+    """
+    text = ' '.join([str(fact.get('summary') or ''),
+                     ' '.join(str(v) for v in (fact.get('details') or {}).get('stated_dates') or [])])
+    found = []
+    for match in _DATE_IN_POST.finditer(text):
+        month = _MONTH_INDEX.get(match.group(0).split()[0].casefold().strip('.'))
+        if not month:
+            continue
+        year = int(match.group(2) or datetime.now(timezone.utc).year)
+        try:
+            found.append(datetime(year, month, int(match.group(1)), tzinfo=timezone.utc).timestamp())
+        except ValueError:
+            continue
+    if not found:
+        return None
+    return min(found), max(found)
+
+
+def _window_state(fact, now):
+    """'running', 'upcoming', 'over' or 'unknown' for a post that states a window."""
+    window = _first_stated_window(fact)
+    if not window:
+        return 'over' if _event_is_over(fact, now) else 'unknown'
+    start, end = window
+    stamp = _now_epoch(now)
+    if stamp > end + 86400:
+        return 'over'
+    if stamp < start:
+        return 'upcoming'
+    return 'running'
+
+
+def _window_label(fact, now):
+    window = _first_stated_window(fact)
+    if not window:
+        return ''
+    start, end = window
+    state = _window_state(fact, now)
+    return {'over': 'this window has passed', 'upcoming': 'starts later',
+            'running': 'running now'}.get(state, '')
+
+
+def _without_title(summary, title):
+    """A summary that opens with the title is the title said twice."""
+    text = str(summary or '').strip()
+    head = str(title or '').strip()
+    if not text or not head:
+        return text
+    squeeze = lambda value: re.sub(r'[^a-z0-9]+', ' ', value.casefold()).strip()
+    if squeeze(text).startswith(squeeze(head)):
+        text = text[len(head):].lstrip(' \u2014-:.,!') if text[:len(head)].casefold() == head.casefold() else text[len(head):].lstrip(' \u2014-:.,!')
+        # fall back to a word-boundary cut when punctuation differed inside the title
+        if squeeze(text).startswith(squeeze(head)):
+            words = squeeze(text).split()
+            want = len(squeeze(head).split())
+            stripped = re.sub(r'^(?:\S+\W+){%d}' % want, '', text, count=1)
+            text = stripped or text
+    return text.strip()
 
 
 def format_announcement_reply(facts, now=None, limit=10):
@@ -795,23 +1030,36 @@ def format_announcement_reply(facts, now=None, limit=10):
         pool = sorted([fact for fact in facts if fact.get('category') == category], key=lambda f: -int(f['posted_at']))
         if not pool:
             continue
+        # Live entries first, and an expired event only ever as a dated line at the end.
+        pool.sort(key=lambda f: (_event_is_over(f, now), -int(f['posted_at'])))
+        live = [fact for fact in pool if not _event_is_over(fact, now)]
         block = [f'**{heading}**']
+        if not live:
+            block[0] += ' *(nothing current — most recent below)*'
         for fact in pool[:limit if category != 'ecr' else 3]:
             line = f"• {_label(fact.get('title'), 70)} · {_date_label(fact['posted_at'])}"
-            summary = _label(fact.get('summary'), 160)
+            if category == 'event':
+                state = _window_label(fact, now)
+                if state:
+                    line += f' *({state})*'
+                elif _event_is_over(fact, now):
+                    line += ' *(this window has passed)*'
+            summary = _label(_without_title(fact.get('summary'), fact.get('title')), 160)
             if summary:
                 line += f'\n  {summary}'
             if fact.get('category') == 'promo_code':
                 found = (fact.get('details') or {}).get('codes') or []
                 if found:
                     line += '\n  ' + ', '.join(f'`{code}`' for code in found[:3]) + ' *(redemption not verified)*'
-            blocks_line = None
             if fact.get('category') == 'ecr':
-                blocks_line = ', '.join(_label(entry.get('label'), 45)
-                                        for entry in [e for e in ((fact.get('details') or {}).get('entries') or [])
-                                                      if not e.get('section')][:2])
-                if blocks_line:
-                    line += f'\n  Featured: {blocks_line}'
+                # The digest lists the same items the ECR reply does, read the same way. It used
+                # to print the raw note and then name the items again under 'Featured:'.
+                entries = [e for e in ((fact.get('details') or {}).get('entries') or [])
+                           if not e.get('section')][:2]
+                item_lines = [text for text in (_ecr_item_line(e, width=190) for e in entries) if text]
+                if item_lines:
+                    line = f"• {_label(fact.get('title'), 70)} · {_date_label(fact['posted_at'])}"
+                    line += '\n  ' + '\n  '.join(text.lstrip('• ') for text in item_lines)
             block.append(line)
         blocks.append('\n'.join(block))
     if not blocks:
@@ -883,13 +1131,19 @@ def format_fact_list(facts, heading, limit=6, show_codes=False, note=None, now=N
             line += ' *(a newer post replaces it)*'
         elif fact.get('status') == 'ended':
             line += ' *(the one-day window it announced has passed)*'
-        summary = _label(fact.get('summary'), 240)
-        if summary and summary.casefold() != title.casefold():
-            line += f'\n  {summary}'
-        if fact.get('category') == 'ecr':
-            verdict_line = spend_check(fact, allow_silent=False)
-            if verdict_line:
-                line += '\n  ' + verdict_line.lstrip('• ')
+        items = [entry for entry in (details.get('entries') or []) if not entry.get('section')]
+        if fact.get('category') == 'ecr' and items:
+            # Same one-line-per-item reading as the current-ECR reply. This listing used to
+            # print the raw note run-together, then a verdict block that named the items a
+            # second time, so one post read as three partial answers.
+            for entry in items[:3]:
+                item_line = _ecr_item_line(entry, width=190)
+                if item_line:
+                    line += '\n  ' + item_line.lstrip('• ')
+        else:
+            summary = _label(_without_title(fact.get('summary'), title), 240)
+            if summary and summary.casefold() != title.casefold():
+                line += f'\n  {summary}'
         codes = [str(value) for value in (details.get('codes') or [])]
         entities = [str(value) for value in (fact.get('entities') or [])
                     if str(value).strip() and str(value).casefold() not in {code.casefold() for code in codes}]
@@ -899,10 +1153,15 @@ def format_fact_list(facts, heading, limit=6, show_codes=False, note=None, now=N
             codes = details.get('codes') or []
             if codes:
                 line += '\n  ' + ', '.join(f'`{code}`' for code in codes[:3]) + ' *(redemption not verified)*'
-        if details.get('stated_dates'):
-            line += f"\n  Date stated in the post: {', '.join(details['stated_dates'][:2])}"
-            if fact.get('date_basis'):
-                line += f" ({fact['date_basis']})"
+        if _event_is_over(fact, now) and fact.get('category') == 'event':
+            line += ' *(this event window has passed)*'
+        stated = details.get('stated_dates') or []
+        if stated:
+            # "Nov 24, Nov 27" is a window; say so, and do not append "(stated in post)" to a
+            # line whose label already says where it came from.
+            joined = ' \u2192 '.join(stated[:2]) if len(stated) >= 2 else stated[0]
+            label = 'Window' if len(stated) >= 2 else 'Date'
+            line += f'\n  {label} in the post: {joined}'
         url = str(fact.get('message_url') or '')
         if url.startswith('http'):
             line += f'\n  Source: <{url[:120]}>'
