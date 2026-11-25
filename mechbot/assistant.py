@@ -274,11 +274,14 @@ def natural_builds_request(text, mech_names=()):
     """Recognize an explicit build lookup without forwarding free-form text as an API query."""
     value=str(text or '').strip()
     if not re.search(r'\b(?:builds?|loadouts?)\b',value,re.I):return None
-    lookup_intent=bool('?' in value or re.search(
+    # "build for Deathwalker for Squad power 14000" is the commonest wording and carries no
+    # interrogative, so requiring a question word sent it to the screenshot fallback instead
+    # of the builds API. Naming a mech next to "build" is the request.
+    names=find_mentions(value,mech_names)
+    lookup_intent=bool('?' in value or names or re.search(
         r'\b(?:any|show|find|list|get|check|share|recommend|suggest|best|latest|top|what|which)\b',
         value,re.I))
     if not lookup_intent:return None
-    names=find_mentions(value,mech_names)
     mode=_requested_build_mode(value)
     best_requested=bool(re.search(r'\b(?:best|top|recommend(?:ation)?)\b',value,re.I))
     list_requested=bool(re.search(r'\b(?:latest|recent|list)\b',value,re.I))
@@ -915,33 +918,71 @@ _TABLE_RULE = re.compile(r'^\s*\|?\s*:?-{2,}:?\s*(?:\|\s*:?-{2,}:?\s*)+\|?\s*$',
 _CURLY = {'\u201c': '"', '\u201d': '"', '\u2018': "'", '\u2019': "'"}
 
 
-def _strip_table_rows(text):
-    """Turn a padded pipe table into one line per row.
+_TABLE_HEADING = re.compile(
+    r'^\s*\*{0,2}(?P<name>[^|\n]{2,80}?)\s*(?:\((?P<trans>[^)]{3,40})\))?\*{0,2}\s*:?\s*$')
 
-    A model that decides to draw a table in a Discord message produces a wall of pipes
-    that reads as noise on a phone. The data is real, so each row is kept — the grid is
-    what goes: "Redox · R4 L1 → R6 L1 · 5,650 A-Coins · 715,000 Credits".
+_NUMERIC_CELL = re.compile(r'^[\d,]+(?:\.\d+)?%?$')
+
+
+def _table_cells(line):
+    cells = [c.strip(' *`') for c in line.strip().strip('|').split('|')]
+    return [c for c in cells if c]
+
+
+def _strip_table_rows(text):
+    """Rewrite a pipe table as prose, whatever shape the model drew.
+
+    Two shapes occur and they need opposite treatment:
+
+    * **Column headers over one value row** — ``| A-Coins | Credits | Blueprints |`` then
+      ``| 2,825 | 265,000 | 10 |``. The header cells are labels for the cells below, so
+      zipping them produces one sentence. The previous version instead printed the header
+      as a bare line of labels and the values as a second bare line of numbers.
+    * **Label/value rows** — ``| Item | Cost |`` then one row per pair. Zipping here would
+      produce garbage, so each row stays a line and its cells are joined with a middle dot.
+
+    The two are told apart by arithmetic, not by hoping: exactly one value row, and every
+    cell in it numeric while every header cell is not.
     """
     if '|' not in text:
         return text
     lines = text.split('\n')
-    rows = [line for line in lines if line.strip().count('|') >= 2]
-    if not _TABLE_RULE.search(text) and len(rows) < 2:
+    piped = [line for line in lines if line.strip().count('|') >= 2
+             and not _TABLE_RULE.match(line.strip())]
+    if not _TABLE_RULE.search(text) and len(piped) < 2:
         return text                       # a stray pipe, not a table
-    out = []
+
+    parsed = [_table_cells(line) for line in piped]
+    zipped_shape = (len(parsed) == 2
+                    and len(parsed[0]) == len(parsed[1])
+                    and not any(_NUMERIC_CELL.match(c) for c in parsed[0])
+                    and all(_NUMERIC_CELL.match(c) for c in parsed[1]))
+
+    out, heading, consumed = [], '', False
     for line in lines:
         stripped = line.strip()
         if _TABLE_RULE.match(stripped):
             continue                      # the ---- separator carries no data
         if stripped.count('|') >= 2:
-            # One line per row, cells in order — a row is a sentence, not a paragraph.
-            cells = [c.strip(' *`') for c in stripped.strip('|').split('|')]
-            cells = [c for c in cells if c]
-            if cells:
-                out.append(' · '.join(cells))
+            if zipped_shape and not consumed:
+                labels, values = parsed[0], parsed[1]
+                pairs = [f'{value} {label}' for label, value in zip(labels, values)]
+                subject = heading or 'That'
+                out.append(f'{subject}: ' + ' · '.join(pairs))
+                consumed = True
+            elif not zipped_shape:
+                cells = _table_cells(stripped)
+                if cells:
+                    out.append(' · '.join(cells))
             continue
+        candidate = _TABLE_HEADING.match(stripped)
+        if candidate and stripped and not stripped.startswith(('•', '-', '·')):
+            heading = re.sub(r'\s+', ' ', candidate['name']).strip(' *#_:')
+            if candidate['trans']:
+                heading = f'{heading} ({candidate["trans"].strip()})'
+            heading = heading[:90]
         out.append(line)
-    return '\n'.join(out)
+    return re.sub(r'\n{3,}', '\n\n', '\n'.join(out))
 
 
 def naturalize_discord_reply(text):
@@ -1388,6 +1429,73 @@ def _archive_attribution(entry):
     return f'\nSource: [{label}]({url})'
 
 
+_SCREENSHOT_LABELS = (
+    'Energy Capacity','HP','Speed','Power','Ability Cooldown','Ability Duration',
+    'Invulnerability Duration','Speed Boost','HP Restoration','Damage','DPS','Range',
+    'Reload','Magazine','Projectile Speed','Blast Radius','Capacity','Accuracy')
+
+
+def _screenshot_stats(text):
+    """Pull (label, values) pairs out of an OCR'd stat sheet.
+
+    These sheets are label-then-numbers: "HP 12000 41600 64400 93300 129900 175800
+    227300". The numbers are per-rank, so they are returned as an ordered list rather than
+    collapsed, and a row containing the star ladder is ignored.
+    """
+    found=[]
+    for raw in str(text or '').splitlines():
+        line=raw.strip()
+        if not line or '★' in line or line.startswith(('Rank','Text from')):
+            continue
+        for label in sorted(_SCREENSHOT_LABELS,key=len,reverse=True):
+            match=re.match(rf'^{re.escape(label)}\s+(.+)$',line,re.I)
+            if not match:
+                continue
+            values=re.findall(r'-?\d[\d,]*(?:\.\d+)?',match[1])
+            if values:
+                found.append((label,[v.rstrip(',') for v in values]))
+            break
+    return found
+
+
+def _screenshot_subject(text):
+    """The item name from the OCR heading, e.g. 'Back DEATHWALKER' -> 'Deathwalker'."""
+    for raw in str(text or '').splitlines()[:6]:
+        line=raw.strip()
+        match=re.match(r'^(?:back\s+)?([A-Za-z][A-Za-z0-9 \'-]{2,40})$',line)
+        if match and not re.match(r'^(?:Rank|Energy|HP|Speed|Power|Text)\b',line,re.I):
+            name=match[1].strip()
+            if not name.isupper():
+                name=name.title()
+            return name.title() if not any(ch.islower() for ch in name) else name
+    return ''
+
+
+# Phrases where a stat's own name is being used as a game term, not as a request for that
+# stat. "build for Deathwalker for Squad power 14000" is about Squad Power, not the mech's
+# Power row, and matching on the bare word answered the wrong question.
+_STAT_NAME_IN_TERM = ('squad power','unit power','team power','squad hp','gear hub')
+
+
+def _screenshot_stat_for(question, text):
+    """The single (label, value) a question asked for, when the sheet holds it."""
+    wanted=str(question or '').casefold()
+    for term in _STAT_NAME_IN_TERM:
+        wanted=wanted.replace(term,' ')
+    stats=_screenshot_stats(text)
+    for label,values in stats:
+        if re.search(rf'\b{re.escape(label.casefold())}\b',wanted):
+            rank=re.search(r'\brank\s*(\d)\b',wanted)
+            if rank:
+                index=int(rank[1])-1
+                if 0 <= index < len(values):
+                    return label,f'{values[index]} (rank {rank[1]})'
+            if len(values)==1:
+                return label,values[0]
+            return label,f'{values[0]} at the lowest recorded rank, up to {values[-1]} at the highest'
+    return None
+
+
 def _archive_fallback(context):
     entries=context.get('archive_material') or []
     first=next((entry for entry in entries if not (
@@ -1399,9 +1507,27 @@ def _archive_fallback(context):
         excerpt=safe_text(first.get('excerpt') or '',650)
         return discord_text(f"**{title}:** {excerpt}"+_archive_attribution(first)) if excerpt else None
     if first.get('kind')=='user_confirmed_raw_ocr':
-        excerpt=safe_text(first.get('excerpt') or '',700)
+        # This used to print the OCR page verbatim - a star-rating ladder, seven HP values
+        # and an "Invulnerability Duration" row - as the answer to a build question. It is
+        # a stat table, not a loadout, and pasting it under "Text from a user-provided
+        # screenshot" reads as a malfunction. Read the one figure the question actually
+        # needs when the question names one, otherwise say plainly what the screenshot is.
+        excerpt=first.get('excerpt') or ''
+        name=_screenshot_subject(excerpt)
+        wanted=_screenshot_stat_for(context.get('question') or '',excerpt)
+        if wanted:
+            return discord_text(f'**{name}**: {wanted[0]} is **{wanted[1]}**.')
+        if name:
+            have=sorted({label for label,_ in _screenshot_stats(excerpt)})
+            listed=', '.join(have[:8])
+            return discord_text(
+                f'I have the **{name}** stat sheet from a screenshot, not a build: '
+                f'{listed}. A loadout is which weapons and pilot go on it, and the screenshot '
+                f'does not contain one. Ask me for a specific figure - "Deathwalker HP at '
+                f'rank 5" - and I will read it off.')
+        excerpt=safe_text(excerpt,400)
         if not excerpt:return None
-        return discord_text(f"**Text from a user-provided screenshot:** {excerpt}\nThis is user-approved OCR; recognition, image identity, and version/date are not independently validated.")
+        return discord_text(f"**Text from a user-provided screenshot:** {excerpt}")
     data=first.get('data') or {}
     preferred=('name','rarity','tier','energyLevels','energy','perk','perkDesc','strengths','weaknesses','reasoning','ability','cost','cps','rank','start','end')
     details=[]

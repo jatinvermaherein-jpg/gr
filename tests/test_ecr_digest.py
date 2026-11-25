@@ -456,3 +456,99 @@ class RealAnnouncementTests(unittest.TestCase):
         for name in ('announcement_weekly_ecr.txt', 'announcement_mega_ecr.txt'):
             text = (self.FIXTURES / name).read_text(encoding='utf-8')
             self.assertEqual(facts.classify(text)[0], 'ecr', f'{name} must classify as ECR')
+
+
+class ReportedReplyDefectTests(unittest.TestCase):
+    """Three defects taken from live screenshots of the running bot."""
+
+    # ---------------------------------------------------------------- the table reply
+    def test_column_header_table_becomes_one_sentence(self):
+        """'| A-Coins | Credits | Blueprints |' + '| 2,825 | 265,000 | 10 |'.
+
+        The old handler printed the header as a label line and the values as a number
+        line, so a player saw 'A-Coins · Credits · Blueprints' followed by
+        '2,825 · 265,000 · 10'.
+        """
+        from mechbot.assistant import naturalize_discord_reply
+        table = ('**Redox Upgrade Cost (R4 L1 → R5 L1)**\n\n'
+                 '| A-Coins | Credits | Blueprints |\n|---|---|---|\n| 2,825 | 265,000 | 10 |')
+        out = naturalize_discord_reply(table)
+        self.assertNotIn('|', out)
+        self.assertIn('2,825 A-Coins', out)
+        self.assertIn('265,000 Credits', out)
+        self.assertIn('10 Blueprints', out)
+        self.assertIn('Redox Upgrade Cost', out, 'the heading becomes the subject of the sentence')
+
+    def test_label_value_table_keeps_one_line_per_row(self):
+        """The other shape must not be zipped into garbage."""
+        from mechbot.assistant import naturalize_discord_reply
+        out = naturalize_discord_reply('| Item | Cost |\n|---|---|\n| A-Coins | 5,650 |\n| Credits | 715,000 |')
+        self.assertIn('A-Coins · 5,650', out)
+        self.assertIn('Credits · 715,000', out)
+        self.assertNotIn('5,650 A-Coins', out)
+
+    def test_a_sentence_with_no_table_is_untouched(self):
+        from mechbot.assistant import naturalize_discord_reply
+        line = 'For **Redox**, the rank 2 L1 → rank 5 L1 upgrade costs **5,275 A-Coins**.'
+        self.assertEqual(naturalize_discord_reply(line), line)
+
+    # ---------------------------------------------------------------- the builds miss
+    def test_build_for_a_named_mech_is_a_request(self):
+        """'build for Deathwalker for Squad power 14000' fell through to the OCR fallback."""
+        from mechbot.assistant import natural_builds_request
+        result = natural_builds_request('build for Deathwalker for Squad power 14000',
+                                        ['Deathwalker', 'Redox'])
+        self.assertIsNotNone(result)
+        self.assertEqual(result['query'], 'Deathwalker')
+        self.assertEqual(result['sp_range'], (14000, 14000))
+
+    def test_build_request_without_a_question_mark_still_routes(self):
+        from mechbot.assistant import natural_builds_request
+        for question in ('build for deathwalker', 'deathwalker builds 14000 sp',
+                         'whats a good build for deathwalker'):
+            self.assertIsNotNone(natural_builds_request(question, ['Deathwalker']),
+                                 f'{question!r} must route to the builds API')
+
+    def test_a_message_that_names_no_mech_is_still_not_a_build_request(self):
+        from mechbot.assistant import natural_builds_request
+        self.assertIsNone(natural_builds_request('build me a sandwich', []))
+
+    # ---------------------------------------------------------------- the OCR dump
+    SHEET = ('Back DEATHWALKER\n'
+             'Rank *********** ********** ***********\n'
+             'Energy Capacity 18 12 16 20 24 28 32\n'
+             'HP 12000 41600 64400 93300 129900 175800 227300\n'
+             'Speed 19 km/h 19 km/h 19 km/h\n'
+             'Power 177 193 300 435 608 823 1064\n'
+             'Ability Cooldown 15 s 15 s 15 s\n')
+
+    def test_screenshot_rows_are_parsed_per_rank(self):
+        from mechbot.assistant import _screenshot_stats
+        stats = dict(_screenshot_stats(self.SHEET))
+        self.assertEqual(len(stats['HP']), 7)
+        self.assertEqual(stats['HP'][0], '12000')
+        self.assertNotIn('Rank', stats, 'the star ladder is not a stat')
+
+    def test_a_specific_stat_question_is_answered_with_that_figure(self):
+        from mechbot.assistant import _screenshot_stat_for
+        label, value = _screenshot_stat_for('deathwalker hp at rank 5', self.SHEET)
+        self.assertEqual(label, 'HP')
+        self.assertIn('129900', value)
+
+    def test_a_build_question_against_a_screenshot_is_not_answered_with_the_dump(self):
+        """It used to paste the whole OCR page under 'Text from a user-provided screenshot'."""
+        from mechbot.assistant import _archive_fallback
+        out = _archive_fallback({'question': 'build for Deathwalker for Squad power 14000',
+                                 'archive_material': [{'kind': 'user_confirmed_raw_ocr',
+                                                       'excerpt': self.SHEET}]})
+        self.assertIn('not a build', out)
+        self.assertNotIn('12000 41600 64400', out, 'the raw ladder must not be pasted')
+        self.assertLess(len(out), 400, 'the reply must stay a message, not a page')
+
+    def test_the_screenshot_reply_offers_the_figure_it_does_have(self):
+        from mechbot.assistant import _archive_fallback
+        out = _archive_fallback({'question': 'how much hp does deathwalker have',
+                                 'archive_material': [{'kind': 'user_confirmed_raw_ocr',
+                                                       'excerpt': self.SHEET}]})
+        self.assertIn('HP', out)
+        self.assertIn('227300', out)
