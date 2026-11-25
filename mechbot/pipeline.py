@@ -259,8 +259,31 @@ def _int_or_none(value, low, high):
     return number if low <= number <= high else None
 
 
-def _name_list(value, names):
-    """Keep only entries the catalog actually recognises, after fuzzy repair."""
+def _name_list(value, names, found_in=None):
+    """Keep only entries the catalog actually recognises, after fuzzy repair.
+
+    With `found_in`, the same matcher runs the other way round: the catalog names are searched for in
+    the player's sentence, so the subjects of an answer come from what was typed rather than from what
+    a model reported. Longest names win, so "Charge Rocket" does not also yield "Rocket" and
+    "Hornet 16" does not also yield "Hornet 1".
+    """
+    if found_in is not None:
+        body = str(found_in or '')
+        taken, out = [], []
+        for name in sorted({str(n) for n in names}, key=len, reverse=True):
+            if len(name) < 3:
+                continue
+            pattern = r'(?<![A-Za-z0-9])' + re.escape(name) + r'(?![A-Za-z0-9])'
+            for match in re.finditer(pattern, body, re.I):
+                span = (match.start(), match.end())
+                if any(span[0] >= low and span[1] <= high for low, high in taken):
+                    continue
+                taken.append(span)
+                out.append(name)
+                break
+        # Back into the order the player wrote them, not longest-first.
+        out.sort(key=lambda name: body.casefold().find(name.casefold()))
+        return out
     if not isinstance(value, list):
         return []
     out = []
@@ -310,6 +333,51 @@ def normalise_understanding(obj, catalog):
     }
 
 
+RANK_WORDS = re.compile(r'\b(?:rank|ranks|stars?|level|levels|lvl|lv|r)\s*\d|\b\d\s*(?:to|->|\u2192|-)\s*'
+                        r'(?:rank|level|lvl|l)?\s*\d|\bmax(?:ed|ing)?\b', re.I)
+COST_WORDS = re.compile(r'\b(?:upgrade|upgrading|cost|costs|price|priced|rank ?up|to rank|how much|'
+                        r'cheaper|expensive)\b', re.I)
+
+
+def reconcile_entities(understanding, text, catalog):
+    """What the player typed outranks what the model heard.
+
+    The catalog check on the model's names only asks whether each name exists, never whether it is
+    the name in the message. "redox" - one word, no rank, no cost wording - came back from the model
+    as an upgrade-cost question about Charge Rocket 10. Every name in that answer is a real catalog
+    row, so it survived validation, and the bot priced a weapon the player never mentioned. Here the
+    message itself is scanned for catalog names and the two are compared:
+
+    * a name the player typed that the model missed is added,
+    * a name the model reported that the player did not type is dropped,
+    * an upgrade-cost intent with no rank and no cost wording in the message is not a cost question.
+    """
+    body = str(text or '')
+    # Mechs and weapons first: a mech or a weapon is what these questions are about, and no mech name
+    # is an ordinary English word. Pilots and mods are only read out of the sentence when the model
+    # already heard one - "in case of a bug" must not resolve to the pilot called Case.
+    gear = {
+        'mechs': _name_list(None, getattr(catalog, 'mech_names', ()) or (), found_in=body),
+        'weapons': _name_list(None, getattr(catalog, 'weapon_names', ()) or (), found_in=body),
+    }
+    if any(gear.values()):
+        # The message names catalog gear, so those are the subjects. Anything else the model added is
+        # not in the sentence and has no business being priced or described.
+        understanding = dict(understanding, **gear)
+    for key in ('pilots', 'mods'):
+        reported = understanding.get(key) or []
+        if reported:
+            lowered = body.casefold()
+            understanding = dict(understanding,
+                                 **{key: [name for name in reported if name.casefold() in lowered]})
+    if understanding.get('intent') == 'upgrade_cost' and not (RANK_WORDS.search(body)
+                                                              or COST_WORDS.search(body)):
+        # One word, no rank, no cost word: that is "tell me about this", not "price this transition".
+        understanding = dict(understanding, intent='item_stats', from_rank=None, to_rank=None,
+                             from_level=None, to_level=None)
+    return understanding
+
+
 async def understand(base, key, model, text, history=None, catalog=None, session=None):
     """Step 1. Returns a normalised understanding, or None if the model failed."""
     if not key or not model:
@@ -327,7 +395,12 @@ async def understand(base, key, model, text, history=None, catalog=None, session
     except Exception as exc:
         log.warning('Understand step failed (%s); falling back to the deterministic ladder.', type(exc).__name__)
         return None
-    return normalise_understanding(parse_json_object(raw), catalog) if catalog is not None else parse_json_object(raw)
+    if catalog is None:
+        return parse_json_object(raw)
+    understanding = normalise_understanding(parse_json_object(raw), catalog)
+    if understanding is None:
+        return None
+    return reconcile_entities(understanding, text, catalog)
 
 
 # -------------------------------------------------------------------- formatting

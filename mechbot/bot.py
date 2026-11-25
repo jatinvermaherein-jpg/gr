@@ -115,6 +115,20 @@ Use `/help` anytime to see this command list.
 You can also mention me: `@bot remind me in 20 seconds to check the event`, `@bot review EM Rifle 10`, `@bot how much to upgrade Redox from rank 4 to 5?`, or `@bot how do I invite you?`. Reviews and upgrade costs use confirmed game data; missing details are never guessed.'''
 
 
+def _cost_fact_is_about(cost_fact, asked_name):
+    """Is this cost fact about the item the player named?
+
+    The cost table is keyed by rarity and item class, so the same totals are produced for any legendary
+    mech. The fact carries the name it was built for, and that name has to be the one in the message
+    before it can be printed as that item's price.
+    """
+    reported = str((cost_fact or {}).get('name') or '').strip()
+    asked = str(asked_name or '').strip()
+    if not reported or not asked:
+        return True
+    return reported.casefold() == asked.casefold()
+
+
 def help_text(user_id=None,guild_id=None):
     if user_id in OPERATORS and guild_id is not None:
         restricted=('• `/ping_loop member interval_seconds duration_seconds reason` — send an immediate, single-user ping, then bounded follow-up pings.\n'
@@ -541,6 +555,12 @@ class MechBot(commands.Bot):
                 if mod_item:
                     return mod_response({'matches':[mod_item],'upgrade_cost':mod_cost})
             cost_fact=next((f for f in ctx.get('verified_game_facts',[]) if f.get('type')=='upgrade_cost'),None)
+            if cost_fact and not _cost_fact_is_about(cost_fact,names[0]):
+                # The fact is about a different item than the one the player named. One screenshot
+                # asked about Redox and was answered with Charge Rocket 10's rank 4 to 5 price, and
+                # both are legendary, so the figures looked plausible: the cost table is keyed by
+                # rarity and class, not by name, and the fact carries the name it was built for.
+                cost_fact=None
             if cost_fact and cost_fact.get('cost') and any(int(v or 0) for v in cost_fact['cost'].values()):
                 # Same verified figures, said the way a person would say them.
                 # Prefer the original currency emoji already uploaded for this app; fall

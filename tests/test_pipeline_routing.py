@@ -763,3 +763,87 @@ class FollowUpThreadTests(unittest.TestCase):
         self.assertIsNone(self.advising.last_decision(self.SCOPE))
         reply = self.advising.answer('i have rosa and gemini implant', scope=self.SCOPE)
         self.assertNotEqual(reply['capability'], 'thread')
+
+
+class TheAnswerIsAboutWhatThePlayerTypedTests(unittest.IsolatedAsyncioTestCase):
+    """A screenshot showed "redox" answered with Charge Rocket 10's rank 4 to 5 upgrade cost.
+
+    The model had reported intent upgrade_cost about the wrong item. Every name in that answer is a
+    real catalog row, so the existing validation passed it - it only ever asked whether a name exists,
+    never whether it was the name in the message. The message is now the authority.
+    """
+
+    BAD = {'intent': 'upgrade_cost', 'mechs': [], 'weapons': ['Charge Rocket 10'], 'pilots': [], 'mods': [],
+           'from_rank': 4, 'from_level': 1, 'to_rank': 5, 'to_level': 1,
+           'question': 'redox', 'unclear': False}
+
+    async def asyncSetUp(self):
+        import tempfile
+        from mechbot.catalog import Catalog, initialize_snapshot
+        self._tmp = tempfile.mkdtemp()
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': str(Path(self._tmp) / 'r.sqlite3')}):
+            self.catalog = Catalog(initialize_snapshot())
+
+    async def asyncTearDown(self):
+        self.catalog.close()
+
+    async def _reply(self, question, understood):
+        from mechbot.bot import MechBot
+        bot = MechBot(self.catalog, object())
+        bot._connection.user = SimpleNamespace(id=9)
+        bot.conversation_history_for = AsyncMock(return_value=[])
+        bot.reply_message = AsyncMock()
+        bot.private_reply = AsyncMock()
+
+        async def fake_chat(base, key, model, system, user, **kwargs):
+            return json.dumps(understood) if 'ONE JSON object' in system else 'x'
+
+        message = SimpleNamespace(author=SimpleNamespace(id=1, bot=False), channel=SimpleNamespace(id=44),
+                                  guild=None, mentions=[bot._connection.user], content=question,
+                                  reference=None, attachments=[])
+        with patch.dict(os.environ, {'AI_API_KEY': 'k', 'AI_MODEL': 'm'}), \
+                patch('mechbot.pipeline._chat', new=fake_chat):
+            await bot.on_message(message)
+        return bot.reply_message.await_args.args[1]
+
+    async def test_a_one_word_item_question_is_not_answered_with_someone_elses_price(self):
+        reply = await self._reply('redox', self.BAD)
+        self.assertIn('Redox', reply)
+        self.assertNotIn('Charge Rocket', reply)
+        self.assertNotIn('1,575', reply, 'the price of a weapon the player never named')
+        self.assertNotIn('265,000', reply, 'a rank-up receipt is not what "redox" asked for')
+
+    async def test_a_real_cost_question_still_answers_with_its_own_figures(self):
+        understood = dict(self.BAD, weapons=[], mechs=['Redox'], question='redox rank 4 to rank 5')
+        reply = await self._reply('redox rank 4 to rank 5 upgrade cost', understood)
+        self.assertIn('Redox', reply)
+        self.assertIn('2,825', reply)
+        self.assertNotIn('1,575', reply)
+
+    def test_the_message_outranks_the_model_on_names(self):
+        from mechbot.pipeline import normalise_understanding, reconcile_entities
+        understanding = normalise_understanding(self.BAD, self.catalog)
+        fixed = reconcile_entities(understanding, 'redox', self.catalog)
+        self.assertEqual(fixed['mechs'], ['Redox'])
+        self.assertEqual(fixed['weapons'], [])
+        self.assertEqual(fixed['intent'], 'item_stats', 'no rank and no cost word is not a cost question')
+
+    def test_a_rank_and_a_cost_word_keep_the_cost_intent(self):
+        from mechbot.pipeline import normalise_understanding, reconcile_entities
+        understanding = normalise_understanding(dict(self.BAD, weapons=[], mechs=['Redox']), self.catalog)
+        fixed = reconcile_entities(understanding, 'redox rank 4 to rank 5 upgrade cost', self.catalog)
+        self.assertEqual(fixed['intent'], 'upgrade_cost')
+        self.assertEqual((fixed['from_rank'], fixed['to_rank']), (4, 5))
+
+    def test_two_typed_names_are_both_kept_in_order(self):
+        from mechbot.pipeline import normalise_understanding, reconcile_entities
+        understanding = normalise_understanding(dict(self.BAD, weapons=[], mechs=['Redox']), self.catalog)
+        fixed = reconcile_entities(understanding, 'tailsting or redox?', self.catalog)
+        self.assertEqual(fixed['mechs'], ['Tailsting', 'Redox'])
+
+    def test_a_mismatched_cost_fact_is_never_printed(self):
+        from mechbot.bot import _cost_fact_is_about
+        fact = {'name': 'Charge Rocket 10', 'cost': {'acoins': 1575}}
+        self.assertFalse(_cost_fact_is_about(fact, 'Redox'))
+        self.assertTrue(_cost_fact_is_about(fact, 'Charge Rocket 10'))
+        self.assertTrue(_cost_fact_is_about({'cost': {}}, 'Redox'), 'no name in the fact, nothing to contradict')
