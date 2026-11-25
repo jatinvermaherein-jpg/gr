@@ -2321,7 +2321,7 @@ class AnnouncementFactTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(verdicts[2],'skip')                           # "skip unless you need it" is a skip
         self.assertIn('ORACLE 16',fact['details']['entries'][0]['label'])
         reply=fact_layer.format_ecr_reply(facts,now=self.now)
-        self.assertIn(': **skip it**',reply)                            # one line per item, verdict first
+        self.assertIn('**Verdict:** Skip it',reply)                   # one verdict line per item
         self.assertIn('skip and save your A-coins',reply)             # quotes the post, does not editorialise
         self.assertNotIn('skip it because',reply.lower())
         silent={'channel_id':self.channel,'message_id':'401','posted_at':self.now-day,'edited_at':None,

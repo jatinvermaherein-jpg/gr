@@ -598,17 +598,22 @@ class EcrReplyReadingTests(unittest.TestCase):
         self.assertTrue(facts.advice_for("Worth the Credits cz it's available for A-coins in Gear Hub "
                                         "Good mech, but very far from meta Get or Skip, it's your choice!"))
 
-    def test_a_caveat_and_a_price_both_survive_on_one_line(self):
+    def test_a_caveat_and_a_price_both_survive_in_the_item_block(self):
         reply, _ = self._reply()
-        line = next(text for text in reply.split('\n') if 'VORTEX' in text)
-        self.assertIn('800K', line)
-        self.assertIn('worth the spend', line)
-        self.assertIn('far from meta', line, 'the caveat is the other half of the advice')
+        block = reply.split('1. **VORTEX (R4)**')[1].split('2. **')[0]
+        self.assertIn('800K', block, '"Max Credits - 800K" is the number the purchase turns on')
+        self.assertIn('far from meta', block, 'the caveat is the other half of the advice')
+        self.assertIn('**Verdict:**', block)
 
-    def test_each_item_is_named_once(self):
+    def test_each_item_is_named_once_before_the_roll_up(self):
+        # The roll-up table names every item a second time on purpose; the body must not.
         reply, _ = self._reply()
-        self.assertEqual(reply.count('VORTEX (R4)'), 1, 'the item was named twice, once per block')
-        self.assertEqual(reply.count('SUPPRESSOR 10'), 1)
+        body = reply.split('**FINAL VERDICT**')[0]
+        self.assertEqual(body.count('VORTEX (R4)'), 1, 'the item was named twice, once per block')
+        self.assertEqual(body.count('SUPPRESSOR 10'), 1)
+        table = reply.split('**FINAL VERDICT**')[1]
+        self.assertEqual(table.count('VORTEX (R4)'), 1)
+        self.assertEqual(table.count('SUPPRESSOR 10'), 1)
 
     def test_the_reply_never_quotes_a_fragment(self):
         reply, _ = self._reply()
@@ -637,6 +642,106 @@ class EcrReplyReadingTests(unittest.TestCase):
         self.assertIn('earlier ECR post(s) are saved but hidden', reply)
         self.assertIn('ORACLE 16', reply, 'five unnamed posts is a door with nothing written on it')
         self.assertIn('ask for \u201cprevious ECRs\u201d', reply)
+
+
+
+class EcrItemSummaryTests(unittest.TestCase):
+    """The reply is a summary of the rotation, not a transcript of the post.
+
+    The shape the owner asked for, one numbered block per featured item:
+
+        1. VORTEX (R4)
+        Availability: Gear Hub – A-Coins
+        • Max Credits: 800K
+        • A decent mech, but still far from the current meta.
+        Verdict: Worth the Credits...
+
+    ...then a FINAL VERDICT roll-up that answers "which one, and with what" in one look. Before
+    this, both items were printed as one long bullet each, with the verdict word embedded in the
+    middle of quoted clauses and no summary anywhere.
+    """
+
+    NOW = 1795350000
+    DAY = 86400
+
+    def _reply(self, content=None):
+        from mechbot import facts
+        body = content or (Path(__file__).parent / 'fixtures' / 'announcement_weekly_ecr.txt').read_text(encoding='utf-8')
+        built, _ = facts.build_facts([{'channel_id': 1, 'message_id': 'weekly',
+                                       'posted_at': self.NOW - 90000, 'edited_at': None,
+                                       'channel_name': 'x', 'guild_name': 'Mech Arena',
+                                       'message_url': '', 'content': body}], now=self.NOW)
+        return facts.format_ecr_reply(built, now=self.NOW), built
+
+    def test_each_item_is_a_numbered_block_of_its_own(self):
+        reply, _ = self._reply()
+        self.assertIn('1. **VORTEX (R4)**', reply)
+        self.assertIn('2. **SUPPRESSOR 10**', reply)
+
+    def test_every_block_states_availability_and_a_verdict(self):
+        reply, _ = self._reply()
+        for block in reply.split('**FINAL VERDICT**')[0].split('\n\n')[1:]:
+            if '**Availability:**' not in block:
+                continue
+            self.assertIn('**Availability:** Gear Hub', block)
+            self.assertIn('**Verdict:**', block)
+
+    def test_an_a_coin_route_and_a_credits_route_are_told_apart(self):
+        # VORTEX is "available for A-coins in Gear Hub"; SUPPRESSOR 10 is "available for Credits
+        # in the Gear Hub" with a free token on top. One line each, read off the post.
+        reply, _ = self._reply()
+        vortex = reply.split('1. **VORTEX (R4)**')[1].split('2. **')[0]
+        suppressor = reply.split('2. **SUPPRESSOR 10**')[1].split('**FINAL VERDICT**')[0]
+        self.assertIn('Gear Hub \u2013 A-Coins', vortex)
+        self.assertIn('Credits or free token', suppressor)
+        self.assertNotIn('Credits or free token', vortex)
+
+    def test_a_ruled_out_currency_does_not_become_the_availability(self):
+        # "Don't spend A-Coins on it" names A-Coins to rule them out. Read as a route, it turned a
+        # free Gear Hub weapon into an A-Coin purchase.
+        reply, _ = self._reply()
+        suppressor = reply.split('2. **SUPPRESSOR 10**')[1].split('**FINAL VERDICT**')[0]
+        self.assertNotIn('Availability:** Gear Hub \u2013 A-Coins', suppressor)
+
+    def test_the_bullets_are_the_posts_own_sentences_one_per_line(self):
+        reply, _ = self._reply()
+        vortex = reply.split('1. **VORTEX (R4)**')[1].split('2. **')[0]
+        self.assertIn('\u2022 Max Credits: 800K', vortex)
+        self.assertIn('\u2022 Good mech, but very far from meta', vortex)
+        self.assertNotIn(' · ', vortex, 'the old reply joined every clause with middle dots')
+
+    def test_the_roll_up_answers_which_item_and_with_what(self):
+        reply, _ = self._reply()
+        tail = reply.split('**FINAL VERDICT**')[1]
+        self.assertIn('Item | Recommendation | Currency', tail)
+        self.assertRegex(tail, r'VORTEX \(R4\) \| Worth Getting \| A-Coins')
+        self.assertRegex(tail, r'SUPPRESSOR 10 \| Worth Getting \| Credits / Free Token')
+
+    def test_the_roll_up_follows_the_items_and_the_items_follow_the_post(self):
+        reply, _ = self._reply()
+        self.assertLess(reply.index('1. **VORTEX'), reply.index('2. **SUPPRESSOR'))
+        self.assertLess(reply.index('SUPPRESSOR 10'), reply.index('**FINAL VERDICT**'))
+
+    def test_no_emoji_reaches_the_reply(self):
+        reply, _ = self._reply()
+        for glyph in ('\U0001F381', '\U0001F6E1', '\U0001F4A5', '\U0001F4A1', '\u2699', '\u2728',
+                      '\U0001FAE0', '\U0001F3C6', '\U0001F525', '\u26A1'):
+            self.assertNotIn(glyph, reply, f'{glyph!r} must be stripped from an ECR answer')
+
+    def test_a_post_that_states_no_route_says_so_instead_of_guessing(self):
+        reply, _ = self._reply('# Current Weekly ECR Guide\n## ORACLE 16 \U0001F47E (R4)\n'
+                               '### The worst tracker is here\n\u2022 Oracle is a very trash weapon.\n'
+                               '\u2022 Just skip and save your A-coins.')
+        self.assertNotIn('Availability:**', reply.split('**FINAL VERDICT**')[0])
+        self.assertIn('ORACLE 16 (R4) | Skip | Not stated', reply)
+
+    def test_a_skipped_item_is_marked_skip_in_both_places(self):
+        reply, _ = self._reply('# Current Weekly ECR Guide\n## ORACLE 16 \U0001F47E (R4)\n'
+                               '### The worst tracker is here\n\u2022 Just skip and save your A-coins.\n'
+                               '## TAILSTING \U0001F9E9\n### Spider meta\n\u2022 Worth it if you run spiders.')
+        self.assertIn('**Verdict:** Skip it', reply)
+        self.assertIn('ORACLE 16 (R4) | Skip | Not stated', reply)
+        self.assertIn('TAILSTING | Optional | Not stated', reply)   # "worth it if..." is conditional
 
 
 class SavedEcrListingTests(unittest.TestCase):

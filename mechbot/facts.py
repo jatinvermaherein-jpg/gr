@@ -340,7 +340,12 @@ def entries(text, note_limit=MAX_NOTE):
             current['bullets'].append(piece[:400])
     for item in found:
         item['note'] = re.sub(r'\s+', ' ', item['note']).strip()
-        verdict = advice_for(item['note'])
+        # The verdict is read off the note, whose clauses were joined with a space. The quote is
+        # what the reply prints, so it is cut from the bullet list instead, where the post's own
+        # sentence boundaries still exist; otherwise two thoughts run into one ("...in Gear Hub
+        # Good mech, but very far from meta") and the reply quotes a sentence nobody wrote.
+        quote = ' '.join(item['bullets']) if item.get('bullets') else item['note']
+        verdict = advice_for(item['note']) or advice_for(quote)
         if verdict:
             item['advice'], item['advice_quote'] = verdict[0], verdict[1][:150]
     return found
@@ -754,6 +759,10 @@ def _label(value, limit=90):
 _ECR_AMOUNT = re.compile(r"\d[\d,.]*\s?(?:[km]\b|credits?|a-?coins?|blueprints?|bp\b|tokens?|parts?)\b"
                          r"|\b\d{1,3}(?:,\d{3})+\b|\b\d{3,}\b", re.I)
 _ECR_ROUTE = re.compile(r"\bgear hub\b|\bfree token\b|\btoken\b|\bstore\b|\bshop\b|\bevent\b", re.I)
+# A bullet that argues against the item: "Good mech, but very far from meta". The half after
+# "but" is the half a player needs before spending, so it is never the line that gets dropped.
+_CAVEAT = re.compile(r"\bbut\b|\bhowever\b|\balthough\b|\bthough\b|\bfar from meta\b|"
+                     r"\bnot (?:that|so|very) good\b|\bworst\b|\btrash\b", re.I)
 
 
 def _ecr_quote(text, limit=90):
@@ -776,11 +785,13 @@ def _overlaps(snippet, spoken, threshold=0.5):
 def _ecr_item_line(entry, width=230):
     """One ECR item on one line: the price, then the verdict and the clauses that earned it.
 
-    The reply used to print the post's opening question as the item's description and then a
-    second line of verdict, so a guide that said "Max Credits - 800K ... worth the Credits"
-    came out as "A-coins Mech for credits, worth the purchase?" with the 800K nowhere. The
-    figure, the route and the caveat are what a player is deciding on, and they are read off
-    the post in its own words.
+    Kept for the announcement digest, which lists many rotations at once and wants one line
+    each; the single-rotation ECR answer prints the fuller per-item blocks from
+    `_ecr_item_block` below. The reply used to print the post's opening question as the item's
+    description and then a second line of verdict, so a guide that said "Max Credits - 800K ...
+    worth the Credits" came out as "A-coins Mech for credits, worth the purchase?" with the 800K
+    nowhere. The figure, the route and the caveat are what a player is deciding on, and they are
+    read off the post in its own words.
     """
     label = _plain(entry.get('label'), 60)
     if not label:
@@ -796,12 +807,6 @@ def _ecr_item_line(entry, width=230):
 
     verdict = entry.get('advice')
     quote = _trim_quote(_ecr_quote(entry.get('advice_quote') or '', 80))
-    # The note has no full stops in it, so a fixed-width window runs one clause into the next:
-    # the guide's "worth the Credits cz it's available for A-Coins in Gear Hub" came out
-    # followed by "Good mech, but very far from meta" as though it were one thought. Quote the
-    # bullet the verdict actually came from, and let the caveat stand on its own.
-    # Quote the whole advice bullet, not a window into it: the bullet that carries the verdict
-    # is already one thought, and the window ran it into the next one.
     advice_bullets = [item for item in bullets
                       if (_ADVICE_GO if verdict == 'worth_it' else
                           _ADVICE_CONDITION if verdict == 'depends' else _ADVICE_SKIP).search(item)]
@@ -835,6 +840,177 @@ def _ecr_item_line(entry, width=230):
     return f'\u2022 **{label}**: ' + ' \u00b7 '.join(parts)
 
 
+# The guide states where an item can be had, and that is the first thing a player needs: the same
+# reward is a shrug at 6,650 A-Coins and a bargain for Credits. It used to be buried inside the
+# post's own sentence, so the reply never said "Gear Hub" anywhere near the word "Availability".
+_AVAIL_TRIGGER = re.compile(r"\bavailable\b|\bin (?:the )?gear\s*hub\b|\bgear\s*hub\b|"
+                            r"\bfor (?:free|credits|a-?coins)\b|\bspend (?:credits|a-?coins)\b|"
+                            r"\bpick(?:ing)? (?:it |them )?up\b|\bfree\s+token\b", re.I)
+# "Don't spend A-Coins on it" names A-Coins to rule them out. Read as a route, it made a free
+# Gear Hub weapon look like a 9,375 A-Coin purchase.
+_A_COIN_RULED_OUT = re.compile(r"\b(?:don['\u2019]?t|do not|never|no need to)\s+(?:spend|buy|get|use)\s+"
+                               r"(?:any\s+)?a-?coins?\b|\bnot\s+(?:for|worth)\s+a-?coins?\b", re.I)
+_CREDITS_RULED_OUT = re.compile(r"\b(?:don['\u2019]?t|do not|never)\s+(?:spend|buy|get|use)\s+(?:any\s+)?credits?\b", re.I)
+_FREE_TOKEN = re.compile(r"\bfree\s+token\b|\bvia free token\b|\bfor\s+\*{0,2}free\b", re.I)
+_GEAR_HUB_ROUTE = re.compile(r"\bgear\s*hub\b", re.I)
+
+AVAIL_WORDS = {
+    'a_coins': 'Gear Hub \u2013 A-Coins',
+    'credits': 'Gear Hub \u2013 Credits',
+    'token': 'Free token',
+    'hub': 'Gear Hub',
+    'mixed': 'Gear Hub \u2013 Credits or free token',
+}
+# The same route as it appears in the roll-up table, where the column already says "Currency".
+AVAIL_TABLE = {'a_coins': 'A-Coins', 'credits': 'Credits',
+               'token': 'Free Token', 'hub': 'Gear Hub', 'mixed': 'Credits / Free Token'}
+
+
+def _availability(clauses, entry=None):
+    """Where the post says the item can be had, read off the bullets that talk about buying it.
+
+    Returns ``(code, line)``, or ``(None, '')`` when the post never says. Never inferred from
+    what the item is: a mech is not assumed to cost A-Coins just because mechs usually do.
+    """
+    entry = entry or {}
+    pool = [str(clause) for clause in clauses]
+    hint = str(entry.get('availability') or '')
+    haystack = ' '.join(pool + ([hint] if hint else []))
+    if not haystack or not (_AVAIL_TRIGGER.search(haystack) or hint):
+        return None, ''
+    paid_a_coins = any(re.search(r"\ba-?coins?\b", clause, re.I) and not _A_COIN_RULED_OUT.search(clause)
+                       for clause in pool)
+    credits = any(re.search(r"\bcredits?\b", clause, re.I) and not _CREDITS_RULED_OUT.search(clause)
+                  for clause in pool)
+    free_token = bool(_FREE_TOKEN.search(haystack))
+    hub = bool(_GEAR_HUB_ROUTE.search(haystack))
+    if paid_a_coins:
+        return 'a_coins', AVAIL_WORDS['a_coins']
+    if free_token:
+        # A token plus a Gear Hub line is two routes for the same reward: earn it free, or buy
+        # it. Only the token, with no other route named, is a single answer.
+        return ('mixed' if (hub or credits) else 'token'), AVAIL_WORDS['mixed' if (hub or credits) else 'token']
+    if credits:
+        return 'credits', AVAIL_WORDS['credits']
+    if hub:
+        return 'hub', AVAIL_WORDS['hub']
+    return None, ''
+
+
+# A verdict word for the roll-up: the post's own stance, not a new opinion.
+_VERDICT_SUMMARY = {'worth_it': 'Worth Getting', 'depends': 'Optional', 'skip': 'Skip'}
+_VERDICT_LINE = {
+    'worth_it': 'Worth getting.',
+    'skip': 'Skip it.',
+    'depends': 'Optional purchase. Get it or skip it!',
+}
+
+
+def _verdict_summary(verdict):
+    """The roll-up cell: a stance that fits a table, in the post's own terms."""
+    return _VERDICT_SUMMARY.get(verdict, 'Optional')
+
+
+def _item_verdict(entry, clauses):
+    """The item's own stance: the bullet that carries it, plus a plain verdict line."""
+    verdict = entry.get('advice')
+    if verdict not in ADVICE_WORDS:
+        verdict = None
+    quote = _trim_quote(_ecr_quote(entry.get('advice_quote') or '', 90))
+    pattern = (_ADVICE_GO if verdict == 'worth_it' else
+               _ADVICE_CONDITION if verdict == 'depends' else _ADVICE_SKIP)
+    matching = [clause for clause in clauses if pattern.search(clause)] if verdict else []
+    if matching:
+        quote = _trim_quote(_ecr_quote(min(matching, key=len), 90)) or quote
+    return verdict, quote
+
+
+_MAX_LABEL = re.compile(r"^(max(?:imum)?\s+(?:credits?|a-?coins?))\s*[-\u2013\u2014:]\s*", re.I)
+
+
+def _bullet_clauses(entry):
+    """The post's own bullets, minus the decoration and the lines that only decline to advise."""
+    clauses = []
+    for raw in (entry.get('bullets') or []):
+        clause = _plain(raw, 160)
+        if not clause or _ADVICE_DECLINED.search(clause):
+            continue
+        clauses.append(_MAX_LABEL.sub(r'\1: ', clause))
+    return clauses
+
+
+def _ecr_item_block(number, entry):
+    """One item as its own numbered block, and the figures the roll-up table needs.
+
+    The old renderer folded the whole item into a single 230-character bullet: a bold figure,
+    then the verdict word, then two quoted clauses run together with middle dots. A player
+    reading it got the post's sentences in the post's order, with the answer \u2014 where to get
+    it and whether to spend \u2014 left to be deduced. This gives each item the four things it was
+    written to say: where it is available, the figures, the reasoning, and a verdict.
+    """
+    label = _plain(entry.get('label'), 60)
+    if not label:
+        return '', None
+    clauses = _bullet_clauses(entry)
+    verdict, quote = _item_verdict(entry, clauses)
+    avail_code, avail_line = _availability(clauses, entry)
+
+    picked = []
+    for clause in [clause for clause in clauses if _ECR_AMOUNT.search(clause)][:2]:
+        # A price or amount is never dropped: it is the number the player is deciding on.
+        if clause != quote and not any(_overlaps(clause, prior) for prior in picked):
+            picked.append(clause)
+
+    # The rest, in the order a player reads it: the caveat ("Good mech, but very far from meta")
+    # then the route ("Worth picking up from the Gear Hub"), then everything else. A bullet that
+    # only rules out a currency lands last, which is where "Don't spend A-Coins on it" belongs in
+    # a post that has already said the item is worth the Credits.
+    rest = [clause for clause in clauses if clause not in picked]
+    rest.sort(key=lambda clause: (0 if _CAVEAT.search(clause) else 1,
+                                  0 if _ECR_ROUTE.search(clause) else 1, len(clause)))
+    for clause in rest:
+        if len(picked) >= 4:
+            break
+        if clause == quote or any(_overlaps(clause, prior) for prior in picked):
+            continue
+        picked.append(clause)
+
+    lines = [f'{number}. **{label}**']
+    if avail_line:
+        lines.append(f'**Availability:** {avail_line}')
+    if picked:
+        lines.extend(f'\u2022 {clause}' for clause in picked)
+    else:
+        lines.append('\u2022 The post states no detail for this one.')
+    if verdict:
+        # The verdict is the bot's one-line answer; the post's own sentence stays behind it as
+        # evidence, instead of standing in for it.
+        stance = _VERDICT_LINE[verdict]
+        # "Worth getting. \u2014 \u201c...\u201d" double-punctuates; the em dash carries the break.
+        lines.append(f'**Verdict:** {stance.rstrip(".")}'
+                     + (f' \u2014 \u201c{quote}\u201d' if quote else '.'))
+    else:
+        lines.append('**Verdict:** The post gives no buy or skip advice.')
+    return '\n'.join(lines), {'name': label, 'verdict': verdict,
+                              'recommendation': _verdict_summary(verdict),
+                              'currency': avail_code or '',
+                              'table_currency': AVAIL_TABLE.get(avail_code, 'Not stated')}
+
+
+def _final_verdict(rows):
+    """The roll-up: one line per item, so the whole rotation fits in one look.
+
+    Discord renders no markdown tables, so this is plain lines joined by pipes: aligned enough to
+    scan, and it reads as written in a client that shows the text as-is.
+    """
+    rows = [row for row in rows if row]
+    if not rows:
+        return ''
+    table = ['**FINAL VERDICT**', 'Item | Recommendation | Currency']
+    table.extend(f"{row['name']} | {row['recommendation']} | {row['table_currency']}" for row in rows)
+    return '\n'.join(table)
+
+
 def format_ecr_reply(facts, now=None, include_older=False):
     """Report the current ECR state; older rotations only when the user asks for them."""
     now = _now_epoch(now)
@@ -856,14 +1032,22 @@ def format_ecr_reply(facts, now=None, include_older=False):
                       'Current ECR' if fact is current[0] else 'Also running')
         block = [f"**{head_label}** \u00b7 {kind_label} \u00b7 {_date_label(fact['posted_at'])} ({fact.get('age', '')})"]
         items = [entry for entry in (details.get('entries') or []) if not entry.get('section')]
-        item_lines = [line for line in (_ecr_item_line(entry) for entry in items[:3]) if line]
-        if item_lines:
-            # Each line already carries the item, its price and its verdict, so the separate
-            # spend-check block that repeated the item names is gone. It used to say every
-            # item twice and, on a route advice, say it backwards.
-            block.extend(item_lines)
-            if not any(entry.get('advice') for entry in items[:3]):
-                block.append('\u2022 No buy or skip advice in the post.')
+        rendered = [_ecr_item_block(index, entry) for index, entry in enumerate(items[:3], start=1)]
+        item_blocks = [text for text, _ in rendered if text]
+        rows = [row for _, row in rendered if row]
+        if item_blocks:
+            # One numbered block per item, then the roll-up. The reply used to spend one long
+            # bullet per item and never summarise the rotation at all, so a player who wanted
+            # "Vortex or Suppressor 10?" still had to read both paragraphs and compare them.
+            # A blank line between blocks: run together, five bold lines and three bullet lists
+            # read as one wall and the item boundaries disappear.
+            block.append('\n\n'.join(item_blocks))
+            if rows:
+                verdicts = [row for row in rows if row['verdict']]
+                if not verdicts:
+                    block.append('\u2022 No buy or skip advice in the post.')
+                else:
+                    block.append('\n' + _final_verdict(rows))
         else:
             summary = _plain(fact.get('summary'), 200).strip(' …')
             closed = ended or (kind == 'one_day' and now - int(fact['posted_at'])
