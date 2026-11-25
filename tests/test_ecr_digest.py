@@ -203,3 +203,68 @@ class CurrencyEmojiTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class CompoundQuestionTests(unittest.TestCase):
+    """A message asking two separate things must not be answered once."""
+
+    def setUp(self):
+        from mechbot import compound
+        self.compound = compound
+
+    def test_two_announcement_topics_fan_out(self):
+        self.assertEqual(self.compound.should_fan_out('what ecr is live and what are the promo codes'),
+                         ['ecr', 'promo'])
+
+    def test_the_case_that_used_to_fall_through_every_gate(self):
+        """'promo codes and the ecr this week' matched neither gate and got no answer."""
+        found = self.compound.should_fan_out('promo codes and the ecr this week')
+        self.assertIn('promo', found)
+        self.assertIn('ecr', found)
+
+    def test_interrogative_survives_the_split(self):
+        """Consuming the conjunction used to strip the question word the gates need."""
+        self.assertEqual(self.compound.should_fan_out('is there an ecr and any new promo?'),
+                         ['ecr', 'promo'])
+
+    def test_contracted_question_words_are_boundaries(self):
+        self.assertEqual(self.compound.should_fan_out('any promo codes and whats coming up next'),
+                         ['promo', 'upcoming'])
+
+    def test_single_topic_is_not_split(self):
+        """One subject asked two ways is one answer, not two."""
+        self.assertEqual(self.compound.should_fan_out('ECR promo codes'), [])
+        self.assertEqual(self.compound.should_fan_out('what is the ecr'), [])
+
+    def test_two_items_in_one_question_are_not_split(self):
+        """The advisor already handles these; splitting them would break a working feature."""
+        for question in ('storm racks and charge rockets', 'compare oracle and redox',
+                         'oracle or redox', 'should I buy storm racks and charge rockets'):
+            self.assertEqual(self.compound.should_fan_out(question), [],
+                             f'{question!r} is one question about two items')
+
+    def test_side_effects_are_never_fanned_out(self):
+        """One message must never create two reminders or notes."""
+        for question in ('remind me tomorrow and what is the ecr',
+                         'note that I have 3000 ac and what are the promo codes',
+                         'set my timezone to Asia/Kolkata and what is the ecr'):
+            self.assertEqual(self.compound.should_fan_out(question), [],
+                             f'{question!r} contains a side effect')
+
+    def test_join_drops_empty_sections(self):
+        text = self.compound.join([('ECR', 'ecr body'), ('Promo', ''), ('Events', None)])
+        self.assertEqual(text, 'ecr body', 'a single surviving section needs no heading')
+
+    def test_join_labels_multiple_sections(self):
+        text = self.compound.join([('ECR', 'ecr body'), ('Promo', 'promo body')])
+        self.assertIn('**1. ECR**', text)
+        self.assertIn('**2. Promo**', text)
+
+    def test_unanswered_clauses_are_named(self):
+        note = self.compound.unanswered_note(['what is the ecr', 'who won the tournament'])
+        self.assertIn('who won the tournament', note)
+        self.assertIn('rather say that than guess', note)
+
+    def test_topic_labels_cover_every_topic(self):
+        for topic, _ in self.compound.TOPIC_PATTERNS:
+            self.assertIn(topic, self.compound.TOPIC_LABELS)

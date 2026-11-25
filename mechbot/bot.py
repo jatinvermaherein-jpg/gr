@@ -33,6 +33,7 @@ from .source_summaries import combined_source_summary, wants_patch_bug_lookup
 from .voice import EmojiBook, humanise_cost, spell_it_out, assume_note, missing_fact
 from .facts import (ai_extract_facts, build_facts, facts_prompt_bundle, merge_ai_facts, format_ecr_reply, format_fact_list, search_facts, wants_older_ecr, refresh_ecr_status)
 from .ecr_digest import ecr_answer as ecr_digest_answer, promo_digest
+from . import compound
 
 log=logging.getLogger('mechbot')
 REPLY_MENTIONS=discord.AllowedMentions(everyone=False,users=False,roles=False,replied_user=True)
@@ -748,6 +749,40 @@ class MechBot(commands.Bot):
         """Search or list the stored Plarium Forum crawl, separate from event scheduling."""
         return format_forum_request(query)
 
+    async def compound_announcement_reply(self,text):
+        """Answer a two-part announcement question in full, or return None.
+
+        Only read-only topics are eligible. Reminders, notes, timezone and loop commands are
+        excluded by ``compound`` itself, so this can never turn one message into two side
+        effects; those clauses fall through to their own handlers untouched.
+        """
+        try:
+            topics=compound.should_fan_out(text)
+            if not topics:return None
+            sections=[]
+            for topic in topics:
+                # The real handler still receives the whole original message, so it applies
+                # its own strict gate and its own data path; this only decides how many of
+                # them to run and how to label the results.
+                if topic=='ecr':
+                    sections.append((compound.TOPIC_LABELS['ecr'],await self.ecr_response(text)))
+                elif topic=='promo':
+                    sections.append((compound.TOPIC_LABELS['promo'],await self.promo_codes_response(text)))
+                elif topic=='upcoming':
+                    sections.append((compound.TOPIC_LABELS['upcoming'],await self.upcoming_response(text)))
+                elif topic=='patch':
+                    sections.append((compound.TOPIC_LABELS['patch'],await self.patch_bug_response(text)))
+                elif topic=='forum':
+                    sections.append((compound.TOPIC_LABELS['forum'],self.forum_response(text)))
+            reply=compound.join(sections)
+            if not reply:return None
+            return discord_text(reply)
+        except Exception as exc:
+            # A fan-out failure must never swallow the message: fall back to the ordinary
+            # single-answer ladder rather than returning an error the user cannot act on.
+            log.warning('Compound announcement answer failed (%s); using the single-answer path.',type(exc).__name__)
+            return None
+
     def ecr_shipped_history(self,query=None):
         """Answer an ECR question from the vendored history, or None when it cannot.
 
@@ -1139,6 +1174,12 @@ class MechBot(commands.Bot):
                 if ambient_question:await self.reply_message(message,out,mention_author=False)
                 else:await self.private_reply(message,out)
                 return
+            # A message that asks two separate things must not be answered once. This runs
+            # before the single-answer gates below, and only fires when at least two distinct
+            # read-only topics are actually present; everything else falls through untouched.
+            compound_reply=await self.compound_announcement_reply(text)
+            if compound_reply:
+                await self.reply_message(message,compound_reply,mention_author=not ambient_question);return
             if wants_forum_lookup(text):
                 await self.reply_message(message,self.forum_response(text),mention_author=not ambient_question);return
             if wants_promo_codes(text):
