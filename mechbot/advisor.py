@@ -1053,7 +1053,8 @@ def _ctx(text=None, data=None, **extra):
     questions and the assumption list honest.
     """
     ctx = {'role': None, 'goal': None, 'budget': parse_budget(text) if text else {}, 'owned': [],
-           'engagement': None, 'rank': 1, 'kind': None, 'level': None, 'real_money': False, 'main': None}
+           'engagement': None, 'rank': 1, 'rank_explicit': False, 'kind': None, 'level': None,
+           'real_money': False, 'main': None}
     body = str(text or '').casefold()
     if body:
         for role, pattern in ROLE_WORDS:
@@ -1084,6 +1085,7 @@ def _ctx(text=None, data=None, **extra):
         rank = _own_rank(body)
         if rank:
             ctx['rank'] = rank
+            ctx['rank_explicit'] = True
         kinds = {name for name, pattern in KIND_WORDS if re.search(pattern, body)}
         ctx['kind'] = kinds.pop() if len(kinds) == 1 else None
         ctx['real_money'] = bool(re.search(r'\$\s?\d|usd|bucks|real money|web ?store|crystal|discount', body))
@@ -1241,7 +1243,9 @@ def explain(name, facts=None, data=None, ctx=None):
                     # The catalog holds HP, speed, power and the ability for a reviewed mech, and the
                     # answer to "redox" was built without ever reading them: it gave energy and a
                     # weighted score while 227,300 HP sat in the same record.
-                    stats=mech_stat_sheet(item), resolved=found,
+                    stats=mech_stat_sheet(item),
+                    stats_rank=_requested_rank(ctx, item),
+                    resolved=found,
                     review={key: (item.get('review') or {}).get(key) for key in
                             ('strengths', 'weaknesses', 'reasoning', 'perk', 'optimalRange', 'dmgPerEnergy',
                              'fireRate', 'magazine', 'reloadSpeed', 'ability', 'role', 'category')},
@@ -1297,6 +1301,28 @@ def _better_alternative(item, ctx, data):
 
 def scored_total(item, ctx, data):
     return score(item, ctx, profile_for(ctx or {}), data)['total']
+
+
+def _requested_rank(ctx, item):
+    """The rank the player asked for, or None.
+
+    "redox rank 5" is a question about rank 5. The catalog review row holds one value per stat
+    with no rank attached, so the honest thing is to report which rank the numbers are from and
+    say so when it is not the one asked about.
+    """
+    try:
+        # Only an explicitly stated rank counts. _ctx defaults rank to 1, and treating that
+        # default as a request told a player who typed "redox" that they had asked about rank 1.
+        if not (ctx or {}).get('rank_explicit'):
+            return None
+        rank = int((ctx or {}).get('rank') or 0)
+    except (TypeError, ValueError):
+        rank = 0
+    if not rank:
+        return None
+    cells = [cell for cell in (item.get('stats') or []) if isinstance(cell, dict)]
+    ranks = sorted({cell.get('rank') for cell in cells if cell.get('rank') is not None})
+    return {'asked': rank, 'available': ranks, 'from_confirmed_cells': bool(ranks)}
 
 
 def mech_stat_sheet(item, rank=1):

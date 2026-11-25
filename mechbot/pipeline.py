@@ -356,6 +356,26 @@ def guard_figures(reply, engine_text):
     return (not invented), invented
 
 
+def guard_substance(reply, engine_text):
+    """Refuse a formatted reply that kept the figures and threw away the answer.
+
+    The second half of the same problem: a card of correct numbers is not a study of the mech.
+    Asked to lay out a full review, a model returned "Redox - 227,300 HP - 22 speed - 948 power -
+    32 energy (9,375 A-Coins)." - every figure present, so guard_completeness passed it, and the
+    review, the ability and the caveat were gone. Judged on content words, not length, and only
+    when the engine produced something substantial to lose.
+    """
+    def content(text):
+        return {word.casefold() for word in re.findall(r'[A-Za-z]{4,}', str(text or ''))}
+    engine = content(engine_text)
+    if len(engine) < 12:
+        return True, 'engine text too short to judge'
+    kept = len(engine & content(reply)) / len(engine)
+    if kept < 0.4:
+        return False, f'kept {kept:.0%} of the answer'
+    return True, ''
+
+
 def guard_completeness(reply, engine_text):
     """Refuse a formatted reply that dropped figures the engine gave.
 
@@ -409,6 +429,11 @@ async def format_reply(base, key, model, understanding, engine_text, history=Non
     ok, dropped = guard_completeness(text, engine_text)
     if not ok:
         log.warning('Formatted reply dropped %s verified figure(s); keeping the engine text.', len(dropped))
+        return None
+    ok, reason = guard_substance(text, engine_text)
+    if not ok:
+        log.warning('Formatted reply replaced the answer with a thinner one (%s); keeping the engine text.',
+                    reason)
         return None
     return text
 

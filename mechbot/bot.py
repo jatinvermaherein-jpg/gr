@@ -575,8 +575,12 @@ class MechBot(commands.Bot):
 
         def mech_answer(name):
             if not name:return None
-            profile=self.catalog.mech_profile(name)
-            return mech_response(profile) if profile else None
+            # The rank in the question is the rank being asked about. Without this, "redox rank 5"
+            # was answered with the default card, so the player had to ask twice.
+            rank_match=re.search(r'\b(?:rank|stars?|r)\s*(\d+)\b',text,re.I)
+            rank=int(rank_match[1]) if rank_match else None
+            profile=self.catalog.mech_profile(name,rank=rank)
+            return mech_response(profile,rank=rank) if profile else None
 
         def advisor_text(question):
             # engine_answer passes the plain question string, already normalised.

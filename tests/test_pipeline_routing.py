@@ -434,7 +434,7 @@ class MechAnswerUsesTheDataTests(unittest.IsolatedAsyncioTestCase):
     async def test_a_reviewed_mech_does_not_lead_with_energy_only(self):
         from mechbot import advising, advisor
         reply = advising.answer('redox', data=advisor.load())['reply']
-        self.assertIn('At rank 1: HP', reply)
+        self.assertIn('HP 227,300', reply)
         self.assertNotIn('Redox: energy 32. Tier A', reply, 'energy alone was the whole opener')
 
     def test_the_weighted_score_is_not_the_answer(self):
@@ -478,3 +478,158 @@ class MechAnswerUsesTheDataTests(unittest.IsolatedAsyncioTestCase):
         sheet = advisor.mech_stat_sheet(advisor.resolve('Redox', advisor.load())['item'])
         self.assertEqual([row['label'] for row in sheet], ['HP', 'Speed', 'Power', 'Energy'])
         self.assertTrue(all(row['value'] for row in sheet))
+
+
+class RankAndOneLinerTests(unittest.IsolatedAsyncioTestCase):
+    """From a live screenshot: one word got three different answers in one minute.
+
+    "voidghost" produced the full advisor answer and then a truncated copy of it, and "redox"
+    produced a bare one-line card - "Redox - 227,300 HP - 22 speed - 948 power - 32 energy
+    (9,375 A-Coins)" - before "redox rank 5" produced the full review with rank-1 figures under a
+    question about rank 5.
+    """
+
+    CARD = 'Redox - 227,300 HP - 22 speed - 948 power - 32 energy (9,375 A-Coins).'
+
+    async def asyncSetUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': str(Path(self.tmp.name) / 'r.sqlite3')}):
+            self.catalog = Catalog(initialize_snapshot())
+
+    async def asyncTearDown(self):
+        self.catalog.close()
+        self.tmp.cleanup()
+
+    async def _ladder_reply(self, question, model_reply):
+        """The bare-word path: the understanding pipeline declines, the ladder answers."""
+        bot = MechBot(self.catalog, object())
+        bot._connection.user = SimpleNamespace(id=987654321098765432)
+        bot.conversation_history_for = AsyncMock(return_value=[])
+        bot.reply_message = AsyncMock()
+        bot.private_reply = AsyncMock()
+
+        async def declines(base, key, model, system, user, **kwargs):
+            return 'X'
+        message = SimpleNamespace(author=SimpleNamespace(id=1, bot=False), channel=SimpleNamespace(id=44),
+                                  guild=None, mentions=[bot._connection.user], content=question,
+                                  reference=None, attachments=[])
+        with patch.dict(os.environ, {'AI_API_KEY': 'k', 'AI_MODEL': 'm'}), \
+                patch('mechbot.pipeline._chat', new=declines), \
+                patch('mechbot.bot.answer_question_with_brain', new=AsyncMock(return_value=model_reply)):
+            await bot.on_message(message)
+        return bot.reply_message.await_args.args[1]
+
+    # ---------------------------------------------------------------- the one-line card
+    async def test_a_one_line_card_does_not_replace_the_verified_answer(self):
+        reply = await self._ladder_reply('redox', self.CARD)
+        self.assertNotEqual(reply, self.CARD, 'a thinner answer to the same question was being sent')
+        self.assertIn('Quick review', reply)
+        self.assertIn('227,300 HP', reply)
+
+    def test_a_full_review_from_the_model_is_kept(self):
+        """Judged at the assistant level: through on_message a fake store falls through first.
+
+        The point of the guard is that a complete, verified answer survives the model path, so
+        this asserts on the function that applies the guard rather than on a bot harness.
+        """
+        from mechbot import assistant
+        full = ('**Redox** — Legendary mech. At a glance: 227,300 HP · 22 speed · 948 power · 32 energy. '
+                'Quick review: strong ability damage and a personal shield, with DoT rather than burst '
+                'as the main weakness. Ability: Caustic Blast, a 30m AoE stasis.')
+        context = assistant.game_knowledge_context('redox', self.catalog)
+        self.assertTrue(assistant._supported_game_reply(full, context),
+                        'every figure in this reply is in the verified fact bundle')
+        self.assertFalse(assistant._thinner_than_the_facts(full, context),
+                         'a full review must not be treated as thinner than the catalog card')
+        self.assertTrue(assistant._thinner_than_the_facts(self.CARD, context))
+        self.assertTrue(assistant._thinner_than_the_facts('', context), 'nothing at all is thinner than the card')
+
+    def test_the_thinning_check_measures_material_not_length(self):
+        from mechbot.assistant import _thinner_than_the_facts
+        context = {'verified_game_facts': [{'type': 'mech', 'name': 'Redox', 'review': {
+            'ability': 'Creates a 30m radius caustic blast — stasis and damage over time. Grants a '
+                       'Personal Shield and a Speed Boost for the ability duration.',
+            'strengths': 'High HP and speed; personal shield extends survivability; strong ability damage.',
+            'weaknesses': 'Damage over time rather than burst; the personal shield is modest.'}}]}
+        self.assertTrue(_thinner_than_the_facts(self.CARD, context))
+        self.assertFalse(_thinner_than_the_facts(
+            'Caustic Blast is a 30m stasis blast with damage over time; the personal shield extends '
+            'survivability, but the damage is over time rather than burst, and the shield is modest.', context))
+
+    # ---------------------------------------------------------------- the rank
+    def test_a_named_rank_is_the_rank_that_is_answered_about(self):
+        from mechbot import advising, advisor
+        data = advisor.load()
+        for question, said in (('redox rank 5', 'rank 5'), ('redox r4', 'rank 4')):
+            reply = advising.answer(question, data=data)['reply']
+            self.assertIn(said, reply, f'{question!r} must say which rank its numbers are for')
+            self.assertNotIn('You asked about rank 1', reply)
+
+    def test_a_question_with_no_rank_does_not_invent_one(self):
+        from mechbot import advising, advisor
+        reply = advising.answer('redox', data=advisor.load())['reply']
+        self.assertNotIn('You asked about rank', reply)
+        self.assertIn('not split by rank', reply)
+
+    def test_the_figures_say_where_they_came_from(self):
+        from mechbot import advising, advisor
+        reply = advising.answer('redox rank 5', data=advisor.load())['reply']
+        self.assertIn('no per-rank stat row', reply,
+                      'the review row carries one value per stat and no rank, and the reply must say so')
+
+
+class PipelineUsesRankAndSubstanceTests(unittest.IsolatedAsyncioTestCase):
+    """The pipeline half of the same report: rank ignored, and a card accepted in place of a review."""
+
+    CARD = 'Redox - 227,300 HP - 22 speed - 948 power - 32 energy (9,375 A-Coins).'
+    UNDERSTOOD = {'intent': 'meta_advice', 'mechs': ['Redox'], 'weapons': [], 'pilots': [], 'mods': [],
+                  'from_rank': None, 'from_level': None, 'to_rank': None, 'to_level': None,
+                  'question': 'redox rank 5', 'unclear': False}
+
+    async def asyncSetUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': str(Path(self.tmp.name) / 'r.sqlite3')}):
+            self.catalog = Catalog(initialize_snapshot())
+
+    async def asyncTearDown(self):
+        self.catalog.close()
+        self.tmp.cleanup()
+
+    async def _reply(self, question, formatter_text):
+        bot = MechBot(self.catalog, object())
+        bot._connection.user = SimpleNamespace(id=987654321098765432)
+        bot.conversation_history_for = AsyncMock(return_value=[])
+        bot.reply_message = AsyncMock()
+        bot.private_reply = AsyncMock()
+
+        async def fake_chat(base, key, model, system, user, **kwargs):
+            return json.dumps(self.UNDERSTOOD) if 'ONE JSON object' in system else formatter_text
+        message = SimpleNamespace(author=SimpleNamespace(id=1, bot=False), channel=SimpleNamespace(id=44),
+                                  guild=None, mentions=[bot._connection.user], content=question,
+                                  reference=None, attachments=[])
+        with patch.dict(os.environ, {'AI_API_KEY': 'k', 'AI_MODEL': 'm'}), \
+                patch('mechbot.pipeline._chat', new=fake_chat):
+            await bot.on_message(message)
+        return bot.reply_message.await_args.args[1]
+
+    async def test_a_card_does_not_replace_the_review_in_the_pipeline(self):
+        reply = await self._reply('redox rank 5', self.CARD)
+        self.assertNotEqual(reply, self.CARD)
+        self.assertIn('Quick review', reply)
+        self.assertIn('Ability', reply)
+
+    async def test_the_pipeline_answers_about_the_rank_that_was_named(self):
+        reply = await self._reply('redox rank 5', self.CARD)
+        self.assertIn('rank-5', reply, 'the reply must say that the figures are not rank-5 figures')
+
+    def test_the_substance_guard_measures_the_answer_not_its_length(self):
+        from mechbot.pipeline import guard_substance
+        engine = ('**Redox** — Legendary mech · Tier A. **At a glance:** 227,300 HP · 22 speed · '
+                  '948 power · 32 energy. **Quick review:** significant buffs bring Redox to '
+                  'Dreadnought-level HP and speed, adding a personal shield and speed boost during the '
+                  'ability. **Watch-out:** damage over time rather than burst, and the shield is modest.')
+        ok, why = guard_substance(self.CARD, engine)
+        self.assertFalse(ok, 'a card of correct numbers is not a review')
+        self.assertIn('kept', why)
+        ok, _ = guard_substance(engine, engine)
+        self.assertTrue(ok, 'the engine answer always passes its own guard')

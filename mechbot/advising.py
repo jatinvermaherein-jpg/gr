@@ -650,11 +650,28 @@ def _say_explain(engine, question=''):
     # weights; HP, speed and power are numbers about the mech. When the sheet is missing, say so
     # plainly instead of substituting the score, and drop the standalone "no community tier" line
     # because the verdict already carries the tier.
+    was_rank = (engine.get('stats_rank') or {})
+    asked = was_rank.get('asked')
     if sheet:
-        text = opener + '. At rank 1: ' + ' · '.join(
+        # The figures carry no rank of their own: the review row is a single value per stat. When
+        # the player named a rank, say which rank these are from and whether the asked-for rank is
+        # among the ranks the catalog holds per-rank cells for, rather than letting rank-1 numbers
+        # sit under a question about rank 5.
+        where = 'the catalog\u2019s community values, which are not split by rank'
+        if asked:
+            if was_rank.get('from_confirmed_cells'):
+                have = ', '.join(str(rank) for rank in was_rank.get('available') or [])
+                where = (f'rank {asked} cells' if asked in (was_rank.get('available') or [])
+                         else f'the community values; per-rank cells exist only for rank {have}')
+            else:
+                where = (f'the community values; there is no per-rank stat row, so these are the only '
+                         f'figures on record and they carry no rank. You asked about rank {asked}')
+        text = opener + f'. Stats from {where}: ' + ' · '.join(
             f'{row["label"]} {row["value"]}{row.get("unit") or ""}'.strip() for row in sheet) + '.'
     else:
         text = opener + '. I have no HP, speed or power figures for it in the catalog.'
+        if asked:
+            text += f' Not for rank {asked} or for any other rank.'
     verdict = (engine.get('verdict') or '').strip()
     if sheet:
         # The score only belongs in the answer when there are figures it was computed from.

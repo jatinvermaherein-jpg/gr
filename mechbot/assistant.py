@@ -29,7 +29,12 @@ def _parse_rank_change(text):
     if not match:return None
     return (int(match[1]),int(match[2]) if match[2] is not None else None,
             int(match[3]),int(match[4]) if match[4] is not None else None,False)
-_REVIEW_FIELDS=('rarity','tier','perk','perkDesc','fireRate','magazine','reloadSpeed','optimalRange','maxRange',
+# hp/speed/power/energy belong here. Without them the fact bundle offered a model the strengths
+# and weaknesses prose and no figures, so a faithful answer that quoted 227,300 HP or 948 power
+# looked like an invention to _supported_game_reply and was thrown away - and a model given the
+# prose but not the numbers "summarises" the card into "Redox - 227,300 HP - 22 speed - ...".
+_REVIEW_FIELDS=('rarity','tier','hp','speed','power','energy','category','role',
+                'perk','perkDesc','fireRate','magazine','reloadSpeed','optimalRange','maxRange',
                 'dmgPerEnergy','strengths','weaknesses','reasoning','ability','abilityName','abilityStats','energyLevels')
 _EVENT_QUERY=re.compile(r'\b(?:events?|tournaments?|seasons?|battle\s*pass|event\s*hub)\b',re.I)
 
@@ -429,7 +434,16 @@ def mech_response(data,rank=None,all_ranks=False):
     stats=[]
     for key,label,unit in (('hp','HP',''),('speed','speed',''),('power','power',''),('energy','energy','')):
         if review.get(key) is not None:stats.append(f"{safe_text(review[key],50)} {label}".strip())
-    if stats:result.append('**At a glance:** '+' · '.join(stats)+'.')
+    if stats:
+        # Say which rank these are. The review row holds one value per stat with no rank, so a
+        # question about rank 5 was answered with figures of unknown rank and no word about it.
+        where=''
+        if rank is not None and not verified_stats:
+            where=(f' No rank-{int(rank)} figures: these are the catalog\u2019s single value per '
+                   'stat, not a per-rank row.')
+        elif rank is not None:
+            where=f' Rank {int(rank)}.'
+        result.append('**At a glance:** '+' · '.join(stats)+'.'+where)
     summary=_short_sentences(review.get('reasoning'),220)
     if summary:result.append('**Quick review:** '+safe_text(summary,260))
     ability=review.get('ability')
@@ -1594,6 +1608,35 @@ def _quotes_verified_cost(text,context):
     return all(re.search(r'\b'+format(a,',')+r'\b',text) for a in amounts)
 
 
+def _thinner_than_the_facts(text,context):
+    """True when the model's answer kept the figures but dropped the substance around them.
+
+    Compares how much of the verified material survives, not the prose length: a one-line card
+    and a full review can both be "supported", and only one of them is the answer.
+    """
+    facts = context.get('verified_game_facts') or []
+    if not facts:
+        return True
+    def words(value):
+        return {word.casefold() for word in re.findall(r'[A-Za-z]{4,}', str(value or ''))}
+    material = set()
+    for fact in facts:
+        review = fact.get('review') or {}
+        for key in ('ability', 'abilityName', 'strengths', 'weaknesses', 'reasoning'):
+            material |= words(review.get(key))
+    if not material:
+        return True
+    speaking = words(text)
+    kept = len(material & speaking) / len(material)
+    # Prose alone can paraphrase the ability without repeating its words, so a model that wrote
+    # real sentences is trusted; a card has almost no sentence structure and must carry the
+    # material itself.
+    sentences = len(re.findall(r'[.!?](?:\s|$)', str(text or '')))
+    if sentences >= 3 and kept >= 0.2:
+        return False
+    return kept < 0.2
+
+
 def _supported_game_reply(text,context):
     if not text or re.search(r'\b(?:identity\s+source|source:|calculator|database|ocr|filename)\b',text,re.I):return False
     if re.search(r'\b[\w.-]+\.(?:json|csv|zip|sqlite|db|png|jpe?g|webp)\b|\b20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}',text,re.I):return False
@@ -1609,7 +1652,7 @@ def _supported_game_reply(text,context):
                     'provenance','stat_sources','source_type','source_path','source_sha256','source_screenshot_sha256',
                     'source_archive_sha256','cell_key','row_key','card_id','run_id','review_notes',
                     'identity_status','reviewed_by','reviewed_at','review_note','rank','from_rank','to_rank',
-                    'level','from_level','to_level','energy'):continue
+                    'level','from_level','to_level'):continue
                 collect(item)
         elif isinstance(value,(list,tuple)):
             for item in value:collect(item)
@@ -1632,6 +1675,7 @@ def _supported_game_reply(text,context):
         if value in ranks and re.search(r'\b(?:rank|star)\s*$',prefix,re.I):continue
         if value in levels and re.search(r'\blevel\s*$',prefix,re.I):continue
         if value in energies and re.search(r'\b(?:energy|variant)\s*$',prefix,re.I):continue
+        if value in energies and re.match(r'\s*(?:energy|variant)\b',stripped[match.end():match.end()+12],re.I):continue
         return False
     return True
 
@@ -1782,7 +1826,12 @@ async def answer_question_with_brain(base,key,model,question,catalog,session=Non
             # same three figures from a fact blob is how a reply lost its transition line
             # and its currency marks. Local wins unless the model actually quoted the cost.
             return _upgrade_cost_answer(context,currency_emoji_map)
-        if _supported_game_reply(answer,context):
+        if _supported_game_reply(answer,context) and _thinner_than_the_facts(answer,context):
+            # A model asked to "write the reply" will compress a verified card into a one-line
+            # summary - "Redox - 227,300 HP - 22 speed - 948 power - 32 energy (9,375 A-Coins)" -
+            # which is supported, uses only verified numbers, and is a different answer from the
+            # one the catalog produced. Same rule as the formatter: the model may word the
+            # facts, not choose which of them the player gets.
             attribution=''
             screenshot_attribution=''
             for entry in context.get('archive_material',[]):
