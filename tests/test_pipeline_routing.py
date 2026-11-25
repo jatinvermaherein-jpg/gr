@@ -186,3 +186,101 @@ class VoiceTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ScreenshotPingTests(unittest.IsolatedAsyncioTestCase):
+    """People ping the bot and drop a screenshot in, usually with no words at all.
+
+    Nothing in the command surface covers this, and the text ladder answered it by
+    pattern-matching whatever names it could find in the OCR text: a Deathwalker stat sheet
+    came back as a mech review, and an empty ping produced no reply whatsoever.
+    """
+
+    async def asyncSetUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        snapshot = Path(self.tmp.name) / 'runtime.sqlite3'
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': str(snapshot)}):
+            self.runtime = initialize_snapshot()
+        self.catalog = Catalog(self.runtime)
+        self.image = SimpleNamespace(filename='image.png', size=120_000,
+                                     url='https://cdn.discordapp.com/attachments/1/image.png',
+                                     content_type='image/png')
+
+    async def asyncTearDown(self):
+        self.catalog.close()
+        self.tmp.cleanup()
+
+    def _bot(self):
+        bot = MechBot(self.catalog, object())
+        bot._connection.user = SimpleNamespace(id=987654321098765432)
+        bot.conversation_history_for = AsyncMock(return_value=[])
+        bot.reply_message = AsyncMock()
+        bot.private_reply = AsyncMock()
+        return bot
+
+    def _message(self, bot, text, attachments=()):
+        return SimpleNamespace(author=SimpleNamespace(id=1, bot=False), channel=SimpleNamespace(id=44),
+                               guild=None, mentions=[bot._connection.user],
+                               content=(f'<@{bot._connection.user.id}> {text}'.strip()),
+                               reference=None, attachments=list(attachments))
+
+    async def _answer(self, text, attachments, env=None, reader=None):
+        bot = self._bot()
+        seen = {}
+
+        async def fake_reader(base, key, model, question, images, catalog=None, session=None, **kwargs):
+            seen['question'], seen['images'] = question, images
+            return (reader or (lambda: ('That is a **Deathwalker** stat sheet, not a build.', True)))()
+
+        with patch.dict(os.environ, env or {'AI_API_KEY': 'test-key', 'AI_MODEL': 'test-model'}), \
+                patch('mechbot.bot.read_screenshot', new=fake_reader):
+            await bot.on_message(self._message(bot, text, attachments))
+        reply = bot.reply_message.await_args.args[1] if bot.reply_message.await_args else None
+        return reply, seen
+
+    async def test_a_ping_with_only_a_screenshot_is_answered(self):
+        reply, seen = await self._answer('', [self.image])
+        self.assertIsNotNone(reply, 'an image-only ping used to be dropped by the empty-text gate')
+        self.assertIn('Deathwalker', reply)
+        self.assertEqual(seen['question'], 'what does this screenshot show?')
+        self.assertEqual(len(seen['images']), 1)
+        self.assertEqual(seen['images'][0]['url'], self.image.url)
+
+    async def test_the_screenshot_is_read_before_the_catalog_ladder(self):
+        """A screenshot naming a mech is a screenshot question, not a mech review."""
+        reply, _ = await self._answer('is redox good', [self.image])
+        self.assertIn('stat sheet', reply)
+        self.assertNotIn('tier A in the community list', reply)
+
+    async def test_a_ping_without_a_screenshot_still_uses_the_text_ladder(self):
+        reply, seen = await self._answer('is redox good', [])
+        self.assertEqual(seen, {}, 'the vision path must not run without an image')
+        self.assertIn('Redox', reply)
+
+    async def test_words_in_the_ping_reach_the_reader(self):
+        _, seen = await self._answer('whats wrong with this build', [self.image])
+        self.assertEqual(seen['question'], 'whats wrong with this build')
+
+    async def test_only_images_are_sent_to_the_reader(self):
+        from mechbot.assistant import screenshot_images
+        archive = SimpleNamespace(filename='logs.zip', size=2000, url='https://cdn.discordapp.com/x.zip',
+                                  content_type='application/zip')
+        nameless = SimpleNamespace(filename='shot.JPG', size=2000, url='https://cdn.discordapp.com/shot.JPG',
+                                   content_type=None)
+        huge = SimpleNamespace(filename='big.png', size=40 * 1024 * 1024,
+                               url='https://cdn.discordapp.com/big.png', content_type='image/png')
+        found = screenshot_images(SimpleNamespace(attachments=[archive, nameless, huge]))
+        self.assertEqual([item['url'] for item in found], ['https://cdn.discordapp.com/shot.JPG'])
+
+    async def test_an_unreadable_screenshot_is_admitted_not_guessed(self):
+        def boom():
+            raise RuntimeError('AI provider request failed (HTTP 400).')
+        reply, _ = await self._answer('what is this', [self.image], reader=boom)
+        self.assertIn('could not read that screenshot', reply)
+        self.assertNotIn('tier A', reply, 'it must not fall back to a catalog guess')
+
+    async def test_no_vision_model_says_so_instead_of_answering_sideways(self):
+        reply, seen = await self._answer('what is this', [self.image],
+                                         env={'AI_API_KEY': '', 'AI_MODEL': ''})
+        self.assertIn('vision model', reply)
+        self.assertEqual(seen, {}, 'no reader call is made without credentials')

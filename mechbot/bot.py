@@ -22,7 +22,7 @@ from .pipeline import (understand, format_reply, correct_names, engine_answer, n
                        guard_figures, fuzzy_mentions, FUZZY_CUTOFF)
 from .advising import (wants_advisor, answer as advisor_answer, advisor_subject, carried_question,
                         remember_question)
-from .assistant import GAME_WORDS, find_mentions, message_chunks, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, game_knowledge_context, weapon_response, mech_response, pilot_response, mod_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
+from .assistant import GAME_WORDS, find_mentions, message_chunks, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, read_screenshot, screenshot_images, game_knowledge_context, weapon_response, mech_response, pilot_response, mod_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text
 from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes
 from .workers import WorkerStore, get_worker, assignment_text, parse_worker_time, parse_worker_snooze, WORKERS, GUILD_ID, CHANNEL_ID, ROLE_NAME, REFERENCE_URL
 from .payouts import PayoutTracker, fetch_snapshot, RECIPIENT, BASE, fetch_totals
@@ -434,6 +434,38 @@ class MechBot(commands.Bot):
         if not (profile.get('review') or profile.get('verified_stats')):
             return True
         return len(profile.get('matches') or []) != 1
+
+    async def screenshot_answer(self, text, message, images, base=None):
+        """Read a screenshot a member pinged in with, and say what it shows.
+
+        Screenshots are how this bot is actually used: people ping it and drop an image,
+        often with no words at all. Before this, the text-only ladder answered those by
+        pattern-matching the names it could find - a Deathwalker stat sheet came back as a
+        mech review, and an image with no text produced no reply at all.
+
+        Returns the reply, or None when no vision-capable model answered. When the model is
+        configured but refuses the image, the reply says so rather than guessing, because a
+        confident wrong answer about a screenshot is worse than an honest one.
+        """
+        if not images:
+            return None
+        key = os.getenv('AI_API_KEY', '')
+        model = os.getenv('AI_MODEL', '')
+        if not key or not model:
+            return ('I can only read screenshots when a vision model is configured, and none is. '
+                    'Tell me in words what the screenshot shows and I will answer that.')
+        base = base or os.getenv('AI_BASE_URL', 'https://api.openai.com/v1')
+        try:
+            reply, ok = await read_screenshot(base, key, model, text, images,
+                                              catalog=self.catalog, session=self.ai_session)
+        except Exception as exc:
+            log.warning('Could not read a pinged screenshot (%s: %s).', type(exc).__name__, exc)
+            return ('I could not read that screenshot. If it is a stat sheet, tell me the mech and '
+                    'rank; if it is an offer, tell me the item and price; I will answer from there.')
+        if ok and reply:
+            return reply
+        return ('I could not make sense of that screenshot. Tell me what you are looking at - '
+                'the mech and rank, or the item and its price - and I will answer.')
 
     async def pipeline_answer(self, text, message, scope=None):
         """Understand the question with a model, answer it with the real engines, format the result.
@@ -1182,7 +1214,15 @@ class MechBot(commands.Bot):
             # the reminder itself is private and never pings the channel author.
             if (not should_answer_unmentioned(text,names) and not parsed_reminder) or self.ambient_chat_rate_limited(message):return
             ambient_question=True
-        if not text:return
+        # A ping that carries only a screenshot is the normal way people use this bot:
+        # they ping it and drop an image. There is no text, so the `if not text` gate used
+        # to drop the message and the bot said nothing at all.
+        images=screenshot_images(message)
+        if images and not text:
+            text='what does this screenshot show?'
+            log.info('Answered a screenshot ping with no text (%s image(s)).',len(images))
+        elif not text:
+            return
         try:
             identity=bot_identity_response(text)
             if identity:
@@ -1334,6 +1374,15 @@ class MechBot(commands.Bot):
             # (reminders, notes, timezones, events) have had their turn but before the
             # exact-lookup ladder decides by pattern order. A cost question, however it is
             # phrased, is caught before "the message mentions a mech" can steal it.
+            if images:
+                # Read the image before the text ladder can answer from catalog data. A
+                # stat sheet is not a question about every mech whose name appears in it,
+                # and a screenshot with no text has no other path to an answer at all.
+                base=os.getenv('AI_BASE_URL','https://api.openai.com/v1')
+                shot_answer=await self.screenshot_answer(text,message,images,base=base)
+                if shot_answer:
+                    await self.conversation_turn_reply(message,text,shot_answer,ambient=ambient_question)
+                    return
             pipeline_out=await self.pipeline_answer(text,message,scope=build_scope)
             if pipeline_out:
                 # Say what was corrected, so the answer never looks like mind reading.

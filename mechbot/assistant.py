@@ -1618,6 +1618,90 @@ async def general_ai(base,key,model,question,context=None,session=None,conversat
     return discord_text(naturalize_discord_reply(text))
 
 
+SCREENSHOT_PROMPT = (
+    "You are ARCHΛNGLE, a Mech Arena assistant. The user pinged you with a screenshot and "
+    "little or no text. Read the image and answer what it is actually asking about.\n"
+    "Mech Arena screenshots are usually one of these, and you must say which you are looking at:\n"
+    "- a mech or weapon stat sheet: ranks/stars, HP, power, speed, energy. Report the figures "
+    "you can read and state the rank they belong to.\n"
+    "- an upgrade screen: item name and the rank/level transition. Say what the transition is.\n"
+    "- a battle result or leaderboard: read the placement and the score.\n"
+    "- a shop or event panel: read the offers.\n"
+    "Rules: never invent a figure you cannot see; if a number is unreadable say so. Never answer a "
+    "stat sheet with a loadout recommendation, or a loadout with stats. If the screenshot is a stat "
+    "sheet, say plainly that it is stats and that a build is a different question. Answer in at most "
+    "four sentences, plain text, no markdown tables."
+)
+
+
+def screenshot_images(message, limit=3):
+    """Image attachments on a Discord message, as plain metadata.
+
+    Discord gives an attachment a URL that the provider fetches itself, so nothing is
+    downloaded here and no token is spent on the transfer. Non-images are ignored: a
+    zip or a log file is not something a person expects the bot to read.
+    """
+    images = []
+    for item in list(getattr(message, 'attachments', None) or ())[:limit]:
+        content_type = str(getattr(item, 'content_type', '') or '')
+        url = str(getattr(item, 'url', '') or '')
+        if not url.startswith(('https://', 'http://')):
+            continue
+        if content_type and not content_type.startswith('image/'):
+            continue
+        if not content_type and not re.search(r'\.(?:png|jpe?g|gif|webp|bmp)$', url, re.I):
+            continue
+        size = getattr(item, 'size', 0) or 0
+        if size and int(size) > 10 * 1024 * 1024:
+            continue
+        images.append({'url': url, 'content_type': content_type or 'image/png'})
+    return images
+
+
+async def read_screenshot(base, key, model, question, images, catalog=None, session=None, timeout=25):
+    """Answer a ping that carried a screenshot, using a model that can see it.
+
+    Returns (text, ok). ok is False only when the model could not be reached or the
+    configured model rejected the image - the caller then says that plainly instead of
+    answering something else off-topic.
+    """
+    if not images or not key or not model:
+        return None, False
+    system = SCREENSHOT_PROMPT
+    if catalog is not None:
+        names = list(getattr(catalog, 'mech_names', ()) or ())[:60]
+        if names:
+            system += ('\nCatalog mech names, for spelling only: ' + ', '.join(names) + '.')
+    content = [{'type': 'text',
+                'text': (f'The user pinged you with {len(images)} screenshot(s).'
+                         + (f' Their message says: {str(question)[:600]}' if question else
+                            ' They wrote no other text, so work out the question from the image.'))}]
+    content += [{'type': 'image_url', 'image_url': {'url': image['url']}} for image in images]
+    payload = {'model': model,
+               'messages': [{'role': 'system', 'content': system},
+                            {'role': 'user', 'content': content}],
+               'temperature': 0.2, 'max_tokens': 400}
+    headers = {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'}
+    own = session is None
+    if own:
+        session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout, connect=5, sock_read=timeout - 5))
+    try:
+        async with session.post(base.rstrip('/') + '/chat/completions', headers=headers,
+                                json=payload, allow_redirects=False) as r:
+            if r.status != 200:
+                raise RuntimeError('AI provider request failed (HTTP %s).' % r.status)
+            obj = await r.json(content_type=None)
+    finally:
+        if own:
+            await session.close()
+    text = obj['choices'][0]['message']['content']
+    if isinstance(text, list):
+        text = ''.join(str(part.get('text') or '') for part in text if isinstance(part, dict))
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError('AI response is not text')
+    return discord_text(naturalize_discord_reply(text.strip())), True
+
+
 async def answer_question_with_brain(base,key,model,question,catalog,session=None,conversation_history=None,currency_emoji_map=None,
                                      announcement_facts=None):
     """Use verified facts, short scoped conversation context, and deterministic local costs.
