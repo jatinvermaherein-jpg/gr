@@ -21,7 +21,7 @@ from .timeparse import parse_spec, parse_natural_reminder, next_occurrence, need
 from .pipeline import (understand, format_reply, correct_names, engine_answer, normalise_understanding,
                        guard_figures, fuzzy_mentions, FUZZY_CUTOFF)
 from .advising import (wants_advisor, answer as advisor_answer, advisor_subject, carried_question,
-                       thread_follow_up,
+                       thread_follow_up, route as advisor_route,
                         remember_question)
 from .assistant import GAME_WORDS, find_mentions, message_chunks, direct_item_lookup, bot_identity_response, IDENTITY_PROFILE_IDS, wants_invite_link, should_answer_unmentioned, parse_natural_calculation, natural_builds_request, parse_build_sp_range, read_screenshot, screenshot_images, game_knowledge_context, weapon_response, mech_response, pilot_response, mod_response, fetch_builds, builds_response, builds_response_parts, answer_question_with_brain, upgrade_cost_response, safe_text, discord_text, naturalize_discord_reply
 from .announcements import DEFAULT_ANNOUNCEMENT_CHANNELS, ANNOUNCEMENT_SYNC_SECONDS, INCREMENTAL_LIMIT, EDIT_REFRESH_LIMIT, message_text, wants_upcoming, format_upcoming, wants_ecr_info, format_ecr_events, wants_promo_codes
@@ -169,6 +169,36 @@ def _wants_one_item(query):
     return bool(_ONE_ITEM_WORDS.search(text))
 
 
+# How long the reply path may take before the bot says something instead of going quiet. The
+# reply itself still arrives in full - this only puts a short line in the channel first, so a
+# slow answer never looks like a dead bot. The model steps keep their own 10-12 s socket timeouts.
+SLOW_ANSWER_ACK_SECONDS = float(os.getenv('SLOW_ANSWER_ACK_SECONDS', '6'))
+
+# A cost question is arithmetic on the verified table, and the pipeline's cost engine answers it
+# from the same table. It is never handed to the advisor's prose, which lists a mech beside a
+# price and says nothing about the transition that was asked for.
+COST_QUESTION = re.compile(r"\bupgrade\s+costs?\b|\bcosts?\s+(?:to|from)\b|\bhow\s+much\s+(?:to|does|do)\b"
+                           r"|\bhow\s+many\s+(?:credits|a-?coins|blueprints)\b|\bto\s+rank\s+\d", re.I)
+
+
+async def _typing_dot(enter):
+    """Enter Discord's typing context, and leave it when the task is cancelled."""
+    try:
+        context = await enter()
+    except Exception:
+        return
+    try:
+        # Keep the indicator alive for the length of a slow turn; Discord shows it for ~10 s.
+        await asyncio.sleep(300)
+    finally:
+        exit_method = getattr(context, '__aexit__', None)
+        if exit_method:
+            try:
+                await exit_method(None, None, None)
+            except Exception:
+                pass
+
+
 class MechBot(commands.Bot):
     def __init__(self, catalog, store):
         # Ambient channel questions and announcement ingestion both require the privileged
@@ -185,6 +215,9 @@ class MechBot(commands.Bot):
         self.forum_archive_runner=None;self.emoji_runner=None;self.command_sync_task=None
         self.worker_setup_lock=asyncio.Lock();self.announcement_access={}
         self.ai_session=None;self.currency_emojis={};self.ambient_last_reply={};self.pending_build_requests={}
+        # Per-turn flags for the reply audit: set at the top of every message and read at its end.
+        self._answered_this_turn=False;self._directed_this_turn=False;self._ambient_this_turn=False
+        self._slow_ack=None
         # Presentation only: Mech Arena flavoured emoji + a human voice. Plain text fallbacks
         # are used whenever the upload is unavailable, so replies never depend on it.
         self.emoji_book=EmojiBook(application_id=self.application_id)
@@ -602,6 +635,18 @@ class MechBot(commands.Bot):
             rank=int(rank_match[1]) if rank_match else None
             profile=self.catalog.mech_profile(name,rank=rank)
             return mech_response(profile,rank=rank) if profile else None
+
+        # One comparison shape is the advisor's whatever the model heard. "Which is best on A or B"
+        # is two catalog items and a verdict, and the pipeline's 1v1 model was answering it with
+        # "Which mech on each side?" - the advisor does it with no round trip at all. Everything
+        # else the advisor can also answer keeps the pipeline first: a mech question is a stat
+        # card, not a store ranking, and the rank in the question decides which row is printed.
+        if (len(understood['mechs']) >= 2 and advisor_route(text) == 'compare'
+                and not COST_QUESTION.search(text)):
+            direct=advisor_answer(text,[],scope=scope) or {}
+            if direct.get('capability') == 'compare' and (direct.get('reply') or '').strip():
+                return (spell_it_out(text,direct.get('corrections') or '')
+                        + discord_text(direct['reply']))
 
         def advisor_text(question):
             # engine_answer passes the plain question string, already normalised. The scope travels
@@ -1173,6 +1218,11 @@ class MechBot(commands.Bot):
         return files
 
     async def reply_message(self,message,text,with_currency_icons=False,mention_author=True,allowed_user_ids=(),suppress_embeds=False):
+        if str(text or '').strip():
+            # A real reply makes a pending slow-answer acknowledgement pointless.
+            ack=getattr(self,'_slow_ack',None)
+            if ack is not None and not ack.done():
+                ack.cancel()
         kwargs={}
         has_discord_profile_link=bool(re.search(r'https://discord\.com/users/\d{17,20}',str(text),re.I))
         if suppress_embeds or has_discord_profile_link:kwargs['suppress_embeds']=True
@@ -1256,8 +1306,114 @@ class MechBot(commands.Bot):
         except (discord.NotFound,discord.Forbidden,discord.HTTPException):
             return False
 
+    async def _ack_if_slow(self,message):
+        """Say something if the answer is taking long, so silence never reads as a dead bot.
+
+        The bot answers instantly when the deterministic handlers own the question, and slowly
+        when a model is in front of them. Either way the turn used to say nothing until the
+        reply was finished - so a slow answer and a dropped message looked identical from the
+        channel, and people pinged again. This posts one short line only when the answer really
+        is slow, and the real reply still follows it in full.
+        """
+        try:
+            await asyncio.sleep(SLOW_ANSWER_ACK_SECONDS)
+        except asyncio.CancelledError:
+            return
+        if self._answered_this_turn:
+            return
+        # The acknowledgement is not the answer: the no-answer line is still owed if the rest of
+        # the turn produces nothing, and the real reply still cancels nothing here.
+        try:
+            await self.reply_message(message,'Looking this one up - one moment.',mention_author=False)
+            self._answered_this_turn=False
+        except Exception:
+            log.exception('Could not send the slow-answer acknowledgement')
+
+    async def _no_answer_reply(self,message,ambient):
+        """The last thing said when nothing else answered: say so, never go quiet.
+
+        Six separate handlers end in `return` on a path that produced no text - the thread
+        follow-up, the understanding pipeline, the exact lookups, the advisor, the model - and
+        the message handler simply ended. From the channel that looks exactly like a bot that
+        has stopped replying: the mention is there, the answer is not, and nothing in the log
+        says the turn finished. There is now always a reply.
+        """
+        out=('I could not turn that into an answer I trust. Try naming the item or question '
+             'directly - a mech, weapon, pilot, cost, ECR, promo code or build - and I will '
+             'answer from the catalog and the saved announcements.')
+        try:
+            await self.reply_message(message,out,mention_author=not ambient)
+        except Exception:
+            log.exception('Could not send the no-answer reply')
+
+    def _start_typing(self,message):
+        """Show Discord's typing dot while the answer is being built.
+
+        Until now a turn said nothing until the reply was ready, and with a two-step model
+        call in front of the engines that silence ran past ten seconds - which reads as a
+        dropped message, so people ping again. The dot is the cheapest possible "working".
+        """
+        channel=getattr(message,'channel',None)
+        typing=getattr(channel,'typing',None)
+        if not typing:
+            return None
+        try:
+            context=typing()
+        except Exception:
+            return None
+        enter=getattr(context,'__aenter__',None)
+        if not enter:
+            return None
+        try:
+            asyncio.create_task(_typing_dot(enter))
+        except Exception:
+            return None
+        return context
+
     async def on_message(self,message):
         if message.author.bot or not self.user:return
+        # One switch per turn: everything that answers goes through `reply_message`, which sets
+        # it, so the end of the turn can tell "answered" from "fell through every path".
+        self._answered_this_turn=False
+        self._directed_this_turn=False
+        self._ambient_this_turn=False
+        slow_ack=asyncio.create_task(self._ack_if_slow(message))
+        self._slow_ack=slow_ack
+        typing_context=self._start_typing(message)
+        # The send is tracked by wrapping it for the length of this turn, not by writing the flag
+        # inside `reply_message`: that kept the count honest but could not be seen by a test
+        # double, so a suite with a mocked `reply_message` thought every turn had gone silent.
+        send=self.reply_message
+        async def tracked_send(target,text,*args,**kwargs):
+            if str(text or '').strip():
+                self._answered_this_turn=True
+            return await send(target,text,*args,**kwargs)
+        self.reply_message=tracked_send
+        try:
+            await self._on_message(message)
+        except ValueError as e:
+            if not self._answered_this_turn:
+                if self._ambient_this_turn:await self.reply_message(message,safe_text(e),mention_author=False)
+                else:await self.private_reply(message,safe_text(e))
+        except Exception:
+            log.exception('Message handling failed')
+            if not self._answered_this_turn:
+                if self._ambient_this_turn:await self.reply_message(message,'Sorry, that question failed. Please try again or mention me for help.',mention_author=False)
+                else:await self.private_reply(message,'Sorry, that request failed. Please try again or use /help.')
+        finally:
+            self.reply_message=send
+            slow_ack.cancel()
+            if typing_context is not None:
+                exit_method=getattr(typing_context,'__aexit__',None)
+                if exit_method:
+                    try:await exit_method(None,None,None)
+                    except Exception:pass
+            # A directed message that no path answered gets an honest line, exactly once.
+            if self._directed_this_turn and not self._answered_this_turn:
+                log.warning('No handler produced a reply for a directed message; sending the no-answer line.')
+                await self._no_answer_reply(message,ambient=self._ambient_this_turn)
+
+    async def _on_message(self,message):
         is_dm=isinstance(message.channel,discord.DMChannel)
         in_worker_server=bool(message.guild and message.guild.id==GUILD_ID)
         worker_context=bool(get_worker(message.author.id) and (is_dm or in_worker_server))
@@ -1297,6 +1453,10 @@ class MechBot(commands.Bot):
         if pending_build_reply and not directed:
             directed=True
             ambient_question=True
+        # Per-turn bookkeeping: whether this turn owed a reply, and whether it was an ambient
+        # channel question (which answers without a ping).
+        self._directed_this_turn=bool(directed)
+        self._ambient_this_turn=bool(ambient_question)
         if not directed:
             # Never jump into another member's reply chain or respond to a message aimed at a user.
             reference=getattr(message,'reference',None)
@@ -1493,6 +1653,10 @@ class MechBot(commands.Bot):
                     await self.conversation_turn_reply(
                         message,text,spell_it_out(text,verdict.get('corrections') or '')
                         +discord_text(verdict['reply']),ambient=ambient_question);return
+            # The advisor can answer a spend, crate or loadout question with no model at all. When
+            # it can, the two model round trips in front of it are pure latency, so a sentence it
+            # owns skips the understand step. Everything else keeps the pipeline first, because
+            # "read, then answer" is what makes a phrasing nothing has seen before work.
             pipeline_out=await self.pipeline_answer(text,message,scope=build_scope)
             if pipeline_out:
                 # Say what was corrected, so the answer never looks like mind reading.
@@ -1585,13 +1749,10 @@ class MechBot(commands.Bot):
                 out='I don’t have reviewed information for that game question yet, so I won’t guess. Try `/weapon`, `/mech`, `/builds`, or `/upcoming` for supported lookups.'
                 await self.conversation_turn_reply(message,text,out,ambient=ambient_question);return
             await self.reply_message(message,'General AI is not configured yet. Use /help to see what I can do.',mention_author=not ambient_question)
-        except ValueError as e:
-            if ambient_question:await self.reply_message(message,safe_text(e),mention_author=False)
-            else:await self.private_reply(message,safe_text(e))
-        except Exception:
-            log.exception('Message handling failed')
-            if ambient_question:await self.reply_message(message,'Sorry, that question failed. Please try again or mention me for help.',mention_author=False)
-            else:await self.private_reply(message,'Sorry, that request failed. Please try again or use /help.')
+        finally:
+            # Nothing is caught here on purpose: `on_message` owns the failure reply and the
+            # end-of-turn check, so an error raised in this body is still reported once.
+            pass
 
 
 def install_commands(bot):
