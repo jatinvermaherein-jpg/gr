@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 
 from aiohttp import web
 
+from . import api_view
 from . import ecr_digest
 from . import facts as fact_lib
 # The channel answers and this API must not disagree about whether a rotation is still live, so the
@@ -40,9 +41,10 @@ from .forum_archive import FORUM_ARCHIVE_PATH, _read_archive
 from .store import Store   # imported for Store.FACT_COLUMNS: one list, one truth
 
 API_PATH = '/api/mech-arena/public'
-# The two paths that answer without a reader token: a deployment's health check has no key to send, and the
-# index is the page someone opens in a browser to find out what the API is. Neither returns a row of data.
-EXEMPT_PATHS = frozenset({'/health', '/api/mech-arena/public/health', '/'})
+# The only paths that answer without a reader token are the health checks: they carry counts and state, no
+# rows. The public page and the index are deliberately not exempt — the page is the data in another skin, so a
+# deployment that sets a token locks it exactly like the JSON.
+EXEMPT_PATHS = frozenset({'/health', '/api/mech-arena/public/health'})
 DEFAULT_LIMIT = 50
 EXPORT_ROW_CAP = 20000        # a ceiling on /export so a bug cannot turn into an unbounded read
 REVISION_TTL = 5.0            # the fingerprint query is cheap but not free; cache it briefly
@@ -618,6 +620,75 @@ class DataApi:
         return state
 
     # -- index ----------------------------------------------------------------------------
+    async def root(self, request):
+        """`/` is the page for a person and the catalogue for a script.
+
+        A browser asking for `/` wants to see what is in there today; `curl` asking the same path wants the
+        machine-readable index, because that is what a probe expects to find at a root. Both read the same
+        counts, so nobody gets a different number depending on how they asked.
+        """
+        if 'text/html' in str(request.headers.get('Accept') or '').lower():
+            return await self.view(request)
+        return await self.index(request)
+
+    async def view(self, request):
+        """The public page: newest ECR, the posts themselves, dated events, the forum crawl.
+
+        Every value comes from the helpers the JSON routes already use — `_fact_view`, `_ecr_view`,
+        `refresh_ecr_status`, `dedupe_facts`, `_forum_view` — so the page cannot call a rotation live while
+        `/ecr` calls it outdated. Only the "give me the six newest" plumbing is repeated here, and it holds
+        no judgement of its own.
+        """
+        now = int(time.time())
+        store = self.store
+        ecr_rows, event_rows, posts = [], [], []
+        if store is not None and getattr(store, 'supports_announcement_facts', False):
+            facts = dedupe_facts(refresh_ecr_status(
+                [_fact_view(row) for row in
+                 await self._facts((), (), self.config['max_limit'] * 5, 0, 'DESC')], now=now))
+            pool = [row for row in facts if row.get('category') == 'ecr']
+            ecr_rows = [_ecr_view(row, now, pool) for row in pool[:6]]
+            for row in [item for item in facts if item.get('category') not in ('ecr', 'other')][:8]:
+                window = _first_stated_window(row)
+                event_rows.append({'title': row.get('title'), 'category': row.get('category'),
+                                   'channel_name': row.get('channel_name'),
+                                   'message_url': row.get('message_url'),
+                                   'event_date_label': row.get('event_date_label') or '',
+                                   'date_note': row.get('date_note'),
+                                   'window': (None if not (window and row.get('date_confirmed')) else
+                                              {'label': fact_lib._window_label(row, now),
+                                               'state': _window_state(row, now)}),
+                                   'standing': fact_lib._fact_standing(row, now),
+                                   'source': row.get('source') or {}})
+        if store is not None and getattr(store, 'supports_announcements', False):
+            posts = [_announcement_view(row) for row in
+                     await _select(store, 'announcements', ANNOUNCEMENT_COLUMNS, [], [], 'DESC', 5, 0)]
+        threads = self._threads() or []
+        forum_meta = {}
+        if threads:
+            forum_meta = {'last_created': ((threads[0].get('created') or {}).get('display')),
+                          'first_created': ((threads[-1].get('created') or {}).get('display')),
+                          'threads_in_file': len(threads)}
+        blocks = {'counts': await self._counts(), 'as_of_utc': _iso(now), 'revision': await self._revision(),
+                  'ingestion': await self._ingestion_state(), 'ecr': ecr_rows, 'events': event_rows,
+                  'announcements': posts, 'forum': [_forum_view(thread) for thread in threads[:14]],
+                  'forum_meta': forum_meta, 'links': {
+                      'JSON index': API_PATH, 'Announcements': API_PATH + '/announcements',
+                      'ECR': API_PATH + '/ecr', 'Forum': API_PATH + '/forum',
+                      'Export NDJSON': API_PATH + '/export?dataset=announcements', 'Health': '/health'},
+                  'caveats': ['“Live”, “outdated” and “unknown” are this bot’s own reading of how long a post '
+                              'of that kind speaks for the game, plus how it compares with the other stored '
+                              'posts — the same derivation the Discord answers use.',
+                              'A buy or skip line inside a folded block is the guide post’s own words about '
+                              'its item, attributed to the post. It is not a recommendation from this API.',
+                              'Forum timestamps are reproduced exactly as the site displayed them; the forum '
+                              'publishes no timezone, so no UTC conversion is claimed.',
+                              'Tracker history comes from the vendored community pack and is never merged '
+                              'with the live announcements.',
+                              'Post text is the stored message, unedited; a table that has not been migrated '
+                              'shows as empty rather than filled in.']}
+        return web.Response(text=api_view.render(blocks), content_type='text/html', charset='utf-8')
+
     async def index(self, request):
         """A machine-readable catalogue, and a human one in the browser.
 
@@ -656,6 +727,9 @@ class DataApi:
              'rows': None, 'params': '—'},
             {'path': API_PATH + '/export', 'gives': 'a whole dataset as NDJSON, for rebuilding a local copy',
              'rows': None, 'params': 'dataset=announcements|facts|ecr_history|forum'},
+            {'path': API_PATH + '/view',
+             'gives': 'the same rows as a web page: current ECR, the originals, events, the forum crawl',
+             'rows': None, 'params': '—'},
         ]
         payload = {'service': 'ARCHΛNGLE data API', 'version': 1, 'read_only': True,
                    'private_data': ('player-owned rows — schedules, saved text, chat memory, per-account '
@@ -1092,7 +1166,8 @@ originals, not summaries. Read-only JSON, NDJSON and CSV. Private player data is
         app = web.Application(middlewares=[self._guards])
         app[APP_CONFIG] = self.config
         app[APP_AUTH] = bool(self.config['token'])
-        app.router.add_get('/', self.index)
+        app.router.add_get('/', self.root)
+        app.router.add_get(API_PATH + '/view', self.view)
         app.router.add_get(API_PATH, self.index)
         app.router.add_get(API_PATH + '/', self.index)
         app.router.add_get(API_PATH + '/announcements', self.announcements)

@@ -16,6 +16,7 @@ Four things these tests pin down, because each one is a promise the rest of the 
 """
 
 import asyncio
+import html
 import json
 import os
 import re
@@ -600,7 +601,10 @@ class Privacy(ApiTestCase):
                   API_PATH + '/ecr/rotations?limit=50', API_PATH + '/events?limit=50', API_PATH + '/forum?limit=50',
                   API_PATH + '/forum/meta', API_PATH + '/stats', API_PATH + '/export?dataset=announcements',
                   API_PATH + '/export?dataset=facts', API_PATH + '/export?dataset=forum',
-                  API_PATH + '/export?dataset=ecr_history', '/health', API_PATH + '/nonexistent']
+                  API_PATH + '/export?dataset=ecr_history', '/health', API_PATH + '/nonexistent',
+                  # The page is the same data in another skin, so it is scanned like every route: it prints
+                  # verbatim Discord and forum text, which must not smuggle a table name into the markup.
+                  API_PATH + '/view', '/']
         bodies = []
         for route in routes:
             response, body = await self.get(route)
@@ -726,6 +730,122 @@ class Startup(ApiTestCase):
                                       user=SimpleNamespace(id=1))
         await bot.tree.get_command('data_api').callback(interaction)
         self.assertIn('DATA_API_ENABLED', sent[0])
+
+
+class PublicView(ApiTestCase):
+    """The page a person opens. It is allowed to say nothing the JSON does not already say."""
+
+    async def get_page(self, path='/', accept='text/html'):
+        response = await self.client.request('GET', path, headers={'Accept': accept})
+        return response, await response.text()
+
+    async def test_a_browser_gets_the_page_and_a_script_still_gets_the_index(self):
+        response, body = await self.get_page()
+        self.assertEqual(response.status, 200)
+        self.assertTrue(response.headers['Content-Type'].startswith('text/html'))
+        self.assertIn('what the game actually said', body)
+        for heading in ('Current ECR', 'Announcement originals', 'Plarium forum'):
+            self.assertIn(heading, body)
+        _response, payload = await self.json('/')            # no Accept header: a probe, not a browser
+        self.assertIn('endpoints', payload)
+        self.assertEqual(payload['counts']['announcements'], len(self.seeded_posts))
+
+    async def test_the_page_is_the_same_document_at_both_paths(self):
+        _response, at_root = await self.get_page('/')
+        response, at_view = await self.get_page(API_PATH + '/view')
+        self.assertEqual(response.status, 200)
+        self.assertEqual(at_root, at_view, 'two entry points, one page, so no copy can drift')
+
+    async def test_no_script_and_no_inline_handlers(self):
+        _response, body = await self.get_page()
+        self.assertNotIn('<script', body.lower())
+        self.assertNotIn('eval(', body)
+        self.assertIn('<details>', body, 'the originals are folded, not omitted')
+
+    async def test_verbatim_text_is_escaped_so_a_post_cannot_write_markup(self):
+        _response, body = await self.get_page()
+        self.assertNotIn('<@&', body, 'a Discord mention must not become an HTML tag')
+        self.assertIn('&lt;@&amp;1532422534442651751&gt;', body,
+                      'the mention is still readable, it simply cannot be a tag')
+        self.assertNotIn('<img', body.lower())
+        self.assertNotIn('None<', body.replace(' ', ''), 'a missing value renders as nothing, not as None')
+
+    async def test_every_figure_on_the_page_comes_from_a_route(self):
+        _response, body = await self.get_page()
+        _response, payload = await self.json(API_PATH + '/ecr?limit=6')
+        rows = self.rows(payload)
+        self.assertTrue(rows)
+        for row in rows:
+            # The page escapes its text, so the expectation has to be escaped the same way:
+            # `assertIn(row['title'], body)` would pass for any title and fail for one with an apostrophe.
+            for key in ('title', 'age', 'standing'):
+                self.assertIn(html.escape(str(row[key]), quote=True), body,
+                              'the page carries the route’s ' + key + ' unchanged')
+            for item in row['items']:
+                self.assertIn(html.escape(item['label'], quote=True), body)
+        counts = (await self.json(API_PATH + '/stats'))[1]['data']['counts']
+        self.assertIn(f'<b>{counts["announcements"]}</b>', body, 'the count tile is the table’s count')
+
+    async def test_a_deployment_with_a_reader_token_locks_the_page_too(self):
+        await self.client.close()
+        await self.start_client(dict(self.api.config, token='let-me-read'))
+        response, _body = await self.get_page('/')
+        self.assertEqual(response.status, 401, 'the page is the data, so it is gated like the data')
+        response, _body = await self.get_page('/health')
+        self.assertEqual(response.status, 200, 'only the health check answers without a key')
+
+    async def test_the_page_says_so_when_nothing_is_stored_yet(self):
+        store = Store(sqlite_path=Path(self.temp.name) / 'bare.sqlite3')
+        bare = DataApi(SimpleNamespace(store=store, announcement_runner=None, forum_archive_runner=None,
+                                       conversation_runner=None),
+                       forum_path=self.api.forum_path, history_path=self.api.history_path,
+                       settings=dict(api.SAFE_DEFAULTS, enabled=True, max_limit=50, cache_seconds=0))
+        client = TestClient(TestServer(bare.create_app()))
+        await client.start_server()
+        self.addCleanup(client.close)
+        response = await client.request('GET', '/', headers={'Accept': 'text/html'})
+        body = await response.text()
+        self.assertEqual(response.status, 200)
+        self.assertIn('Nothing stored yet', body)
+        self.assertIn('never seeded with a guess', body)
+        await store.close()
+
+
+class StandaloneService(unittest.IsolatedAsyncioTestCase):
+    """`python -m mechbot.api_server`: the same app on its own, for a public web service."""
+
+    def setUp(self):
+        self.env = patch.dict(os.environ, {}, clear=True)
+        self.env.start()
+        self.addCleanup(self.env.stop)
+
+    async def test_it_refuses_to_create_a_database_it_was_never_pointed_at(self):
+        from mechbot.api_server import build_store
+        with self.assertRaises(SystemExit) as caught:
+            await build_store()
+        message = str(caught.exception)
+        self.assertIn('DATABASE_URL', message)
+        self.assertIn('ALLOW_LOCAL_STORAGE', message, 'the way to say “yes, make a local one”')
+        for candidate in (Path('data/mech_bot_api_reader.sqlite3'), Path.cwd() / 'data' / 'mech_bot_api_reader.sqlite3'):
+            self.assertFalse(candidate.exists(),
+                             'a refused start must not leave a half-made database behind')
+
+    async def test_it_opens_the_local_file_it_is_told_about(self):
+        from mechbot.api_server import build_store
+        path = Path(tempfile.mkdtemp()) / 'reader.sqlite3'
+        os.environ['MECH_BOT_SQLITE'] = str(path)
+        os.environ['ALLOW_LOCAL_STORAGE'] = 'true'
+        store = await build_store()
+        self.addCleanup(store.close)
+        self.assertTrue(path.exists())
+        self.assertTrue(store.supports_announcements, 'a local store has the tables, so the page can promise rows')
+
+    async def test_the_service_is_off_until_the_deployment_sets_a_port(self):
+        from mechbot.api_server import main
+        self.assertFalse(api_config()['enabled'], 'no PORT, no API — a laptop run opens nothing')
+        self.assertEqual(await main(), 2, 'and it says so instead of listening anyway')
+        os.environ['DATA_API_PORT'] = '8099'
+        self.assertTrue(api_config()['enabled'])
 
 
 if __name__ == '__main__':
