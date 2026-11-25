@@ -22,6 +22,7 @@ import time
 
 from . import advisor
 from .humanize import audit, polish
+from .pipeline import correct_names
 
 MAX_ANSWER = 1800
 DISCORD_LIMIT = 1900
@@ -194,7 +195,12 @@ _THREAD: dict = {}
 
 
 def remember_thread(scope, question, result):
-    """Hold the decision just made, so the next sentence can be read as a follow-up to it."""
+    """Hold the decision just made, so the next sentence can be read as a follow-up to it.
+
+    It also holds the one thing the answer said it could not settle. A comparison that comes out even
+    asks which role the player plays; "what should i buy" a minute later is that question being
+    answered, and the store ranking has no way to know it.
+    """
     key = _scope_key(scope)
     if not key:
         return
@@ -215,6 +221,7 @@ def remember_thread(scope, question, result):
                                else picks[0] if len(picks) == 1 and verdict in ('BUY', 'YES', 'GOOD') else None),
                     'capability': (result or {}).get('capability'),
                     'verdict': verdict,
+                    'owned': [str(name) for name in (envelope.get('owned') or []) if name],
                     'expires': time.monotonic() + THREAD_TTL_SECONDS}
 
 
@@ -294,6 +301,9 @@ def _owned_phrases(text, data):
     return phrases
 
 
+BUY_WORDS = re.compile(r'\b(?:buy|purchase|spend|invest|worth it|pick up|get)\b', re.I)
+
+
 def _say_thread(engine, question=''):
     """The follow-up answer: the earlier decision, applied to what the player just said.
 
@@ -309,6 +319,11 @@ def _say_thread(engine, question=''):
     blocks = [heading]
     data = advisor.load()
     verdict = str(engine.get('verdict') or '')
+    if len(picks) > 1 and BUY_WORDS.search(str(question or '')):
+        # "so what should I buy" after a comparison is asking which of the two. Ranking the whole store
+        # was the answer it used to get, which is a different question with a longer answer.
+        blocks.append(_buy_from_the_pair(picks, winner, engine.get('owned') or [], data, question))
+        return '\n'.join(block for block in blocks if block)
     if len(picks) == 1 and not winner:
         winner = picks[0]
     role_line = _role_answer(winner, picks, question, data)
@@ -321,6 +336,34 @@ def _say_thread(engine, question=''):
     if next_line:
         blocks.append(f'**What I would do:** {next_line}')
     return '\n'.join(blocks)
+
+
+def _buy_from_the_pair(picks, winner, owned, data, question):
+    """The answer to "so what should I buy" when the last thing the player saw was two items."""
+    left, right = picks[0], picks[1]
+    mine = [str(name) for name in owned]
+    if mine:
+        rest = [name for name in picks if name not in mine]
+        if rest:
+            return (f'**Buy {rest[0]}.** You already have {mine[0]}, so this is an addition rather than a '
+                    f'replacement, and it is the one of the two you do not own.')
+        return f'**Buy neither.** You already have both of them.'
+    prices = {name: advisor.store_price(advisor.resolve(name, data).get('item') or {}, data)
+              for name in picks}
+    costs = {name: (advisor.amount_text(row['currency'], row['amount'])
+                    if row.get('status') == 'ok' else None) for name, row in prices.items()}
+    if winner:
+        return (f'**Buy {winner}.** It is the one this comparison put ahead'
+                + (f', at {costs.get(winner)}' if costs.get(winner) else '') + '.')
+    if costs.get(left) and costs.get(right) and costs[left] != costs[right]:
+        cheap = left if (advisor.store_price(advisor.resolve(left, data).get('item') or {},
+                                             data).get('amount') or 0) < \
+            (advisor.store_price(advisor.resolve(right, data).get('item') or {},
+                                 data).get('amount') or 0) else right
+        return (f'**Buy neither yet.** They are the same tier, the catalog holds nothing separating them, '
+                f'and only the price differs: {cheap} is the cheaper of the two at {costs[cheap]}.')
+    return (f'**Buy whichever you will actually run.** The two are the same tier and the catalog holds no '
+            f'figure that separates them, so the decision is which of the two suits your hangar.')
 
 
 def _role_answer(winner, picks, question, data):
@@ -526,6 +569,18 @@ def wants_advisor(text, data=None):
     return bool(RANKABLE.search(body))
 
 
+def _repair_names(body, data):
+    """Rewrite misspelled catalog names in the question, and say which ones were rewritten."""
+    # The engine's own name index, not the bot catalog: this module runs with no bot and no database,
+    # and the advisor pack is the thing it resolves names against everywhere else.
+    pool = tuple(name for name, (kind, _row) in advisor._candidate_names(data).items()
+                 if kind in ('mech', 'weapon', 'pilot', 'mod'))
+    if not pool:
+        return body, {}
+    corrected, corrections = correct_names(body, pool)
+    return (corrected, corrections) if corrections else (body, {})
+
+
 def route(text, data=None):
     """Which capability a sentence is asking for. The shape of the question decides, not a keyword list alone."""
     data = data or advisor.load()
@@ -555,7 +610,7 @@ def route(text, data=None):
     return 'unknown'
 
 
-def answer(text, facts=None, data=None, limit=MAX_ANSWER, scope=None):
+def answer(text, facts=None, data=None, limit=MAX_ANSWER, scope=None, thread_only=False):
     """One prose question in, one channel-ready answer out, with the envelope that justifies it.
 
     Returns a dict with `reply`, `capability`, `envelope` and a `style` note recording what the
@@ -566,6 +621,12 @@ def answer(text, facts=None, data=None, limit=MAX_ANSWER, scope=None):
     from scratch - "i have rosa and gemini, what now" is a follow-up, not a store ranking.
     """
     data = data or advisor.load()
+    if thread_only:
+        # Only the continuation, or nothing: used by the caller that has already decided this
+        # sentence is a follow-up and must not be re-routed as a fresh store question.
+        result = _answer_follow_up(scope, text, None, facts, data, limit)
+        return result or {'capability': 'unknown', 'status': 'no_match', 'envelope': {}, 'guard': 'n/a',
+                          'style': {'tells': [], 'audit': []}, 'corrections': {}, 'reply': ''}
     follow = thread_follow_up(scope, text, data) if scope else None
     if follow:
         result = _answer_follow_up(scope, text, follow, facts, data, limit)
@@ -574,15 +635,20 @@ def answer(text, facts=None, data=None, limit=MAX_ANSWER, scope=None):
     body = str(text or '').strip()
     if not body:
         return {'capability': 'empty', 'reply': 'Ask me something about a buy, a crate or a build.',
-                'envelope': {}, 'status': 'empty'}
+                'envelope': {}, 'status': 'empty', 'corrections': {}}
+    # A misspelled item name used to delete half the question. "which is better outlow or deathwalker"
+    # found Deathwalker and dropped "outlow", and the comparison came out as Deathwalker against
+    # nothing. The repair is the same one the bot's own ladder uses, and the reply owns up to it.
+    body, corrections = _repair_names(body, data)
     capability = route(body, data)
+    repaired = dict(corrections or {})
     if capability in ('ask_loadouts', 'clarify_item'):
         engine = {'kind': 'ask', 'verdict': 'ASK', 'numbers': set(), 'caveats': [], 'assumptions': [],
                   'data_gaps': [], 'status': 'ask', 'missing_slots': ['item'],
                   'followups': (['Which mechs on each side? Name them and I can model the fight, and say '
                                  'whether you expect to meet close or long.'] if capability == 'ask_loadouts'
                                 else ['What is "it"? Name the item and I can price it.'])}
-        return _package(engine, capability, body, data, limit)
+        return _package(engine, capability, body, data, limit, None, repaired)
     facts = advisor._facts(facts)
     if capability == 'simulate_1v1':
         left, right = _split_versus(body)
@@ -625,7 +691,7 @@ def answer(text, facts=None, data=None, limit=MAX_ANSWER, scope=None):
             for issue in issues:
                 engine['numbers'] |= {str(value) for value in
                                       (advisor.normalise(issue['note']).split() + issue['candidates'])}
-            return _package(engine, capability, body, data, limit, scope)
+            return _package(engine, capability, body, data, limit, scope, repaired)
         engine = dict(engine, kind=(engine.get('kind') or 'explain'),
                       refusal=issues[0], numbers=set(engine.get('numbers') or set()))
         for issue in issues:
@@ -635,7 +701,7 @@ def answer(text, facts=None, data=None, limit=MAX_ANSWER, scope=None):
         # Q20: a one-item buy question is answered, then asked the one thing that would reorder it
         engine = dict(engine, followups=list(engine.get('followups') or []) + [advisor.FOLLOWUP_TEXT['role']],
                       provisional=True)
-    return _package(engine, capability, body, data, limit, scope)
+    return _package(engine, capability, body, data, limit, scope, repaired)
 
 
 def _answer_follow_up(scope, text, merged, facts, data, limit):
@@ -651,10 +717,15 @@ def _answer_follow_up(scope, text, merged, facts, data, limit):
     winner = thread.get('winner')
     verdict = str(thread.get('verdict') or '')
     picks = list(thread.get('picks') or [])
-    if not (_role_answer(winner, picks, text, data) or _owned_answer(winner, picks, text, data, verdict)):
+    # A "what should I buy" after two items were compared is answered about those two, not from the
+    # store ranking - it is the same decision carrying on.
+    from_pair = len(picks) > 1 and BUY_WORDS.search(text)
+    if not (from_pair or _role_answer(winner, picks, text, data)
+            or _owned_answer(winner, picks, text, data, verdict)):
         return None
     engine = {'kind': 'thread', 'verdict': (thread.get('winner') or 'ASK'), 'status': 'ok',
               'picks': list(thread.get('picks') or []), 'item': thread.get('winner'),
+              'owned': list(thread.get('owned') or []),
               'numbers': set(), 'caveats': [], 'assumptions': [], 'data_gaps': [], 'followups': [],
               'thread_question': thread.get('question')}
     # Any figure the follow-up quotes has to survive the digit guard, so it is gathered from the catalog
@@ -680,10 +751,10 @@ def _answer_follow_up(scope, text, merged, facts, data, limit):
     if _digits_ok(styled, engine):
         reply = styled
     return {'capability': 'thread', 'status': 'ok', 'envelope': engine, 'reply': _clip(reply, limit),
-            'guard': guard, 'style': {'tells': tells, 'audit': audit(styled)}}
+            'guard': guard, 'style': {'tells': tells, 'audit': audit(styled)}, 'corrections': {}}
 
 
-def _package(engine, capability, body, data, limit=MAX_ANSWER, scope=None):
+def _package(engine, capability, body, data, limit=MAX_ANSWER, scope=None, corrections=None):
     """Render, guard, humanize, clip. One place so every capability gets the same treatment."""
     reply = _render(engine, body)
     reply, guard = _guard(reply, engine)
@@ -691,7 +762,8 @@ def _package(engine, capability, body, data, limit=MAX_ANSWER, scope=None):
     if _digits_ok(styled, engine):
         reply = styled
     result = {'capability': capability, 'status': engine.get('status') or 'ok', 'envelope': engine,
-              'reply': _clip(reply, limit), 'guard': guard, 'style': {'tells': tells, 'audit': audit(styled)}}
+              'reply': _clip(reply, limit), 'guard': guard, 'style': {'tells': tells, 'audit': audit(styled)},
+              'corrections': dict(corrections or {})}
     if capability in ('compare', 'explain') and scope:
         remember_thread(scope, body, result)
     return result
@@ -743,6 +815,35 @@ def _money(value):
     if not value or value.get('status') != 'ok':
         return None
     return advisor.amount_text(value.get('currency'), value.get('amount'))
+
+
+MECH_STATS = (('hp', 'HP'), ('speed', 'speed'), ('power', 'power'), ('energy', 'energy'))
+
+
+def _panel(item):
+    """The community stat row for one item, as (label, value) pairs, skipping what is missing."""
+    review = (item or {}).get('review') or {}
+    out = []
+    for key, label in MECH_STATS:
+        value = review.get(key)
+        if value in (None, '', 0, '0'):
+            continue
+        out.append((label, str(value)))
+    return out
+
+
+def _panel_line(item):
+    """One item's figures on one line: "**Outlaw:** 213,100 HP · 24 speed · 931 power · 32 energy"."""
+    rows = _panel(item)
+    if not rows:
+        return ''
+    return f'**{item.get("name") or "It"}:** ' + ' · '.join(f'{value} {label}' if label != 'HP' else
+                                                          f'{value} HP' for label, value in rows)
+
+
+def _item(engine, name):
+    """The catalog row the comparison resolved, so figures come from data rather than from a table cell."""
+    return ((engine.get('resolved') or {}).get(_side(engine, name)) or {})
 
 
 def _side(engine, name):
@@ -804,6 +905,30 @@ def _article(word):
     return 'an' if str(word or '')[:1].lower() in 'aeiou' else 'a'
 
 
+def _grade_line(engine, left, right):
+    """Which side leads on each stat the catalog holds for both, as one line rather than a score."""
+    a, b = _item(engine, left), _item(engine, right)
+    if not a or not b:
+        return ''
+    leads = {left: [], right: []}
+    for label, _ in MECH_STATS:
+        first, second = (a.get('review') or {}).get(label), (b.get('review') or {}).get(label)
+        one, two = _number(str(first)), _number(str(second))
+        if one is None or two is None or one == two:
+            continue
+        leads[left if one > two else right].append(label)
+    lines = [f'{name} leads on {", ".join(stats)}' for name, stats in leads.items() if stats]
+    if not lines:
+        return ''
+    return '**On the figures:** ' + '; '.join(lines) + '.'
+
+
+def labels_for(key):
+    """Which word a stat is compared by, so the loser's case names the right one."""
+    return {'hp': 'survivability', 'speed': 'speed', 'power': 'damage output',
+            'energy': 'energy budget'}.get(key, key)
+
+
 def _loser_edge(engine, left, right, loser, counter):
     """The losing side's real advantage, in place of "the gap is small enough that ...".
 
@@ -842,7 +967,20 @@ def _loser_edge(engine, left, right, loser, counter):
     gap = next((str(row) for row in (engine.get('data_gaps') or []) if str(row).startswith(loser)), '')
     if gap:
         return f'the catalog holds no stat row for it, so the tier list is most of what separates them'
-    return f'the two are close enough that a build which already runs {loser} has no reason to swap'
+    mine, theirs = _item(engine, loser), _item(engine, other)
+    for key, label in MECH_STATS:
+        one = _number(str((mine.get('review') or {}).get(key)))
+        two = _number(str((theirs.get('review') or {}).get(key)))
+        if one and two and one > two:
+            raw_mine = str((mine.get('review') or {}).get(key))
+            raw_theirs = str((theirs.get('review') or {}).get(key))
+            return (f'it carries {raw_mine} {label} where {other} carries {raw_theirs}, which is the '
+                    f'figure a {labels_for(key)} player would feel')
+    if not (mine.get('tier') or (mine.get('review') or {}).get('hp')):
+        return (f'the catalog holds no tier and no stat row for it, so it is unrated rather than rated '
+                f'worse - {other} wins because it has figures to be rated on')
+    return (f'nothing the catalog holds separates them, so {other} wins only on the ratio it is rated '
+            f'on rather than on anything a player would feel')
 
 
 def _review_of(engine, name):
@@ -902,6 +1040,15 @@ def _say_compare(engine, question=''):
             return f'tier {tiers[0]} against tier {tiers[1]}'
         return ''
 
+    def winner_price_leads(name):
+        if not (prices[0] and prices[1]) or 'not priced' in prices:
+            return False
+        first, second = _number(prices[0]) or 0, _number(prices[1]) or 0
+        if not (first and second) or first == second:
+            return False
+        cheaper_is_left = first < second
+        return cheaper_is_left == (name is left)
+
     def price_phrase():
         if not (prices[0] and prices[1]) or 'not priced' in prices or prices[0] == prices[1]:
             return ''
@@ -914,18 +1061,37 @@ def _say_compare(engine, question=''):
         better, worse = (left, right) if (_number(worth[0]) or 0) > (_number(worth[1]) or 0) else (right, left)
         return f'{worth_of(better)} damage per energy for {better} against {worth_of(worse)} for {worse}'
 
+    panels = [_panel_line(_item(engine, name)) for name in (left, right)]
+    panels = [line for line in panels if line]
+    # The stat panels are the catalog's own figures, but the reply guard only lets through numbers the
+    # envelope already carries, so they are declared here rather than assumed to be there. Both spellings
+    # go in, because the guard compares "213,100" and "213100" as the same figure.
+    declared = [str(value) for name in (left, right) for _label, value in _panel(_item(engine, name))]
+    engine['numbers'] = sorted(set(engine.get('numbers') or []) |
+                               {form for value in declared for form in (value, value.replace(',', ''))})
     if winner:
-        reasons = []
-        same_tier = bool(tiers[0] and tiers[0] == tiers[1])
-        if same_tier:
-            reasons.append(f'both tier {tiers[0]} in the community list')
-        if price_phrase():
-            reasons.append(price_phrase())
+        # What decided it, in a figure the player can check, or an honest statement that nothing did.
+        reason = ''
+        # The price only decides it when the cheaper side is the pick; otherwise it is the pick's
+        # drawback and belongs in the loser's case, not in the reason line.
+        if price_phrase() and winner_price_leads(winner):
+            reason = price_phrase()
         elif worth_phrase():
-            reasons.append(worth_phrase())
-        elif not reasons and tier_phrase():
-            reasons.append(tier_phrase())
-        head = f'**{winner}** over **{loser}**' + (': ' + ' and '.join(reasons) if reasons else '') + '.'
+            better_left = (_number(worth[0]) or 0) > (_number(worth[1]) or 0)
+            if (winner is left) == better_left:
+                reason = worth_phrase()
+        elif spread[0] and spread[1] and spread[0] != spread[1]:
+            reason = f'{spread[0]} reach against {spread[1]}'
+        elif tiers[0] and tiers[1] and tiers[0] != tiers[1]:
+            reason = f'tier {tiers[0]} against tier {tiers[1]}'
+        if reason and tiers[0] and tiers[0] == tiers[1]:
+            reason += f', both tier {tiers[0]} in the community list'
+        elif not reason and tiers[0] and tiers[0] == tiers[1]:
+            reason = f'both tier {tiers[0]} in the community list'
+        head = f'**{winner}** over **{loser}**' + (': ' + reason if reason else '') + '.'
+    elif prices[0] and prices[1] and prices[0] == prices[1] and tiers[0] == tiers[1]:
+        head = (f'**{left}** and **{right}** are the same price and the same tier, so the catalog does '
+                f'not split them.')
     else:
         head = f'**{left}** and **{right}** come out level on what the catalog holds.'
         if price_phrase():
@@ -938,13 +1104,30 @@ def _say_compare(engine, question=''):
     if spread[0] and spread[1] and spread[0] != spread[1]:
         figures.append(f'{left} works at {spread[0]}, {right} at {spread[1]}')
     if categories[0] and categories[1] and categories[0] != categories[1]:
-        figures.append(f'{left} is {_article(categories[0])} {categories[0]} weapon and {right} '
-                       f'{_article(categories[1])} {categories[1]} one')
-    if sizes[0] and sizes[1] and sizes[0] != sizes[1]:
+        # A mech has a role (attacker, tank) and a weapon has a class (guided, missile). "Outlaw is an
+        # attacker weapon" said the wrong thing; a mech's sentence needs the role word, a weapon's
+        # sentence needs its class word to mean anything at all.
+        def role_phrase(name, category):
+            item = _item(engine, name) or {}
+            if str(item.get('kind') or '') == 'mech':
+                return f'{name} plays {_article(category)} {category} role'
+            return f'{name} is {_article(category)} {category} {item.get("kind") or "weapon"}'
+        figures.append(role_phrase(left, categories[0]) + ', ' + role_phrase(right, categories[1]))
+    if sizes[0] and sizes[1] and sizes[0] != sizes[1] and not panels:
+        # Already in the stat panels when both items have one; only worth a line when it is the sole
+        # figure the catalog holds for them.
         figures.append(f'it takes {_num(sizes[0])} energy against {_num(sizes[1])}')
     figures = figures[:3]
 
+    # Who leads on which figure. "Voidghost wins stats (0.37 against 0.292)" was our own weighting
+    # printed as a decimal; "Outlaw leads on speed" is a fact about two mechs.
+    grades = _grade_line(engine, left, right)
+
     blocks = [head]
+    if panels:
+        blocks.append('\n'.join(panels))
+    if grades:
+        blocks.append(grades)
     if figures:
         blocks.append(_bullets(figures))
 
@@ -1288,8 +1471,12 @@ def _tail(engine, body=''):
         if 'community catalog' in line:
             # The answer already says the tier is the community list. Repeating the long form of the
             # same provenance under every comparison is what left a paragraph of disclaimers at the
-            # end of a two-item answer.
-            line = 'Tier and damage-per-energy labels come from the community catalog, not the developers.'
+            # end of a two-item answer - and "damage-per-energy" has nothing to do with two mechs.
+            has_damage = any('damage per energy' in str(row.get('label'))
+                             for row in engine.get('head_to_head') or [])
+            line = ('Tier and damage-per-energy labels come from the community catalog, not the '
+                    'developers.' if has_damage else
+                    'Tier and stat labels come from the community catalog, not the developers.')
         bits.append(_upcase_first(_closed(line)))
     answered = engine.get('verdict') not in ('ASK', None) and engine.get('status') != 'ask'
     # "Ordered on the budget weights" names a weighting set the player never chose. Say the ordering

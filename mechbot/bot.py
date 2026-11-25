@@ -658,6 +658,25 @@ class MechBot(commands.Bot):
         reply=naturalize_discord_reply(formatted) if formatted else engine['text']
         return discord_text(reply)
 
+    async def thread_follow_up_reply(self,text,corrections=None):
+        """A follow-up to the last comparison, answered against it - with no model configured.
+
+        `advisor_verdict` is the other way in, and it runs the model path first when one is configured.
+        That is wrong for this shape: "what i should buy" after a comparison is a deterministic
+        continuation, and sending it through the understand step got it read as a fresh budget
+        question. This asks the advisor directly, so the answer is the same ether way.
+        """
+        try:
+            verdict=advisor_answer(text,[],scope=None,thread_only=True)
+        except Exception:
+            log.exception('Thread follow-up failed; falling back to the normal path')
+            return None
+        if not verdict or verdict.get('capability')!='thread':
+            return None
+        known=dict(corrections or {})
+        known.update(verdict.get('corrections') or {})
+        return spell_it_out(text,known)+discord_text(verdict['reply'])
+
     async def advisor_verdict(self, text, scope=None, force=False):
         """The advisor's whole answer for one sentence - prose plus the envelope - or None.
 
@@ -685,6 +704,8 @@ class MechBot(commands.Bot):
             return None
         verdict['question'] = question
         verdict['carried'] = bool(carried)
+        # The advisor repairs misspelled catalog names itself now; the caller discloses them.
+        verdict['corrections'] = dict(verdict.get('corrections') or {})
         if scope:
             remember_question(scope, question, verdict)
         return verdict
@@ -692,7 +713,11 @@ class MechBot(commands.Bot):
     async def advisor_reply(self, text, scope=None, force=False):
         """Just the prose half of `advisor_verdict`, for callers that only need a reply to send."""
         verdict = await self.advisor_verdict(text, scope=scope, force=force)
-        return discord_text(verdict['reply']) if verdict else None
+        if not verdict:
+            return None
+        # The advisor repairs misspelled catalog names itself, so its repairs are disclosed here too.
+        return (spell_it_out(text, verdict.get('corrections') or '')
+                + discord_text(verdict['reply']))
 
     async def _announcement_fact_rows(self,categories,limit=ANNOUNCEMENT_FACT_REPLY_LIMIT):
         """Read curated facts back from the database - this is the answer source after the dump."""
@@ -1458,11 +1483,16 @@ class MechBot(commands.Bot):
             # to be answered as a Rosa pilot listing - a name in the sentence won the ladder - and
             # never as the follow-up to the comparison it clearly was.
             thread_question=thread_follow_up(build_scope,text) if build_scope else None
+            from_thread=(await self.thread_follow_up_reply(text,fuzzy_corrections)
+                         if (thread_question and not images) else None)
+            if from_thread:
+                await self.conversation_turn_reply(message,text,from_thread,ambient=ambient_question);return
             if thread_question and not images:
                 verdict=await self.advisor_verdict(text,scope=build_scope)
                 if verdict and verdict.get('capability')=='thread':
-                    await self.conversation_turn_reply(message,text,discord_text(verdict['reply']),
-                                                       ambient=ambient_question);return
+                    await self.conversation_turn_reply(
+                        message,text,spell_it_out(text,verdict.get('corrections') or '')
+                        +discord_text(verdict['reply']),ambient=ambient_question);return
             pipeline_out=await self.pipeline_answer(text,message,scope=build_scope)
             if pipeline_out:
                 # Say what was corrected, so the answer never looks like mind reading.
@@ -1516,7 +1546,10 @@ class MechBot(commands.Bot):
             if not pilot_mentions and not mod_mentions:
                 verdict=await self.advisor_verdict(text,scope=build_scope)
                 if verdict:
-                    out=discord_text(verdict['reply'])
+                    # The advisor repairs misspelled catalog names now, so it has to say which ones it
+                    # repaired - the same disclosure the ladder below already gives.
+                    known=dict(fuzzy_corrections or {});known.update(verdict.get('corrections') or {})
+                    out=spell_it_out(text,known)+discord_text(verdict['reply'])
                     if verdict.get('carried'):
                         # Say that the short reply was read as an answer, so nothing looks like mind reading.
                         subject=advisor_subject(verdict)

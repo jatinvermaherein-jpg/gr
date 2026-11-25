@@ -777,15 +777,14 @@ class TheAnswerIsAboutWhatThePlayerTypedTests(unittest.IsolatedAsyncioTestCase):
            'from_rank': 4, 'from_level': 1, 'to_rank': 5, 'to_level': 1,
            'question': 'redox', 'unclear': False}
 
-    async def asyncSetUp(self):
-        import tempfile
+    @classmethod
+    def setUpClass(cls):
         from mechbot.catalog import Catalog, initialize_snapshot
-        self._tmp = tempfile.mkdtemp()
-        with patch.dict(os.environ, {'SNAPSHOT_PATH': str(Path(self._tmp) / 'r.sqlite3')}):
-            self.catalog = Catalog(initialize_snapshot())
+        cls.catalog = Catalog(initialize_snapshot())
 
-    async def asyncTearDown(self):
-        self.catalog.close()
+    @classmethod
+    def tearDownClass(cls):
+        cls.catalog.close()
 
     async def _reply(self, question, understood):
         from mechbot.bot import MechBot
@@ -847,3 +846,75 @@ class TheAnswerIsAboutWhatThePlayerTypedTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(_cost_fact_is_about(fact, 'Redox'))
         self.assertTrue(_cost_fact_is_about(fact, 'Charge Rocket 10'))
         self.assertTrue(_cost_fact_is_about({'cost': {}}, 'Redox'), 'no name in the fact, nothing to contradict')
+
+
+class TypoAndDeadHeatComparisonTests(unittest.IsolatedAsyncioTestCase):
+    """The screenshot: "which is better outlow or deathwalker", then "what i should buy".
+
+    Two defects in one exchange. "outlow" for Outlaw scored below the fuzzy cutoff, so the word was
+    dropped and the comparison answered about one item; and the comparison itself came out as a tie
+    that printed a category line instead of the two mechs' own figures - then the follow-up ignored it
+    and asked for a budget, because a store ranking cannot know what was on screen a minute earlier.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        from mechbot.catalog import Catalog, initialize_snapshot
+        cls.catalog = Catalog(initialize_snapshot())
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.catalog.close()
+
+    async def _ping(self, bot, text):
+        message = SimpleNamespace(author=SimpleNamespace(id=1, bot=False), channel=SimpleNamespace(id=44),
+                                  guild=None, mentions=[bot._connection.user], content=text,
+                                  reference=None, attachments=[])
+        await bot.on_message(message)
+
+    async def test_the_misspelt_item_is_repaired_and_disclosed(self):
+        from mechbot.bot import MechBot
+        bot = MechBot(self.catalog, object())
+        bot._connection.user = SimpleNamespace(id=9)
+        bot.conversation_history_for = AsyncMock(return_value=[])
+        bot.reply_message = AsyncMock()
+        with patch.dict(os.environ, {'AI_API_KEY': '', 'AI_MODEL': ''}):
+            await self._ping(bot, 'which is better outlow or deathwalker')
+        reply = bot.reply_message.await_args.args[1]
+        self.assertIn('Outlaw', reply)
+        self.assertIn('outlow', reply, 'the correction is disclosed, not silent')
+        self.assertIn('Deathwalker', reply)
+
+    async def test_a_dead_heat_shows_both_stat_rows(self):
+        from mechbot import advising
+        reply = advising.answer('which is better outlow or deathwalker')['reply']
+        self.assertIn('213,100 HP', reply, "Outlaw's own figures")
+        self.assertIn('227,300 HP', reply, "Deathwalker's own figures")
+        self.assertIn('leads on', reply)
+        self.assertNotIn('come out level on what the catalog holds', reply,
+                         'two mechs at the same price and tier still have figures that differ')
+
+    async def test_the_role_words_are_not_called_weapons(self):
+        from mechbot import advising
+        reply = advising.answer('which is better outlow or deathwalker')['reply']
+        self.assertIn('attacker role', reply)
+        self.assertNotIn('attacker weapon', reply)
+
+    async def test_what_should_i_buy_after_a_comparison_is_about_those_two(self):
+        from mechbot import advising
+        scope = ('buy-tests', 'channel', 'player')
+        advising._THREAD.clear()
+        advising.answer('which is better outlow or deathwalker', scope=scope)
+        reply = advising.answer('what i should buy', scope=scope)
+        self.assertEqual(reply['capability'], 'thread')
+        self.assertIn('Outlaw vs Deathwalker', reply['reply'])
+        self.assertNotIn('What can you spend?', reply['reply'],
+                         'the follow-up was answered as a fresh budget question')
+
+    async def test_a_buy_follow_up_names_the_winner(self):
+        from mechbot import advising
+        scope = ('buy-tests-2', 'channel', 'player')
+        advising._THREAD.clear()
+        advising.answer('which is better redox or voidghost', scope=scope)
+        reply = advising.answer('so what should i buy', scope=scope)['reply']
+        self.assertIn('**Buy Redox.**', reply)

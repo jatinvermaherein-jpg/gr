@@ -39,7 +39,13 @@ log = logging.getLogger(__name__)
 
 # A typo of one or two characters off a real name is almost always a typo. Below
 # this, it is a different word and guessing would be worse than asking.
-FUZZY_CUTOFF = 0.86
+#
+# 0.86 was one keystroke out of reach of the typo players actually type: "outlow" for Outlaw scores
+# 0.83, so the matcher refused it, the word was dropped from the question, and a comparison came back
+# as one item described against nothing. 0.80 still rejects ordinary words - "mech" does not reach any
+# catalog name - and `fuzzy_rank` already refuses to pick when the top two candidates are within 0.02
+# of each other, so the extra range only ever resolves a name that is unambiguous anyway.
+FUZZY_CUTOFF = 0.80
 # Never propose a name shorter than this by fuzz: "A1" is close to too much.
 FUZZY_MIN_LEN = 4
 
