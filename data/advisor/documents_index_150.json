@@ -1,0 +1,1502 @@
+[
+ {
+  "id": 106,
+  "category": "announcements",
+  "title": "1.23 Release Highlights",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/592078_1-23-release-highlights/",
+  "author_label": "Deleted Jun 2, 2021, 09:05 06/02/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 107,
+  "category": "announcements",
+  "title": "1.24 Release Highlights",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/593569_1-24-release-highlights/",
+  "author_label": "Deleted Jul 12, 2021, 09:41 07/12/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 108,
+  "category": "announcements",
+  "title": "Meme Contest",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/219505_meme-contest/",
+  "author_label": "Deleted Apr 1, 2021, 10:09 04/01/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 105,
+  "category": "announcements",
+  "title": "St. Patrick's Day Contest",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/218616_st--patrick-s-day-contest/",
+  "author_label": "Deleted Mar 16, 2021, 11:23 03/16/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 110,
+  "category": "announcements",
+  "title": "Valentine's Day Contest",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/217133_valentine-s-day-contest/",
+  "author_label": "Deleted Feb 14, 2021, 08:41 02/14/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 104,
+  "category": "announcements",
+  "title": "What we are working on",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/216256_what-we-are-working-on/",
+  "author_label": "Deleted Jan 29, 2021, 11:39 01/29/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 109,
+  "category": "announcements",
+  "title": "What we are working on №3",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/218623_what-we-are-working-on--3/",
+  "author_label": "Deleted Mar 16, 2021, 12:32 03/16/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 103,
+  "category": "announcements",
+  "title": "What we are working on №4",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/531309_what-we-are-working-on--4/",
+  "author_label": "Deleted May 14, 2021, 13:46 05/14/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 102,
+  "category": "announcements",
+  "title": "World Emoji Day Contest",
+  "url": "https://forum.plarium.com/mech-arena/699_announcements/593713_world-emoji-day-contest/",
+  "author_label": "Alina Community Manager Jul 16, 2021, 15:45 07/16/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 89,
+  "category": "bug_reports",
+  "title": "Creating a bug report",
+  "url": "https://forum.plarium.com/mech-arena/707_bug-reports/108923_creating-a-bug-report--2/",
+  "author_label": "Deleted Aug 30, 2018, 06:21 08/30/18",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 88,
+  "category": "bug_reports",
+  "title": "Working with your bug reports in Discord",
+  "url": "https://forum.plarium.com/mech-arena/707_bug-reports/216539_working-with-your-bug-reports-in-discord/",
+  "author_label": "Deleted Feb 3, 2021, 12:13 02/03/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 113,
+  "category": "client_source",
+  "title": "../webpack/bootstrap",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=../webpack/bootstrap",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 138,
+  "category": "client_source",
+  "title": "App.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=App.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 127,
+  "category": "client_source",
+  "title": "components/CalculatorPage.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/CalculatorPage.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 125,
+  "category": "client_source",
+  "title": "components/Footer.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/Footer.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 124,
+  "category": "client_source",
+  "title": "components/Header.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/Header.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 121,
+  "category": "client_source",
+  "title": "components/LevelRating.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/LevelRating.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 132,
+  "category": "client_source",
+  "title": "components/ModCalculatorPage.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/ModCalculatorPage.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 131,
+  "category": "client_source",
+  "title": "components/ModUpgradeCalculator.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/ModUpgradeCalculator.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 123,
+  "category": "client_source",
+  "title": "components/NavigationMenu.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/NavigationMenu.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 126,
+  "category": "client_source",
+  "title": "components/PageLayout.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/PageLayout.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 118,
+  "category": "client_source",
+  "title": "components/ParticlesBackground.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/ParticlesBackground.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 130,
+  "category": "client_source",
+  "title": "components/PilotCalculatorPage.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/PilotCalculatorPage.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 129,
+  "category": "client_source",
+  "title": "components/PilotUpgradeCalculator.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/PilotUpgradeCalculator.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 136,
+  "category": "client_source",
+  "title": "components/SkinCard.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/SkinCard.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 120,
+  "category": "client_source",
+  "title": "components/StarRating.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/StarRating.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 122,
+  "category": "client_source",
+  "title": "components/UpgradeCalculator.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=components/UpgradeCalculator.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 114,
+  "category": "client_source",
+  "title": "contexts/LanguageContext.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=contexts/LanguageContext.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 117,
+  "category": "client_source",
+  "title": "contexts/SoundContext.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=contexts/SoundContext.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 115,
+  "category": "client_source",
+  "title": "contexts/ThemeContext.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=contexts/ThemeContext.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 139,
+  "category": "client_source",
+  "title": "index.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=index.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 135,
+  "category": "client_source",
+  "title": "pages/CheckMyStats.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=pages/CheckMyStats.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 137,
+  "category": "client_source",
+  "title": "pages/LegendarySkins.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=pages/LegendarySkins.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 133,
+  "category": "client_source",
+  "title": "pages/PrivacyPolicy.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=pages/PrivacyPolicy.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 134,
+  "category": "client_source",
+  "title": "pages/TermsOfUse.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=pages/TermsOfUse.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 119,
+  "category": "client_source",
+  "title": "utils/dataUtils.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=utils/dataUtils.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 128,
+  "category": "client_source",
+  "title": "utils/pilotDataUtils.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=utils/pilotDataUtils.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 116,
+  "category": "client_source",
+  "title": "utils/soundUtils.js",
+  "url": "https://mecharena.infohubhq.in/static/js/main.1b0f3f05.js.map#source=utils/soundUtils.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 150,
+  "category": "context_screenshots",
+  "title": "User chat screenshots 25–30 (OCR context only)",
+  "url": "upload://chat-screenshots/image-25.png-image-30.png",
+  "author_label": "requesting user (uploaded screenshots)",
+  "published_text": null,
+  "trust": "user_confirmed",
+  "review_status": "verified"
+ },
+ {
+  "id": 50,
+  "category": "database_bots",
+  "title": "bots.json",
+  "url": "https://database.mecharenadev.com/backend/data/bots.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 51,
+  "category": "database_ecrData",
+  "title": "ecrData.json",
+  "url": "https://database.mecharenadev.com/backend/data/ecrData.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 52,
+  "category": "database_mechs",
+  "title": "mechs.json",
+  "url": "https://database.mecharenadev.com/backend/data/mechs.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 53,
+  "category": "database_weapons",
+  "title": "weapons.json",
+  "url": "https://database.mecharenadev.com/backend/data/weapons.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 87,
+  "category": "feedback",
+  "title": "Working with your feedback and suggestions in Discord",
+  "url": "https://forum.plarium.com/mech-arena/703_feedback-and-suggestions/216537_working-with-your-suggestions-in-discord/",
+  "author_label": "Deleted Feb 3, 2021, 12:06 02/03/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 64,
+  "category": "game_discussion",
+  "title": "Active Promo Codes - 30th October, 2026",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1759149_active-promo-codes---10th-june--2026/",
+  "author_label": "ηιgнт ƒυяу® Moderator Jun 11, 2026, 08:09 06/11/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 66,
+  "category": "game_discussion",
+  "title": "Game will not load on iOS",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1762029_game-will-not-load-on-ios/",
+  "author_label": "seraph Oct 21, 2026, 18:24 10/21/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 73,
+  "category": "game_discussion",
+  "title": "Kesplarium was banned....",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1762373_kesplarium-was-banned/",
+  "author_label": "Kesmech Nov 7, 2026, 05:13 3 days",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 68,
+  "category": "game_discussion",
+  "title": "Mods with no Pilot SP dropping",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1762380_mods-with-no-pilot-sp-dropping/",
+  "author_label": "korrosion Nov 7, 2026, 17:36 3 days",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 69,
+  "category": "game_discussion",
+  "title": "New Mech, \"Living Bomb\"",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1762376_new-mech---living-bomb/",
+  "author_label": "Kesmech Nov 7, 2026, 05:42 3 days",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 71,
+  "category": "game_discussion",
+  "title": "New game play idea",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1762383_new-game-play-idea/",
+  "author_label": "imortals Nov 8, 2026, 17:30 2 days",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 70,
+  "category": "game_discussion",
+  "title": "QOL updates",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1762354_qol-updates/",
+  "author_label": "JUAN OLIVIER Nov 6, 2026, 07:16 4 days",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 65,
+  "category": "game_discussion",
+  "title": "Randomizer",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1762384_randomizer/",
+  "author_label": "CAVEMAN Nov 9, 2026, 04:09 Yesterday",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 72,
+  "category": "game_discussion",
+  "title": "What can be the right nerf for VOIDGHOST?",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1761929_what-can-be-the-right-nerf-for-voidghost/",
+  "author_label": "Goldenwind Oct 17, 2026, 02:27 10/17/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 67,
+  "category": "game_discussion",
+  "title": "hacker in game ?",
+  "url": "https://forum.plarium.com/mech-arena/702_game-discussion/1762396_hacker-in-game/",
+  "author_label": "lexusis200 Nov 9, 2026, 19:09 Yesterday",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 76,
+  "category": "guides",
+  "title": "Guide - Are Two weapons of the same series better than one, heavier weapon",
+  "url": "https://forum.plarium.com/mech-arena/701_guides-and-tutorials/115238_guide---are-two-weapons-of-the-same-series-better-than-one--heavier-weapon/",
+  "author_label": "Shandar Sep 23, 2026, 08:03 09/23/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 75,
+  "category": "guides",
+  "title": "Guide - In App Purchases and Crates",
+  "url": "https://forum.plarium.com/mech-arena/701_guides-and-tutorials/115189_guide---in-app-purchases-and-crates/",
+  "author_label": "Samar Shah Jun 26, 2026, 14:07 06/26/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 74,
+  "category": "guides",
+  "title": "Mech Arena Game Base",
+  "url": "https://forum.plarium.com/mech-arena/701_guides-and-tutorials/594714_mech-arena-game-base/",
+  "author_label": "Alina Community Manager Aug 13, 2021, 14:53 08/13/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 145,
+  "category": "html_tables",
+  "title": "MA Database tables",
+  "url": "https://database.mecharenadev.com/frontend/pages/income.html#tables",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 146,
+  "category": "html_tables",
+  "title": "MA Database tables",
+  "url": "https://database.mecharenadev.com/frontend/pages/fortune.html#tables",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 147,
+  "category": "html_tables",
+  "title": "MA Database tables",
+  "url": "https://database.mecharenadev.com/frontend/pages/ecr-pattern.html#tables",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 7,
+  "category": "legendary_skins",
+  "title": "legendary_skins.json",
+  "url": "https://mecharena.infohubhq.in/legendary_skins.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 1,
+  "category": "list",
+  "title": "list.json",
+  "url": "https://mecharena.infohubhq.in/list.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 149,
+  "category": "mech_stats_screenshots",
+  "title": "MA SS.zip — mech stats screenshots (48 PNGs)",
+  "url": "https://drive.google.com/file/d/1TY_Mal19TN_5lkmvQkvSBHrDexHFqHcE/view",
+  "author_label": "Gladitor (user-attributed; independent verification pending)",
+  "published_text": "2026-11-11T19:37:46.367Z",
+  "trust": "user_confirmed",
+  "review_status": "verified"
+ },
+ {
+  "id": 2,
+  "category": "mech_upgrade_costs",
+  "title": "mech_upgrade_costs.json",
+  "url": "https://mecharena.infohubhq.in/mech_upgrade_costs.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 6,
+  "category": "mod_cost",
+  "title": "mod_cost.json",
+  "url": "https://mecharena.infohubhq.in/mod_cost.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 5,
+  "category": "mod_list",
+  "title": "mod_list.json",
+  "url": "https://mecharena.infohubhq.in/mod_list.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 63,
+  "category": "news",
+  "title": "Digital Ghosts Gift and Offers in the Mech Arena Store",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43811_digital-ghosts-gift-and-offers-in-mech-arena-store/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 56,
+  "category": "news",
+  "title": "Halloween Gift",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43843_halloween-gift/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 58,
+  "category": "news",
+  "title": "Hard Reboot Gift and Offers in the Mech Arena Store",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43829_hard-reboot-gift-and-offers-in-the-mech-arena-store/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 54,
+  "category": "news",
+  "title": "Hard Reset Gift",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43846_hard-reset-gift/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 61,
+  "category": "news",
+  "title": "Help Neev, Asami and Red escape from a virtual world!",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43823_help-neev--asami-and-red-escape-from-a-virtual-world/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 57,
+  "category": "news",
+  "title": "Mech Arena Roundup #2",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43832_mech-arena-roundup--2/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 60,
+  "category": "news",
+  "title": "Mech Arena | Weapon Spotlight | Bouncecritter",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43824_mech-arena---weapon-spotlight---bouncecritter/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 62,
+  "category": "news",
+  "title": "Plarium Play Event Schedule #12",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43820_plarium-play-event-schedule--12/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 55,
+  "category": "news",
+  "title": "Plarium Play Event Schedule #13",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43845_plarium-play-even-schedule--13/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 59,
+  "category": "news",
+  "title": "Voidghost Update: Next Steps",
+  "url": "https://forum.plarium.com/mech-arena/854_news/43827_voidghost-update-next-steps/",
+  "author_label": null,
+  "published_text": "Like",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 9,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/general-tips.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 10,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/mechs.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 11,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/compare-mechs.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 12,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 13,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/compare-weapons.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 14,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/fv-and-ecr.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 15,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/income.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 16,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/gear-hub.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 17,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/general-mechanics.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 18,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/gear-hub-progression.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 19,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/mechs-attackers.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 20,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/mechs-scouts.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 21,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/mechs-tanks.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 22,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/mechs-supports.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 23,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-assault.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 24,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-missile.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 25,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-beam.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 26,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-close-quarter.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 27,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-sniper.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 28,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-guided.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 29,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-artillery.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 30,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-barrage.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 31,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/weapons-heavy-duty.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 32,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/fortune.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 33,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/week-view.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 34,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/ecr-pattern.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 35,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/calendar.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 36,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/influence.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 37,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/bots.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 38,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/awards.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 142,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/p2wtips.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 143,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/privacy.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 144,
+  "category": "page",
+  "title": "MA Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/tos.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 8,
+  "category": "page",
+  "title": "MA-Database",
+  "url": "https://database.mecharenadev.com/frontend/pages/index.html",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 3,
+  "category": "pilot_list",
+  "title": "pilot_list.json",
+  "url": "https://mecharena.infohubhq.in/pilot_list.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 148,
+  "category": "pilot_stats_screenshots",
+  "title": "PILOT.zip — pilot bonus screenshots (36 PNGs)",
+  "url": "https://drive.google.com/file/d/1o7-ceXZ8bQqhKK1kpVchnK28nE_XEH61/view",
+  "author_label": "Gladitor (user-attributed; independent verification pending)",
+  "published_text": "2026-11-11T20:03:34.763Z",
+  "trust": "user_confirmed",
+  "review_status": "verified"
+ },
+ {
+  "id": 4,
+  "category": "pilot_upgrade_costs",
+  "title": "pilot_upgrade_costs.json",
+  "url": "https://mecharena.infohubhq.in/pilot_upgrade_costs.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 99,
+  "category": "release_notes",
+  "title": "1.23.01 Patch Notes",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/592279_1-23-01-patch-notes/",
+  "author_label": "Deleted Jun 7, 2021, 10:31 06/07/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 94,
+  "category": "release_notes",
+  "title": "RELEASE NOTES: Update 1.13",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/187396_release-notes-update-1-13/",
+  "author_label": "Sergey Kryvorotchenko Admin Feb 10, 2020, 14:20 02/10/20",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 112,
+  "category": "release_notes",
+  "title": "RELEASE NOTES: Update 1.16.01",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/201282_release-notes-update-1-16-01/",
+  "author_label": "Deleted Jul 27, 2020, 12:45 07/27/20",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 101,
+  "category": "release_notes",
+  "title": "RELEASE NOTES: Update 1.17.01",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/202032_release-notes-update-1-17-01/",
+  "author_label": "Deleted Aug 13, 2020, 13:03 08/13/20",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 111,
+  "category": "release_notes",
+  "title": "RELEASE NOTES: Update 1.18",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/205308_release-notes-update-1-18/",
+  "author_label": "Deleted Sep 29, 2020, 15:30 09/29/20",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 98,
+  "category": "release_notes",
+  "title": "RELEASE NOTES: Update 1.21",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/217205_release-notes-update-1-21/",
+  "author_label": "Deleted Feb 15, 2021, 13:56 02/15/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 96,
+  "category": "release_notes",
+  "title": "RELEASE NOTES: Update 1.22.02",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/219835_release-notes-update-1-22-02/",
+  "author_label": "Deleted Apr 7, 2021, 12:38 04/07/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 95,
+  "category": "release_notes",
+  "title": "RELEASE NOTES: Update 1.24.01",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/593653_release-notes-update-1-24-01/",
+  "author_label": "Deleted Jul 15, 2021, 09:08 07/15/21",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 100,
+  "category": "release_notes",
+  "title": "Release Notes: Update 1.05",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/123326_release-notes-update-1-05/",
+  "author_label": "Sergey Kryvorotchenko Admin Mar 1, 2019, 13:42 03/01/19",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 97,
+  "category": "release_notes",
+  "title": "Release Notes: Update 1.09",
+  "url": "https://forum.plarium.com/mech-arena/700_release-notes/146600_release-notes-update-1-09/",
+  "author_label": "Sergey Kryvorotchenko Admin Aug 14, 2019, 11:20 08/14/19",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 93,
+  "category": "rules",
+  "title": "Harassment Policy",
+  "url": "https://forum.plarium.com/mech-arena/709_violations/108893_harassment-policy-2/",
+  "author_label": "Deleted Aug 29, 2018, 11:30 08/29/18",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 91,
+  "category": "rules",
+  "title": "Naming Policy",
+  "url": "https://forum.plarium.com/mech-arena/709_violations/108896_-naming-policy/",
+  "author_label": "Deleted Aug 29, 2018, 11:39 08/29/18",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 90,
+  "category": "rules",
+  "title": "Official Forum Rules",
+  "url": "https://forum.plarium.com/mech-arena/709_violations/115700_official-forum-rules-8/",
+  "author_label": "Deleted Oct 31, 2018, 15:17 10/31/18",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 92,
+  "category": "rules",
+  "title": "Security Policy",
+  "url": "https://forum.plarium.com/mech-arena/709_violations/108894_security-policy--how-to-keep-your-account-secure-2/",
+  "author_label": "Deleted Aug 29, 2018, 11:33 08/29/18",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 39,
+  "category": "script",
+  "title": "backButton.js",
+  "url": "https://database.mecharenadev.com/backend/backButton.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 40,
+  "category": "script",
+  "title": "bots.js",
+  "url": "https://database.mecharenadev.com/backend/bots.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 41,
+  "category": "script",
+  "title": "calender.js",
+  "url": "https://database.mecharenadev.com/backend/calender.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 42,
+  "category": "script",
+  "title": "compare-mechs.js",
+  "url": "https://database.mecharenadev.com/backend/compare-mechs.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 43,
+  "category": "script",
+  "title": "compare-weapons.js",
+  "url": "https://database.mecharenadev.com/backend/compare-weapons.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 44,
+  "category": "script",
+  "title": "mechCardsDisplay.js",
+  "url": "https://database.mecharenadev.com/backend/mechCardsDisplay.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 45,
+  "category": "script",
+  "title": "searchBar.js",
+  "url": "https://database.mecharenadev.com/backend/searchBar.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 46,
+  "category": "script",
+  "title": "theme.js",
+  "url": "https://database.mecharenadev.com/backend/theme.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 47,
+  "category": "script",
+  "title": "tips.js",
+  "url": "https://database.mecharenadev.com/backend/tips.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 48,
+  "category": "script",
+  "title": "weaponCardsDisplay.js",
+  "url": "https://database.mecharenadev.com/backend/weaponCardsDisplay.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 49,
+  "category": "script",
+  "title": "week-view.js",
+  "url": "https://database.mecharenadev.com/backend/week-view.js",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 140,
+  "category": "sitemap",
+  "title": "Published sitemap",
+  "url": "https://mecharena.infohubhq.in/sitemap.xml",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 141,
+  "category": "skin_likes",
+  "title": "skin-likes.json",
+  "url": "https://mecharena.infohubhq.in/skin-likes.json",
+  "author_label": null,
+  "published_text": null,
+  "trust": "user_designated_trusted",
+  "review_status": "pending"
+ },
+ {
+  "id": 85,
+  "category": "tavern",
+  "title": "12",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1761553_12/",
+  "author_label": "Ibrahim Oct 1, 2026, 13:21 10/01/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 79,
+  "category": "tavern",
+  "title": "Account for sale:",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1714470_account-for-sale/",
+  "author_label": "geraldcarmack Jan 13, 2025, 14:41 01/13/25",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 78,
+  "category": "tavern",
+  "title": "Hanger rating (||▪︎.▪︎)",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1762196_hanger-rating/",
+  "author_label": "《\\Chrono/》 Oct 28, 2026, 23:03 10/28/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 77,
+  "category": "tavern",
+  "title": "How do I make a ban appeal?",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1762391_how-do-i-make-a-ban-appeal/",
+  "author_label": "Baconbro Nov 9, 2026, 10:40 Yesterday",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 82,
+  "category": "tavern",
+  "title": "Luca cool",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1761941_luca-cool/",
+  "author_label": "Luca102242031 Oct 17, 2026, 09:26 10/17/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 86,
+  "category": "tavern",
+  "title": "New weapon ideas",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1760718_new-weapon-ideas/",
+  "author_label": "XRealSteelX Aug 24, 2026, 22:45 08/24/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 81,
+  "category": "tavern",
+  "title": "Promo codes",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1761118_promo-codes/",
+  "author_label": "Marcel Sep 12, 2026, 20:20 09/12/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 83,
+  "category": "tavern",
+  "title": "Promod Code",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1761726_promod-code/",
+  "author_label": "chiko Oct 8, 2026, 16:59 10/08/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 84,
+  "category": "tavern",
+  "title": "Promod code",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1761725_promod-code/",
+  "author_label": "chiko Oct 8, 2026, 16:50 10/08/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ },
+ {
+  "id": 80,
+  "category": "tavern",
+  "title": "Sell parts",
+  "url": "https://forum.plarium.com/mech-arena/704_tavern/1761305_sell-parts/",
+  "author_label": "Sebametal Sep 22, 2026, 01:35 09/22/26",
+  "published_text": "Search",
+  "trust": "unverified",
+  "review_status": "pending"
+ }
+]

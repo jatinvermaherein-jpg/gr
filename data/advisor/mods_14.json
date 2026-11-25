@@ -1,0 +1,100 @@
+[
+ {
+  "mod_label": "Perimeter ML",
+  "mod_name": "perimeter_ml",
+  "purchase_currency": "basic_mod_parts",
+  "purchase_cost": 380,
+  "rarity": "epic"
+ },
+ {
+  "mod_label": "Blockade ML",
+  "mod_name": "blockade_ml",
+  "purchase_currency": "basic_mod_parts",
+  "purchase_cost": 615,
+  "rarity": "epic"
+ },
+ {
+  "mod_label": "Perimeter ",
+  "mod_name": "perimeter",
+  "purchase_currency": "basic_mod_parts",
+  "purchase_cost": 2945,
+  "rarity": "epic"
+ },
+ {
+  "mod_label": "Blockade ",
+  "mod_name": "blockade",
+  "purchase_currency": "basic_mod_parts",
+  "purchase_cost": 3825,
+  "rarity": "epic"
+ },
+ {
+  "mod_label": "Hardened hull ",
+  "mod_name": "hardened_hull",
+  "purchase_currency": "basic_mod_parts",
+  "purchase_cost": 1480,
+  "rarity": "epic"
+ },
+ {
+  "mod_label": "Canopy ",
+  "mod_name": "canopy",
+  "purchase_currency": "basic_mod_parts",
+  "purchase_cost": 1480,
+  "rarity": "epic"
+ },
+ {
+  "mod_label": "Galvanic Hull ",
+  "mod_name": "galvanic_hull",
+  "purchase_currency": "basic_mod_parts",
+  "purchase_cost": 2360,
+  "rarity": "epic"
+ },
+ {
+  "mod_label": "Perimeter ML",
+  "mod_name": "perimeter_ml",
+  "purchase_currency": "elite_mod_parts",
+  "purchase_cost": 115,
+  "rarity": "legendary"
+ },
+ {
+  "mod_label": "Blockade ML",
+  "mod_name": "blockade_ml",
+  "purchase_currency": "elite_mod_parts",
+  "purchase_cost": 300,
+  "rarity": "legendary"
+ },
+ {
+  "mod_label": "Perimeter ",
+  "mod_name": "perimeter",
+  "purchase_currency": "elite_mod_parts",
+  "purchase_cost": 1175,
+  "rarity": "legendary"
+ },
+ {
+  "mod_label": "Blockade ",
+  "mod_name": "blockade",
+  "purchase_currency": "elite_mod_parts",
+  "purchase_cost": 1575,
+  "rarity": "legendary"
+ },
+ {
+  "mod_label": "Hardened hull ",
+  "mod_name": "hardened_hull",
+  "purchase_currency": "elite_mod_parts",
+  "purchase_cost": 600,
+  "rarity": "legendary"
+ },
+ {
+  "mod_label": "Canopy ",
+  "mod_name": "canopy",
+  "purchase_currency": "elite_mod_parts",
+  "purchase_cost": 660,
+  "rarity": "legendary"
+ },
+ {
+  "mod_label": "Galvanic Hull ",
+  "mod_name": "galvanic_hull",
+  "purchase_currency": "elite_mod_parts",
+  "purchase_cost": 1030,
+  "rarity": "legendary"
+ }
+]

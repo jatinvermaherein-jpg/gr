@@ -1,0 +1,762 @@
+[
+ {
+  "Skin name": "Aerodynamo",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Apex",
+  "Mech name": "Shadow"
+ },
+ {
+  "Skin name": "Arbitrator",
+  "Mech name": "Volti"
+ },
+ {
+  "Skin name": "Team mascot",
+  "Mech name": "Volti"
+ },
+ {
+  "Skin name": "Beast Trapper",
+  "Mech name": "Volti"
+ },
+ {
+  "Skin name": "Arctic Ambusher",
+  "Mech name": "Onyx"
+ },
+ {
+  "Skin name": "Astronomic",
+  "Mech name": "Seeker"
+ },
+ {
+  "Skin name": "Automaton",
+  "Mech name": "Eclipse"
+ },
+ {
+  "Skin name": "Battle Chicken",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Black Widow",
+  "Mech name": "Blockhorn"
+ },
+ {
+  "Skin name": "Mind Prowler",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Space Emissary",
+  "Mech name": "Hemlock"
+ },
+ {
+  "Skin name": "Blessed Knight",
+  "Mech name": "Deathwalker"
+ },
+ {
+  "Skin name": "Dragon Deity",
+  "Mech name": "Deathwalker"
+ },
+ {
+  "Skin name": "Carapace",
+  "Mech name": "Guardian"
+ },
+ {
+  "Skin name": "Celestial Cyborg",
+  "Mech name": "Solis"
+ },
+ {
+  "Skin name": "Celestial Guard",
+  "Mech name": "Dreadnought"
+ },
+ {
+  "Skin name": "Bounty Bandit",
+  "Mech name": "Dreadnought"
+ },
+ {
+  "Skin name": "Centurion",
+  "Mech name": "Lacewing"
+ },
+ {
+  "Skin name": "Chromacore",
+  "Mech name": "Surge"
+ },
+ {
+  "Skin name": "Courtly Conduct",
+  "Mech name": "Redeemer"
+ },
+ {
+  "Skin name": "Crowd Control",
+  "Mech name": "Blockhorn"
+ },
+ {
+  "Skin name": "Cruiser",
+  "Mech name": "Shadow"
+ },
+ {
+  "Skin name": "Cyber Cyclops",
+  "Mech name": "Nomad"
+ },
+ {
+  "Skin name": "Phoenix rush",
+  "Mech name": "Nomad"
+ },
+ {
+  "Skin name": "Dark Matter",
+  "Mech name": "Nomad"
+ },
+ {
+  "Skin name": "Dawnburst",
+  "Mech name": "Salvor"
+ },
+ {
+  "Skin name": "Dead zone",
+  "Mech name": "Gatecrasher"
+ },
+ {
+  "Skin name": "Deathless one",
+  "Mech name": "Deathwalker"
+ },
+ {
+  "Skin name": "Deathless",
+  "Mech name": "Tengu"
+ },
+ {
+  "Skin name": "Depth charge",
+  "Mech name": "Brickhouse"
+ },
+ {
+  "Skin name": "Doomscream",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Dragon heart",
+  "Mech name": "Vortex"
+ },
+ {
+  "Skin name": "Dustblight",
+  "Mech name": "Scorpius"
+ },
+ {
+  "Skin name": "Emperor",
+  "Mech name": "Redox"
+ },
+ {
+  "Skin name": "Enforcer",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "First gen",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Gobblemaw",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Halcyon days",
+  "Mech name": "Scorpius"
+ },
+ {
+  "Skin name": "Hanbok",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Hawankund",
+  "Mech name": "Onyx"
+ },
+ {
+  "Skin name": "Hellstomper",
+  "Mech name": "Solis"
+ },
+ {
+  "Skin name": "Hotrod",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Huntertron 5000",
+  "Mech name": "Orion"
+ },
+ {
+  "Skin name": "Imposter",
+  "Mech name": "Mimicker"
+ },
+ {
+  "Skin name": "Inferno",
+  "Mech name": "Gatecrasher"
+ },
+ {
+  "Skin name": "Iron geisha",
+  "Mech name": "Aegis"
+ },
+ {
+  "Skin name": "Junkyard brawler",
+  "Mech name": "Sentinel"
+ },
+ {
+  "Skin name": "Killer clown",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Kraken's fury",
+  "Mech name": "Orion"
+ },
+ {
+  "Skin name": "Hunter's maw",
+  "Mech name": "Silverthorn"
+ },
+ {
+  "Skin name": "Crimson Assassin",
+  "Mech name": "Silverthorn"
+ },
+ {
+  "Skin name": "Lady of shadows",
+  "Mech name": "Arachnos"
+ },
+ {
+  "Skin name": "Liberty",
+  "Mech name": "Onyx"
+ },
+ {
+  "Skin name": "Lightwielder",
+  "Mech name": "Seeker"
+ },
+ {
+  "Skin name": "Lionguard",
+  "Mech name": "Aegis"
+ },
+ {
+  "Skin name": "Living fossil",
+  "Mech name": "Lacewing"
+ },
+ {
+  "Skin name": "Lucky charm",
+  "Mech name": "Slingshot"
+ },
+ {
+  "Skin name": "Machine mummy",
+  "Mech name": "Cheetah"
+ },
+ {
+  "Skin name": "Master of death",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Mecha revival",
+  "Mech name": "Bastion"
+ },
+ {
+  "Skin name": "Mechlodon",
+  "Mech name": "Surge"
+ },
+ {
+  "Skin name": "Milspec",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Mine crawler",
+  "Mech name": "Outlaw"
+ },
+ {
+  "Skin name": "Pharaoh's grasp",
+  "Mech name": "Outlaw"
+ },
+ {
+  "Skin name": "Mobile suit",
+  "Mech name": "Ares"
+ },
+ {
+  "Skin name": "Moderator mark",
+  "Mech name": "Parasite"
+ },
+ {
+  "Skin name": "Muv-er mech",
+  "Mech name": "Guardian"
+ },
+ {
+  "Skin name": "Nekobot",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Night terror",
+  "Mech name": "Hemlock"
+ },
+ {
+  "Skin name": "Observer",
+  "Mech name": "Redeemer"
+ },
+ {
+  "Skin name": "Ocean predator",
+  "Mech name": "Deathwalker"
+ },
+ {
+  "Skin name": "Offroader",
+  "Mech name": "Zephyr"
+ },
+ {
+  "Skin name": "Orbit velocity",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Earthshaker",
+  "Mech name": "Citadel"
+ },
+ {
+  "Skin name": "Overlord",
+  "Mech name": "Scorpius"
+ },
+ {
+  "Skin name": "Parasite host",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Polar athlete",
+  "Mech name": "Dreadnought"
+ },
+ {
+  "Skin name": "Polar blue",
+  "Mech name": "Surge"
+ },
+ {
+  "Skin name": "Prost",
+  "Mech name": "Aegis"
+ },
+ {
+  "Skin name": "Purple power",
+  "Mech name": "Guardian"
+ },
+ {
+  "Skin name": "Quicksilver",
+  "Mech name": "Eclipse"
+ },
+ {
+  "Skin name": "Rapid response",
+  "Mech name": "Mimicker"
+ },
+ {
+  "Skin name": "Raptor",
+  "Mech name": "Zephyr"
+ },
+ {
+  "Skin name": "Rebellion",
+  "Mech name": "Eclipse"
+ },
+ {
+  "Skin name": "Renegade",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Royalist",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Rust punk",
+  "Mech name": "Seeker"
+ },
+ {
+  "Skin name": "Rust ravager",
+  "Mech name": "Stalker"
+ },
+ {
+  "Skin name": "Sage advice",
+  "Mech name": "Onyx"
+ },
+ {
+  "Skin name": "Santa's slayer",
+  "Mech name": "Guardian"
+ },
+ {
+  "Skin name": "Saving grace",
+  "Mech name": "Salvor"
+ },
+ {
+  "Skin name": "Sawblade",
+  "Mech name": "Surge"
+ },
+ {
+  "Skin name": "Scrapyard devil",
+  "Mech name": "Tengu"
+ },
+ {
+  "Skin name": "Sea monster",
+  "Mech name": "Dreadnought"
+ },
+ {
+  "Skin name": "Shaka zulu",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Sin bin",
+  "Mech name": "Aegis"
+ },
+ {
+  "Skin name": "Ski season",
+  "Mech name": "Blizzfrost"
+ },
+ {
+  "Skin name": "Slalom",
+  "Mech name": "Bastion"
+ },
+ {
+  "Skin name": "Slay ride",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Slick profile",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Solar explorer",
+  "Mech name": "Solis"
+ },
+ {
+  "Skin name": "Speed demon",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Spoiler alert",
+  "Mech name": "Ares"
+ },
+ {
+  "Skin name": "Spymaster",
+  "Mech name": "Seeker"
+ },
+ {
+  "Skin name": "Spy on the wall",
+  "Mech name": "Lacewing"
+ },
+ {
+  "Skin name": "Squad captain",
+  "Mech name": "Parasite"
+ },
+ {
+  "Skin name": "Star slayer",
+  "Mech name": "Hemlock"
+ },
+ {
+  "Skin name": "Sting operation",
+  "Mech name": "Scorpius"
+ },
+ {
+  "Skin name": "The contentinator",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Torque",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Touchdown",
+  "Mech name": "Cheetah"
+ },
+ {
+  "Skin name": "Trinity",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Triskelion",
+  "Mech name": "Guardian"
+ },
+ {
+  "Skin name": "True grit",
+  "Mech name": "Bastion"
+ },
+ {
+  "Skin name": "Turbocharger",
+  "Mech name": "Deathwalker"
+ },
+ {
+  "Skin name": "Unearthed power",
+  "Mech name": "Parasite"
+ },
+ {
+  "Skin name": "Urban exile",
+  "Mech name": "Nomad"
+ },
+ {
+  "Skin name": "V8 custom",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Valentine",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Vampire knight",
+  "Mech name": "Vortex"
+ },
+ {
+  "Skin name": "Vetrix",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Vintage spirit",
+  "Mech name": "Brickhouse"
+ },
+ {
+  "Skin name": "Wrecker",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Adorabot",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Autodoc",
+  "Mech name": "Md"
+ },
+ {
+  "Skin name": "Beholder",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Bubblegum",
+  "Mech name": "Arachnos"
+ },
+ {
+  "Skin name": "Bunker Buddy",
+  "Mech name": "Md"
+ },
+ {
+  "Skin name": "Chrome",
+  "Mech name": "Guardian"
+ },
+ {
+  "Skin name": "Confectionist",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Crewmate",
+  "Mech name": "Md"
+ },
+ {
+  "Skin name": "Cupidicus",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Cyber Samurai",
+  "Mech name": "Zephyr"
+ },
+ {
+  "Skin name": "Distillery",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Dream Eater",
+  "Mech name": "Hemlock"
+ },
+ {
+  "Skin name": "Dust Devil",
+  "Mech name": "Shadow"
+ },
+ {
+  "Skin name": "Elfinator",
+  "Mech name": "Arachnos"
+ },
+ {
+  "Skin name": "Evil Jack",
+  "Mech name": "Ares"
+ },
+ {
+  "Skin name": "Falcon",
+  "Mech name": "Guardian"
+ },
+ {
+  "Skin name": "Falcon04a",
+  "Mech name": "Panther"
+ },
+ {
+  "Skin name": "Get Juked",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Gingerbreaker",
+  "Mech name": "Stalker"
+ },
+ {
+  "Skin name": "Gladiator",
+  "Mech name": "Seeker"
+ },
+ {
+  "Skin name": "Hard Evidence",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Hazard Zone",
+  "Mech name": "Ares"
+ },
+ {
+  "Skin name": "Honor Guard",
+  "Mech name": "Arachnos"
+ },
+ {
+  "Skin name": "Infiltrator",
+  "Mech name": "Eclipse"
+ },
+ {
+  "Skin name": "Invader",
+  "Mech name": "Redox"
+ },
+ {
+  "Skin name": "Ion Alpha",
+  "Mech name": "Cheetah"
+ },
+ {
+  "Skin name": "Kensei",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Lightrider",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Lucky Dragon",
+  "Mech name": "Md"
+ },
+ {
+  "Skin name": "Lifeguard",
+  "Mech name": "Md"
+ },
+ {
+  "Skin name": "Malachite",
+  "Mech name": "Brickhouse"
+ },
+ {
+  "Skin name": "Mantis",
+  "Mech name": "Tengu"
+ },
+ {
+  "Skin name": "Mechsarehere",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Mega Marine",
+  "Mech name": "Brickhouse"
+ },
+ {
+  "Skin name": "Military Grade",
+  "Mech name": "Ares"
+ },
+ {
+  "Skin name": "No Quarter",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Party Suit",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Pit Stop",
+  "Mech name": "Md"
+ },
+ {
+  "Skin name": "Pots O Gold",
+  "Mech name": "Guardian"
+ },
+ {
+  "Skin name": "Power Player",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Primal Instinct",
+  "Mech name": "Onyx"
+ },
+ {
+  "Skin name": "Repairdolph",
+  "Mech name": "Md"
+ },
+ {
+  "Skin name": "Rush Formula",
+  "Mech name": "Killshot"
+ },
+ {
+  "Skin name": "Scraprat",
+  "Mech name": "Zephyr"
+ },
+ {
+  "Skin name": "Showpiece",
+  "Mech name": "Ares"
+ },
+ {
+  "Skin name": "Skullface",
+  "Mech name": "Shadow"
+ },
+ {
+  "Skin name": "So Many Cups",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Squad Goals",
+  "Mech name": "paragon"
+ },
+ {
+  "Skin name": "Steel Jaws",
+  "Mech name": "Vortex"
+ },
+ {
+  "Skin name": "Steel Lancer",
+  "Mech name": "Lancer"
+ },
+ {
+  "Skin name": "Steel Reaper",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Swashbuckler",
+  "Mech name": "Tengu"
+ },
+ {
+  "Skin name": "Teeheehee",
+  "Mech name": "Paragon"
+ },
+ {
+  "Skin name": "Technosaurus",
+  "Mech name": "Blockhorn"
+ },
+ {
+  "Skin name": "Tomino",
+  "Mech name": "Orion"
+ },
+ {
+  "Skin name": "Torch Dragon",
+  "Mech name": "Stalker"
+ },
+ {
+  "Skin name": "Underbite",
+  "Mech name": "Ares"
+ },
+ {
+  "Skin name": "Warsong",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Watchtower",
+  "Mech name": "Scorpius"
+ },
+ {
+  "Skin name": "Web Spitter",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Wendigo",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Whole Hog",
+  "Mech name": "Juggernaut"
+ },
+ {
+  "Skin name": "Xolotl",
+  "Mech name": "Bastion"
+ },
+ {
+  "Skin name": "Cerebral warden",
+  "Mech name": "Tailsting"
+ },
+ {
+  "Skin name": "Righteous iron",
+  "Mech name": "Blizzfrost"
+ },
+ {
+  "Skin name": "Antlion",
+  "Mech name": "Parasite"
+ }
+]

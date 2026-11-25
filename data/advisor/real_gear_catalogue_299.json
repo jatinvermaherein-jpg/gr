@@ -1,0 +1,3291 @@
+[
+    {
+        "list": "Aegis",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 1865,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Aegis.png"
+    },
+    {
+        "list": "Arachnos",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "rare",
+        "cost": {
+            "amount": 42200,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Arachnos.png"
+    },
+    {
+        "list": "Arc Torrent 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 77250,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Arc Torrent 6.png"
+    },
+    {
+        "list": "Arc Torrent 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 870,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Arc Torrent 10.png"
+    },
+    {
+        "list": "Arc Torrent 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 910,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Arc Torrent 12.png"
+    },
+    {
+        "list": "Ares",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "rare",
+        "cost": {
+            "amount": 420,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Ares.png"
+    },
+    {
+        "list": "Autocannon 2",
+        "energy": 2,
+        "type": "weapon",
+        "rarity": "common",
+        "cost": {
+            "amount": 50,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Autocannon 2.png"
+    },
+    {
+        "list": "Autocannon 4",
+        "energy": 4,
+        "type": "weapon",
+        "rarity": "common",
+        "cost": {
+            "amount": "",
+            "currency": "free"
+        },
+        "image_url": "\/mech_weapon_images\/Autocannon 4.png"
+    },
+    {
+        "list": "Bastion",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Bastion.png"
+    },
+    {
+        "list": "Berserker 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Berserker 8.png"
+    },
+    {
+        "list": "Berserker 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Berserker 8.png"
+    },
+    {
+        "list": "Berserker 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 712500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Berserker 10.png"
+    },
+    {
+        "list": "Berserker 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Berserker 12.png"
+    },
+    {
+        "list": "Berserker 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Berserker 16.png"
+    },
+    {
+        "list": "Blast RPG 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 6000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Blast RPG 6.png"
+    },
+    {
+        "list": "Blast RPG 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Blast RPG 8.png"
+    },
+    {
+        "list": "Blast RPG 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7125,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Blast RPG 10.png"
+    },
+    {
+        "list": "Blast RPG 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Blast RPG 12.png"
+    },
+    {
+        "list": "Blast RPG 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Blast RPG 16.png"
+    },
+    {
+        "list": "Blizzfrost",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Blizzfrost.png"
+    },
+    {
+        "list": "Blockhorn",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Blockhorn.png"
+    },
+    {
+        "list": "Brickhouse",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 937500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Brickhouse.png"
+    },
+    {
+        "list": "Bouncecritter 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Bouncecritter 6.png"
+    },
+    {
+        "list": "Bouncecritter 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Bouncecritter 8.png"
+    },
+    {
+        "list": "Bouncecritter 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Bouncecritter 10.png"
+    },
+    {
+        "list": "Bouncecritter 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Bouncecritter 12.png"
+    },
+    {
+        "list": "Bouncecritter 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Bouncecritter 16.png"
+    },
+    {
+        "list": "Burrow beam 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 650000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Burrow beam 6.png"
+    },
+    {
+        "list": "Burrow beam 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Burrow beam 8.png"
+    },
+    {
+        "list": "Burrow beam 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Burrow beam 10.png"
+    },
+    {
+        "list": "Burrow beam 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Burrow beam 12.png"
+    },
+    {
+        "list": "Burrow beam 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Burrow beam 16.png"
+    },
+    {
+        "list": "Carbine 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Carbine 8.png"
+    },
+    {
+        "list": "Carbine 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7125,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Carbine 10.png"
+    },
+    {
+        "list": "Carbine 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Carbine 12.png"
+    },
+    {
+        "list": "Charge Rocket 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Charge rocket 6.png"
+    },
+    {
+        "list": "Charge Rocket 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Charge Rocket 8.png"
+    },
+    {
+        "list": "Charge Rocket 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 650000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Charge rocket 10.png"
+    },
+    {
+        "list": "Charge Rocket 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Charge rocket 12.png"
+    },
+    {
+        "list": "Charge Rocket 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Charge rocket 16.png"
+    },
+    {
+        "list": "Chain Gun 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 750000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Chain Gun 6.png"
+    },
+    {
+        "list": "Chain Gun 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Chain Gun 8.png"
+    },
+    {
+        "list": "Chain Gun 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 712500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Chain Gun 10.png"
+    },
+    {
+        "list": "Chain Gun 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Chain Gun 12.png"
+    },
+    {
+        "list": "Chain Gun 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Chain Gun 16.png"
+    },
+    {
+        "list": "Cheetah",
+        "energy": 16,
+        "type": "mech",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 1305,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Cheetah.png"
+    },
+    {
+        "list": "Continuum 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Continuum 6.png"
+    },
+    {
+        "list": "Continuum 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Continuum 8.png"
+    },
+    {
+        "list": "Continuum 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Continuum 10.png"
+    },
+    {
+        "list": "Continuum 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 750000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Continuum 12.png"
+    },
+    {
+        "list": "Continuum 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Continuum 16.png"
+    },
+    {
+        "list": "Compound beam 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Compound beam 6.png"
+    },
+    {
+        "list": "Compound beam 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Compound beam 8.png"
+    },
+    {
+        "list": "Compound beam 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Compound beam 10.png"
+    },
+    {
+        "list": "Compound beam 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Compound beam 12.png"
+    },
+    {
+        "list": "Compound beam 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Compound beam 16.png"
+    },
+    {
+        "list": "Citadel",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Citadel.png"
+    },
+    {
+        "list": "Cryo Javelin 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": "",
+            "currency": "Referral"
+        },
+        "image_url": "\/mech_weapon_images\/Cryo Javelin 6.png"
+    },
+    {
+        "list": "Cryo Javelin 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": "",
+            "currency": "Referral"
+        },
+        "image_url": "\/mech_weapon_images\/Cryo Javelin 12.png"
+    },
+    {
+        "list": "Cryo Launcher 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 66550,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Cryo Launcher 6.png"
+    },
+    {
+        "list": "Cryo Launcher 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 705,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Cryo Launcher 8.png"
+    },
+    {
+        "list": "Cryo Launcher 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 73450,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Cryo Launcher 10.png"
+    },
+    {
+        "list": "Cryo Launcher 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 760,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Cryo Launcher 12.png"
+    },
+    {
+        "list": "Cryo Launcher 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 79950,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Cryo Launcher 16.png"
+    },
+    {
+        "list": "Deathwalker",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Deathwalker.png"
+    },
+    {
+        "list": "Disc Launcher 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 826750,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Disc Launcher 8.png"
+    },
+    {
+        "list": "Disc Launcher 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Disc Launcher 12.png"
+    },
+    {
+        "list": "Disc Launcher 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Disc Launcher 16.png"
+    },
+    {
+        "list": "Disruptor 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 755000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Disruptor 6.png"
+    },
+    {
+        "list": "Disruptor 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Disruptor 8.png"
+    },
+    {
+        "list": "Disruptor 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7125,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Disruptor 10.png"
+    },
+    {
+        "list": "Disruptor 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 755000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Disruptor 12.png"
+    },
+    {
+        "list": "Disruptor 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 826750,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Disruptor 16.png"
+    },
+    {
+        "list": "Dreadnought",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Dreadnought.png"
+    },
+    {
+        "list": "Dreadshot 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "700000",
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Dreadshot 6.png"
+    },
+    {
+        "list": "Dreadshot 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "800000",
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Dreadshot 8.png"
+    },
+    {
+        "list": "Dreadshot 10",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "700000",
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Dreadshot 10.png"
+    },
+    {
+        "list": "Dreadshot 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "7500",
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Dreadshot 12.png"
+    },
+    {
+        "list": "Dreadshot 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "8275",
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Dreadshot 16.png"
+    },
+    {
+        "list": "Eclipse",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Eclipse.png"
+    },
+    {
+        "list": "EM Rifle 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/EM Rifle 6.png"
+    },
+    {
+        "list": "EM Rifle 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/EM Rifle 8.png"
+    },
+    {
+        "list": "EM Rifle 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7125,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/EM Rifle 10.png"
+    },
+    {
+        "list": "EM Rifle 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/EM Rifle 12.png"
+    },
+    {
+        "list": "EM Rifle 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/EM Rifle 16.png"
+    },
+    {
+        "list": "Ember Gun 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 87900,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Ember Gun 6.png"
+    },
+    {
+        "list": "Ember Gun 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 95000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Ember Gun 8.png"
+    },
+    {
+        "list": "Ember Gun 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 1005,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Ember Gun 10.png"
+    },
+    {
+        "list": "Ember Gun 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 1055,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Ember Gun 12.png"
+    },
+    {
+        "list": "Ember Gun 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 1130,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Ember Gun 16.png"
+    },
+    {
+        "list": "Fragment Gun 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 21850,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Fragment Gun 6.png"
+    },
+    {
+        "list": "Fragment Gun 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 22850,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Fragment Gun 8.png"
+    },
+    {
+        "list": "Fragment Gun 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 235,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Fragment Gun 10.png"
+    },
+    {
+        "list": "Fragment Gun 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 24400,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Fragment Gun 12.png"
+    },
+    {
+        "list": "Fragment Gun 14",
+        "energy": 14,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 250,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Fragment Gun 14.png"
+    },
+    {
+        "list": "Fuse Mortar 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 825,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Fuse Mortar 8.png"
+    },
+    {
+        "list": "Fuse Mortar 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 87000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Fuse Mortar 10.png"
+    },
+    {
+        "list": "Fuse Mortar 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 910,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Fuse Mortar 12.png"
+    },
+    {
+        "list": "Fusion Cannon 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 665,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Fusion Cannon 6.png"
+    },
+    {
+        "list": "Fusion Cannon 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 705,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Fusion Cannon 8.png"
+    },
+    {
+        "list": "Fusion Cannon 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 73450,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Fusion Cannon 10.png"
+    },
+    {
+        "list": "Fusion Cannon 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 760,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Fusion Cannon 12.png"
+    },
+    {
+        "list": "Fusion Cannon 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 79950,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Fusion Cannon 16.png"
+    },
+    {
+        "list": "Gatecrasher",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Gatecrasher.png"
+    },
+    {
+        "list": "Gauss Rifle 4",
+        "energy": 4,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 205,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Gauss Rifle 4.png"
+    },
+    {
+        "list": "Gauss Rifle 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 220,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Gauss Rifle 6.png"
+    },
+    {
+        "list": "Gauss Rifle 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 235,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Gauss Rifle 10.png"
+    },
+    {
+        "list": "Gemini 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Gemini 6.png"
+    },
+    {
+        "list": "Gemini 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Gemini 8.png"
+    },
+    {
+        "list": "Gemini 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 712500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Gemini 10.png"
+    },
+    {
+        "list": "Gemini 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Gemini 12.png"
+    },
+    {
+        "list": "Gemini 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Gemini 16.png"
+    },
+    {
+        "list": "Graviton Beam 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 711500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Graviton Beam 10.png"
+    },
+    {
+        "list": "Graviton Beam 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Graviton Beam 12.png"
+    },
+    {
+        "list": "Graviton Beam 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Graviton Beam 16.png"
+    },
+    {
+        "list": "Guardian",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "rare",
+        "cost": {
+            "amount": 420,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Guardian.png"
+    },
+    {
+        "list": "Helix Rack 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 880,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Helix Rack 6.png"
+    },
+    {
+        "list": "Helix Rack 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 95000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Helix Rack 8.png"
+    },
+    {
+        "list": "Helix Rack 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 1005,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Helix Rack 10.png"
+    },
+    {
+        "list": "Helix Rack 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 1055,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Helix Rack 12.png"
+    },
+    {
+        "list": "Helix Rack 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 112800,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Helix Rack 16.png"
+    },
+    {
+        "list": "Hellfire 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Hellfire 6.png"
+    },
+    {
+        "list": "Hellfire 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Hellfire 8.png"
+    },
+    {
+        "list": "Hellfire 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Hellfire 10.png"
+    },
+    {
+        "list": "Hellfire 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Hellfire 12.png"
+    },
+    {
+        "list": "Hellfire 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Hellfire 16.png"
+    },
+    {
+        "list": "Hemlock",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 937500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Hemlock.png"
+    },
+    {
+        "list": "Hornet 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "600000",
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Hornet 6.png"
+    },
+    {
+        "list": "Hornet 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "8000",
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Hornet 8.png"
+    },
+    {
+        "list": "Hornet 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Hornet 10.png"
+    },
+    {
+        "list": "Hornet 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "750000",
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Hornet 12.png"
+    },
+    {
+        "list": "Hornet 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "8275",
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Hornet 16.png"
+    },
+    {
+        "list": "Howler 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 6000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Howler 6.png"
+    },
+    {
+        "list": "Howler 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Howler 8.png"
+    },
+    {
+        "list": "Howler 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 6750,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Howler 10.png"
+    },
+    {
+        "list": "Howler 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Howler 12.png"
+    },
+    {
+        "list": "Howler 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 872500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Howler 16.png"
+    },
+    {
+        "list": "Javelin Rack 4",
+        "energy": 4,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 20300,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Javelin Rack 4.png"
+    },
+    {
+        "list": "Javelin Rack 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 220,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Javelin Rack 6.png"
+    },
+    {
+        "list": "Javelin Rack 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 230,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Javelin Rack 8.png"
+    },
+    {
+        "list": "Javelin Rack 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 245,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Javelin Rack 12.png"
+    },
+    {
+        "list": "Javelin Rack 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 255,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Javelin Rack 16.png"
+    },
+    {
+        "list": "Juggernaut",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 45,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Juggernaut.png"
+    },
+    {
+        "list": "Killshot",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 1865,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Killshot.png"
+    },
+    {
+        "list": "Lacewing",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Lacewing.png"
+    },
+    {
+        "list": "Lancer",
+        "energy": 16,
+        "type": "mech",
+        "rarity": "common",
+        "cost": {
+            "amount": 400,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Lancer.png"
+    },
+    {
+        "list": "Longarm 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 3700,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Longarm 8.png"
+    },
+    {
+        "list": "Longarm 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 3800,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Longarm 10.png"
+    },
+    {
+        "list": "Longarm 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 40,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Longarm 12.png"
+    },
+    {
+        "list": "MD",
+        "energy": 16,
+        "type": "mech",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 45,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/MD.png"
+    },
+    {
+        "list": "Mimicker",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 937000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Mimicker.png"
+    },
+    {
+        "list": "Minigun 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Minigun 6.png"
+    },
+    {
+        "list": "Minigun 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "a-coins"
+        },
+        "image_url": "\/mech_weapon_images\/Minigun 8.png"
+    },
+    {
+        "list": "Minigun 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7125,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Minigun 10.png"
+    },
+    {
+        "list": "Minigun 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Minigun 12.png"
+    },
+    {
+        "list": "Minigun 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Minigun 16.png"
+    },
+    {
+        "list": "Missile Rack 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 77250,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Missile Rack 6.png"
+    },
+    {
+        "list": "Missile Rack 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 825,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Missile Rack 8.png"
+    },
+    {
+        "list": "Missile Rack 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 910,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Missile Rack 12.png"
+    },
+    {
+        "list": "Missile Rack 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 965,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Missile Rack 16.png"
+    },
+    {
+        "list": "Nade Launcher 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 770,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Nade Launcher 6.png"
+    },
+    {
+        "list": "Nade Launcher 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 825,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Nade Launcher 8.png"
+    },
+    {
+        "list": "Nade Launcher 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 87100,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Nade Launcher 10.png"
+    },
+    {
+        "list": "Nade Launcher 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 910,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Nade Launcher 12.png"
+    },
+    {
+        "list": "Nade Launcher 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 965,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Nade Launcher 16.png"
+    },
+    {
+        "list": "Nomad",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Nomad.png"
+    },
+    {
+        "list": "Onyx",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Onyx.png"
+    },
+    {
+        "list": "Oracle 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Oracle 6.png"
+    },
+    {
+        "list": "Oracle 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Oracle 8.png"
+    },
+    {
+        "list": "Oracle 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Oracle 10.png"
+    },
+    {
+        "list": "Oracle 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 750000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Oracle 12.png"
+    },
+    {
+        "list": "Oracle 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Oracle 16.png"
+    },
+    {
+        "list": "Orion",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 1865,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Orion.png"
+    },
+    {
+        "list": "Outlaw",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Outlaw.png"
+    },
+    {
+        "list": "Overdriver 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 6000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Overdriver 6.png"
+    },
+    {
+        "list": "Overdriver 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Overdriver 8.png"
+    },
+    {
+        "list": "Overdriver 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 712500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Overdriver 10.png"
+    },
+    {
+        "list": "Overdriver 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Overdriver 12.png"
+    },
+    {
+        "list": "Overdriver 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Overdriver 16.png"
+    },
+    {
+        "list": "Panther",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "epic_c",
+        "cost": {
+            "amount": 2425,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Panther.png"
+    },
+    {
+        "list": "Paragon",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "common",
+        "cost": {
+            "amount": "",
+            "currency": "free"
+        },
+        "image_url": "\/mech_weapon_images\/Paragon.png"
+    },
+    {
+        "list": "Parasite",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Parasite.png"
+    },
+    {
+        "list": "Particle Beam 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Particle Beam 6.png"
+    },
+    {
+        "list": "Particle Beam 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Particle Beam 8.png"
+    },
+    {
+        "list": "Particle Beam 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 712500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Particle Beam 10.png"
+    },
+    {
+        "list": "Particle Beam 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Particle Beam 12.png"
+    },
+    {
+        "list": "Particle Beam 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Particle Beam 16.png"
+    },
+    {
+        "list": "Plasma Cannon 2",
+        "energy": 2,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 30,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Plasma Cannon 2.png"
+    },
+    {
+        "list": "Plasma Cannon 4",
+        "energy": 4,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 3450,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Plasma Cannon 4.png"
+    },
+    {
+        "list": "Plasma Cannon 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 3600,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Plasma Cannon 6.png"
+    },
+    {
+        "list": "Pod Gun 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 6250,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Pod Gun 6.png"
+    },
+    {
+        "list": "Pod Gun 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Pod Gun 8.png"
+    },
+    {
+        "list": "Pod Gun 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 712500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Pod Gun 10.png"
+    },
+    {
+        "list": "Pod Gun 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Pod Gun 12.png"
+    },
+    {
+        "list": "Pod Gun 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Pod Gun 16.png"
+    },
+    {
+        "list": "Pulse Cannon 4",
+        "energy": 4,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 205,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Pulse Cannon 4.png"
+    },
+    {
+        "list": "Pulse Cannon 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 21850,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Pulse Cannon 6.png"
+    },
+    {
+        "list": "Pulse Cannon 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 22850,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Pulse Cannon 8.png"
+    },
+    {
+        "list": "Puma",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 45,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Puma.png"
+    },
+    {
+        "list": "Quantum Gun 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 77250,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Quantum Gun 6.png"
+    },
+    {
+        "list": "Quantum Gun 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 82700,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Quantum Gun 8.png"
+    },
+    {
+        "list": "Quantum Gun 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 87100,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Quantum Gun 10.png"
+    },
+    {
+        "list": "Quantum Gun 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 910,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Quantum Gun 12.png"
+    },
+    {
+        "list": "Quantum Gun 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 965,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Quantum Gun 16.png"
+    },
+    {
+        "list": "Quasher 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 650000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Quasher 6.png"
+    },
+    {
+        "list": "Quasher 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 800000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Quasher 8.png"
+    },
+    {
+        "list": "Quasher 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7125,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Quasher 10.png"
+    },
+    {
+        "list": "Quasher 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Quasher 12.png"
+    },
+    {
+        "list": "Quasher 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Quasher 12.png"
+    },
+    {
+        "list": "Railgun 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Railgun 8.png"
+    },
+    {
+        "list": "Railgun 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Railgun 12.png"
+    },
+    {
+        "list": "Railgun 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Railgun 16.png"
+    },
+    {
+        "list": "Reaver 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 6000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Reaver 6.png"
+    },
+    {
+        "list": "Reaver 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 650000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Reaver 8.png"
+    },
+    {
+        "list": "Reaver 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Reaver 10.png"
+    },
+    {
+        "list": "Reaver 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Reaver 12.png"
+    },
+    {
+        "list": "Reaver 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 800000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Reaver 16.png"
+    },
+    {
+        "list": "Redeemer",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 1865,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Redeemer.png"
+    },
+    {
+        "list": "Redox",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Redox.png"
+    },
+    {
+        "list": "Repeater 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 712500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Repeater 6.png"
+    },
+    {
+        "list": "Repeater 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Repeater 8.png"
+    },
+    {
+        "list": "Repeater 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 675000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Repeater 10.png"
+    },
+    {
+        "list": "Repeater 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Repeater 12.png"
+    },
+    {
+        "list": "Repeater 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Repeater 16.png"
+    },
+    {
+        "list": "Revoker 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Revoker 6.png"
+    },
+    {
+        "list": "Revoker 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Revoker 8.png"
+    },
+    {
+        "list": "Revoker 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Revoker 10.png"
+    },
+    {
+        "list": "Revoker 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Revoker 12.png"
+    },
+    {
+        "list": "Revoker 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Revoker 16.png"
+    },
+    {
+        "list": "Rocket Mortar 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 230,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Rocket Mortar 8.png"
+    },
+    {
+        "list": "Rocket Mortar 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 23700,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Rocket Mortar 10.png"
+    },
+    {
+        "list": "Rocket Mortar 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "rare",
+        "cost": {
+            "amount": 245,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Rocket Mortar 12.png"
+    },
+    {
+        "list": "RPG 2",
+        "energy": 2,
+        "type": "weapon",
+        "rarity": "common",
+        "cost": {
+            "amount": 50,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/RPG 2.png"
+    },
+    {
+        "list": "RPG 4",
+        "energy": 4,
+        "type": "weapon",
+        "rarity": "common",
+        "cost": {
+            "amount": 100,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/RPG 4.png"
+    },
+    {
+        "list": "RPG 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "common",
+        "cost": {
+            "amount": 150,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/RPG 6.png"
+    },
+    {
+        "list": "Salvor",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 937500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Salvor.png"
+    },
+    {
+        "list": "Biform",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Biform.png"
+    },
+    {
+        "list": "Voidghost",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Voidghost.png"
+    },
+    {
+        "list": "Savant 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Savant 6.png"
+    },
+    {
+        "list": "Savant 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Savant 8.png"
+    },
+    {
+        "list": "Savant 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7125,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Savant 10.png"
+    },
+    {
+        "list": "Savant 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Savant 12.png"
+    },
+    {
+        "list": "Savant 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Savant 16.png"
+    },
+    {
+        "list": "Scorpius",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Scorpius.png"
+    },
+    {
+        "list": "Seeker",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Seeker.png"
+    },
+    {
+        "list": "Versa 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Versa 6.png"
+    },
+    {
+        "list": "Versa 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 650000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Versa 8.png"
+    },
+    {
+        "list": "Versa 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Versa 10.png"
+    },
+    {
+        "list": "Versa 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Versa 12.png"
+    },
+    {
+        "list": "Versa 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8000,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Versa 16.png"
+    },
+    {
+        "list": "Sentinel",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 130600,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Sentinel.png"
+    },
+    {
+        "list": "Shadow",
+        "energy": 16,
+        "type": "mech",
+        "rarity": "rare",
+        "cost": {
+            "amount": 420,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Shadow.png"
+    },
+    {
+        "list": "Shotgun 2",
+        "energy": 2,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 3150,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Shotgun 2.png"
+    },
+    {
+        "list": "Shotgun 4",
+        "energy": 4,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 3450,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Shotgun 4.png"
+    },
+    {
+        "list": "Shotgun 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 35,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Shotgun 8.png"
+    },
+    {
+        "list": "Silverthorn",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Silverthorn.png"
+    },
+    {
+        "list": "Slingshot",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "uncommon",
+        "cost": {
+            "amount": 45,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Slingshot.png"
+    },
+    {
+        "list": "Solis",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 937500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Solis.png"
+    },
+    {
+        "list": "Stalker",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "rare",
+        "cost": {
+            "amount": 420,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Stalker.png"
+    },
+    {
+        "list": "Stasis Beam 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 70400,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Stasis Beam 8.png"
+    },
+    {
+        "list": "Stasis Beam 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 760,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Stasis Beam 12.png"
+    },
+    {
+        "list": "Stasis Beam 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 79950,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Stasis Beam 16.png"
+    },
+    {
+        "list": "Storm Rack 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 675000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Storm Rack 6.png"
+    },
+    {
+        "list": "Storm Rack 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Storm Rack 8.png"
+    },
+    {
+        "list": "Storm Rack 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 712500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Storm Rack 10.png"
+    },
+    {
+        "list": "Storm Rack 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Storm Rack 12.png"
+    },
+    {
+        "list": "Storm Rack 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Storm Rack 16.png"
+    },
+    {
+        "list": "Strike Rocket 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Strike Rocket 6.png"
+    },
+    {
+        "list": "Strike Rocket 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 750000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Strike Rocket 8.png"
+    },
+    {
+        "list": "Strike Rocket 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 675000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Strike Rocket 10.png"
+    },
+    {
+        "list": "Strike Rocket 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Strike Rocket 12.png"
+    },
+    {
+        "list": "Strike Rocket 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Strike Rocket 16.png"
+    },
+    {
+        "list": "Suppressor 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 650000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Suppressor 6.png"
+    },
+    {
+        "list": "Suppressor 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Suppressor 8.png"
+    },
+    {
+        "list": "Suppressor 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Suppressor 10.png"
+    },
+    {
+        "list": "Suppressor 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 725000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Suppressor 12.png"
+    },
+    {
+        "list": "Suppressor 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Suppressor 16.png"
+    },
+    {
+        "list": "Surge",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Surge.png"
+    },
+    {
+        "list": "Tailsting",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Tailsting.png"
+    },
+    {
+        "list": "Tengu",
+        "energy": 16,
+        "type": "mech",
+        "rarity": "rare",
+        "cost": {
+            "amount": 420,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Tengu.png"
+    },
+    {
+        "list": "Tetra Rifle 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Tetra Rifle 6.png"
+    },
+    {
+        "list": "Tetra Rifle 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 800000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Tetra Rifle 8.png"
+    },
+    {
+        "list": "Tetra Rifle 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 700000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Tetra Rifle 10.png"
+    },
+    {
+        "list": "Tetra Rifle 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Tetra Rifle 12.png"
+    },
+    {
+        "list": "Tetra Rifle 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Tetra Rifle 16.png"
+    },
+    {
+        "list": "Thermal lance 2",
+        "energy": 2,
+        "type": "weapon",
+        "rarity": "common",
+        "cost": {
+            "amount": 50,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Thermal lance 2.png"
+    },
+    {
+        "list": "Thermal lance 4",
+        "energy": 4,
+        "type": "weapon",
+        "rarity": "common",
+        "cost": {
+            "amount": 100,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Thermal lance 4.png"
+    },
+    {
+        "list": "Thermal Lance 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "common",
+        "cost": {
+            "amount": 150,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Thermal Lance 6.png"
+    },
+    {
+        "list": "Viper 6",
+        "energy": 6,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 600000,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Viper 6.png"
+    },
+    {
+        "list": "Viper 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 827500,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Viper 8.png"
+    },
+    {
+        "list": "Viper 10",
+        "energy": 10,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7125,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Viper 10.png"
+    },
+    {
+        "list": "Viper 12",
+        "energy": 12,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 7500,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Viper 12.png"
+    },
+    {
+        "list": "Viper 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 8275,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Viper 16.png"
+    },
+    {
+        "list": "Voltaic RPG 8",
+        "energy": 8,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 70400,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Voltaic RPG 8.png"
+    },
+    {
+        "list": "Voltaic RPG 14",
+        "energy": 14,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 78050,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Voltaic RPG 14.png"
+    },
+    {
+        "list": "Voltaic RPG 16",
+        "energy": 16,
+        "type": "weapon",
+        "rarity": "epic_a",
+        "cost": {
+            "amount": 800,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Voltaic RPG 16.png"
+    },
+    {
+        "list": "Volti",
+        "energy": 32,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": "",
+            "currency": "Paid"
+        },
+        "image_url": "\/mech_weapon_images\/Volti.png"
+    },
+    {
+        "list": "Vortex",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "legendary",
+        "cost": {
+            "amount": 9375,
+            "currency": "A-Coins"
+        },
+        "image_url": "\/mech_weapon_images\/Vortex.png"
+    },
+    {
+        "list": "Zephyr",
+        "energy": 24,
+        "type": "mech",
+        "rarity": "epic_b",
+        "cost": {
+            "amount": 186600,
+            "currency": "Credits"
+        },
+        "image_url": "\/mech_weapon_images\/Zephyr.png"
+    }
+]

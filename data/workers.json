@@ -1,0 +1,244 @@
+[
+  {
+    "user_id": "1515232384159715364",
+    "group": 1,
+    "mechs": [
+      {
+        "name": "Blizzfrost",
+        "tier": "S"
+      },
+      {
+        "name": "Citadel",
+        "tier": "S"
+      },
+      {
+        "name": "Aegis",
+        "tier": "A"
+      },
+      {
+        "name": "Bastion",
+        "tier": "A"
+      },
+      {
+        "name": "Ares",
+        "tier": "B"
+      },
+      {
+        "name": "Guardian",
+        "tier": "C"
+      }
+    ]
+  },
+  {
+    "user_id": "1461906648871338230",
+    "group": 2,
+    "mechs": [
+      {
+        "name": "Deathwalker",
+        "tier": "S"
+      },
+      {
+        "name": "Eclipse",
+        "tier": "S"
+      },
+      {
+        "name": "Blockhorn",
+        "tier": "A"
+      },
+      {
+        "name": "Dreadnought",
+        "tier": "A"
+      },
+      {
+        "name": "Brickhouse",
+        "tier": "B"
+      },
+      {
+        "name": "Arachnos",
+        "tier": "D"
+      }
+    ]
+  },
+  {
+    "user_id": "1275344151428202537",
+    "group": 3,
+    "mechs": [
+      {
+        "name": "Lacewing",
+        "tier": "S"
+      },
+      {
+        "name": "Gatecrasher",
+        "tier": "A"
+      },
+      {
+        "name": "Killshot",
+        "tier": "B"
+      },
+      {
+        "name": "Juggernaut",
+        "tier": "C"
+      },
+      {
+        "name": "Cheetah",
+        "tier": "D"
+      }
+    ]
+  },
+  {
+    "user_id": "1524358166345814120",
+    "group": 4,
+    "mechs": [
+      {
+        "name": "Nomad",
+        "tier": "S"
+      },
+      {
+        "name": "Outlaw",
+        "tier": "S"
+      },
+      {
+        "name": "Mimicker",
+        "tier": "A"
+      },
+      {
+        "name": "Onyx",
+        "tier": "B"
+      },
+      {
+        "name": "Lancer",
+        "tier": "C"
+      }
+    ]
+  },
+  {
+    "user_id": "848899344865820672",
+    "group": 5,
+    "mechs": [
+      {
+        "name": "Parasite",
+        "tier": "S"
+      },
+      {
+        "name": "Orion",
+        "tier": "A"
+      },
+      {
+        "name": "Panther",
+        "tier": "A"
+      },
+      {
+        "name": "Redeemer",
+        "tier": "B"
+      },
+      {
+        "name": "M.D.",
+        "tier": "C"
+      }
+    ]
+  },
+  {
+    "user_id": "1522670657043824690",
+    "group": 6,
+    "mechs": [
+      {
+        "name": "Seeker",
+        "tier": "S"
+      },
+      {
+        "name": "Redox",
+        "tier": "A"
+      },
+      {
+        "name": "Salvor",
+        "tier": "A"
+      },
+      {
+        "name": "Scorpius",
+        "tier": "B"
+      },
+      {
+        "name": "Shadow",
+        "tier": "C"
+      }
+    ]
+  },
+  {
+    "user_id": "1178707061249421400",
+    "group": 7,
+    "mechs": [
+      {
+        "name": "Surge",
+        "tier": "S"
+      },
+      {
+        "name": "Solis",
+        "tier": "A"
+      },
+      {
+        "name": "Sentinel",
+        "tier": "B"
+      },
+      {
+        "name": "Slingshot",
+        "tier": "C"
+      },
+      {
+        "name": "Paragon",
+        "tier": "D"
+      }
+    ]
+  },
+  {
+    "user_id": "1524006507379687526",
+    "group": 8,
+    "mechs": [
+      {
+        "name": "Tailsting",
+        "tier": "S"
+      },
+      {
+        "name": "Volti",
+        "tier": "A"
+      },
+      {
+        "name": "Stalker",
+        "tier": "B"
+      },
+      {
+        "name": "Zephyr",
+        "tier": "C"
+      },
+      {
+        "name": "Puma",
+        "tier": "D"
+      }
+    ]
+  },
+  {
+    "user_id": "1413148554092089354",
+    "group": 9,
+    "mechs": [
+      {
+        "name": "Hemlock",
+        "tier": "A"
+      },
+      {
+        "name": "Voidghost",
+        "tier": "S"
+      },
+      {
+        "name": "Vortex",
+        "tier": "A"
+      },
+      {
+        "name": "Tengu",
+        "tier": "B"
+      },
+      {
+        "name": "Silverthorn",
+        "tier": "D"
+      }
+    ]
+  }
+]

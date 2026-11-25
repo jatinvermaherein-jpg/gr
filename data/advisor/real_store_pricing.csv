@@ -1,0 +1,25 @@
+category,item,quantity,in_game_usd,web_usd,discount_pct,offer_uuid
+A-Coins,80 A-Coins,80,0.99,0.80,19.2,335e7cd0-2cb3-48b3-990d-c2077ad7febe
+A-Coins,400 A-Coins,400,4.99,3.99,20.0,c7696c83-0462-4284-af07-f8f3a9069c30
+A-Coins,800 A-Coins,800,9.99,6.99,30.0,42d7ef4c-6a66-4503-9246-8128b71300a4
+A-Coins,1600 A-Coins,1600,19.99,12.99,35.0,1380b241-74fd-4fe0-9e83-d0a9fe026b6d
+A-Coins,4000 A-Coins,4000,49.99,31.99,36.0,038b024e-5869-4cb5-9942-e8240ae41069
+A-Coins,8000 A-Coins,8000,99.99,59.99,40.0,b12f8222-d975-4d48-b01d-3ef134d93c45
+A-Coins,14000 A-Coins,14000,99.99,99.99,0.0,0e63fc96-46c6-4195-9b24-5cfcb5f78226
+A-Coins,22000 A-Coins,22000,149.99,149.99,0.0,e373f79a-3094-4624-8b01-55be1d0d76e7
+A-Coins,30000 A-Coins,30000,199.99,199.99,0.0,12cbe021-352c-4eb4-9494-d984c5d71326
+A-Coins,48000 A-Coins,48000,299.99,299.99,0.0,82c5e638-f3af-478b-8f6b-b1dafb7b6a35
+Crate Offers,Amateur A-Coin Pack,,,1.99,,1d91db88-79a0-4399-8f0c-a71a867975bf
+Crate Offers,Prodigy A-Coin Pack,,,14.99,,9710d898-c069-4851-84b1-c1c315b2c6c1
+Crate Offers,Champion A-Coin Pack,,,29.99,,e87d4308-c634-4801-bf3c-41db524a3768
+Crate Offers,Champion Mega Pack,,,49.99,,63663e6a-93cd-433c-af34-602cf9f334bd
+Crate Offers,Amateur Credits Pack,,,1.99,,759357a2-dafd-4d93-b6de-d78db694f309
+Crate Offers,Prodigy Credits Pack,,,14.99,,4ae7e5a3-c9d6-4035-9a7a-f8394cbea6d4
+Crate Offers,Champion Riches Pack,,,29.99,,43689f9d-fae6-419c-99ef-a7ab9ac51902
+Crate Offers,Champion Credits Pack,,,49.99,,261acaf5-914f-4002-be8a-9f59bcfc5d40
+Fortune Keys,20 Fortune Keys,20,24.99,20.99,16.0,d3d9f773-db68-426a-a4df-b1dce3b621c6
+Fortune Keys,40 Fortune Keys,40,49.99,39.99,20.0,148866d7-aa0e-4805-9e3f-39b665349605
+Pilot Marks,500 Pilot Marks,500,1.99,1.70,14.6,34774c47-f6e8-4552-91e0-5aa3bfd23175
+Pilot Marks,2500 Pilot Marks,2500,9.99,7.99,20.0,57fc5cf8-826c-4b16-bdb9-af695acf000d
+Implant Parts,5000 Implant Parts,5000,4.99,3.99,20.0,2809e5fb-5b97-4ddb-a55d-aa5864268999
+Implant Parts,25000 Implant Parts,25000,24.99,18.99,24.0,5c013eca-95d6-45b8-ac54-5144014c5089

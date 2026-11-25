@@ -1,0 +1,9410 @@
+[
+  {
+    "star": 1,
+    "level": 1,
+    "common_mech": {
+      "credits": 75,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 825,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 25,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 50,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 50,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 825,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 825,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 825,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 825,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 825,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 1,
+    "level": 2,
+    "common_mech": {
+      "credits": 125,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 25,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 75,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 75,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 1,
+    "level": 3,
+    "common_mech": {
+      "credits": 200,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 50,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 100,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 125,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 1,
+    "level": 4,
+    "common_mech": {
+      "credits": 275,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 75,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 125,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 175,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 1,
+    "level": 5,
+    "common_mech": {
+      "credits": 400,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 100,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 200,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 1,
+    "level": 6,
+    "common_mech": {
+      "credits": 450,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 100,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 225,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_6": {
+      "credits": 275,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 1,
+    "level": 7,
+    "common_mech": {
+      "credits": 0,
+      "acoins": 10,
+      "blueprints": 0
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 0,
+      "acoins": 75,
+      "blueprints": 0
+    },
+    "common_weapon_2": {
+      "credits": 0,
+      "acoins": 5,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 0,
+      "acoins": 5,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 0,
+      "acoins": 5,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 0,
+      "acoins": 50,
+      "blueprints": 0
+    },
+    "legendary_weapon_8": {
+      "credits": 0,
+      "acoins": 50,
+      "blueprints": 0
+    },
+    "legendary_weapon_10": {
+      "credits": 0,
+      "acoins": 25,
+      "blueprints": 0
+    },
+    "legendary_weapon_12": {
+      "credits": 0,
+      "acoins": 50,
+      "blueprints": 0
+    },
+    "legendary_weapon_16": {
+      "credits": 0,
+      "acoins": 75,
+      "blueprints": 0
+    }
+  },
+  {
+    "star": 2,
+    "level": 1,
+    "common_mech": {
+      "credits": 225,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_mech": {
+      "credits": 450,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 50,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_4": {
+      "credits": 125,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_6": {
+      "credits": 150,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 125,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_4": {
+      "credits": 225,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_6": {
+      "credits": 300,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_8": {
+      "credits": 350,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 375,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_12": {
+      "credits": 425,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 2,
+    "level": 2,
+    "common_mech": {
+      "credits": 450,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_mech": {
+      "credits": 875,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 100,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_4": {
+      "credits": 225,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_6": {
+      "credits": 275,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_2": {
+      "credits": 225,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_4": {
+      "credits": 450,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_6": {
+      "credits": 575,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_8": {
+      "credits": 650,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_10": {
+      "credits": 725,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_12": {
+      "credits": 800,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 2,
+    "level": 3,
+    "common_mech": {
+      "credits": 750,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_mech": {
+      "credits": 1500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 200,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_4": {
+      "credits": 375,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_6": {
+      "credits": 500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_2": {
+      "credits": 375,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_4": {
+      "credits": 750,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_6": {
+      "credits": 975,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_8": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_10": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_12": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 2,
+    "level": 4,
+    "common_mech": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_mech": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 300,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_4": {
+      "credits": 575,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_6": {
+      "credits": 750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_2": {
+      "credits": 575,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_4": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_6": {
+      "credits": 1500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_8": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_10": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_weapon_12": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 2,
+    "level": 5,
+    "common_mech": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_mech": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 450,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_4": {
+      "credits": 875,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "common_weapon_6": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_weapon_2": {
+      "credits": 875,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_4": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_6": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_weapon_8": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_10": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_12": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 2,
+    "level": 6,
+    "common_mech": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_mech": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_4": {
+      "credits": 1000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "common_weapon_6": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "uncommon_weapon_2": {
+      "credits": 1000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_4": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_6": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "uncommon_weapon_8": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "uncommon_weapon_10": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "uncommon_weapon_12": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 2,
+    "level": 7,
+    "common_mech": {
+      "credits": 0,
+      "acoins": 55,
+      "blueprints": 11
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 110,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 0,
+      "acoins": 575,
+      "blueprints": 0
+    },
+    "common_weapon_2": {
+      "credits": 0,
+      "acoins": 10,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 0,
+      "acoins": 20,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 0,
+      "acoins": 20,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 20,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 40,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 50,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 60,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 60,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 70,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 0,
+      "acoins": 275,
+      "blueprints": 0
+    },
+    "legendary_weapon_8": {
+      "credits": 0,
+      "acoins": 375,
+      "blueprints": 0
+    },
+    "legendary_weapon_10": {
+      "credits": 0,
+      "acoins": 225,
+      "blueprints": 0
+    },
+    "legendary_weapon_12": {
+      "credits": 0,
+      "acoins": 275,
+      "blueprints": 0
+    },
+    "legendary_weapon_16": {
+      "credits": 0,
+      "acoins": 375,
+      "blueprints": 0
+    }
+  },
+  {
+    "star": 3,
+    "level": 1,
+    "common_mech": {
+      "credits": 1000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_mech": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_mech": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 5250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 275,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_4": {
+      "credits": 525,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_6": {
+      "credits": 675,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_2": {
+      "credits": 525,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "uncommon_weapon_4": {
+      "credits": 1000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_6": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_8": {
+      "credits": 1500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_10": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_12": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_4": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "rare_weapon_6": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "rare_weapon_8": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "rare_weapon_10": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_12": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_14": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_16": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 3,
+    "level": 2,
+    "common_mech": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "uncommon_mech": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_mech": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 350,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_4": {
+      "credits": 675,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_6": {
+      "credits": 875,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_2": {
+      "credits": 675,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_4": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_6": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_8": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_weapon_10": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_12": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_weapon_4": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "rare_weapon_6": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_8": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_10": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_12": {
+      "credits": 4250,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_14": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_16": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 3,
+    "level": 3,
+    "common_mech": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "uncommon_mech": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_mech": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 9250,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 450,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_4": {
+      "credits": 925,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "common_weapon_6": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_2": {
+      "credits": 925,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_4": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_weapon_6": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_8": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "uncommon_weapon_10": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_weapon_12": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_weapon_4": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_6": {
+      "credits": 4250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_8": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_10": {
+      "credits": 5250,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_12": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_14": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_16": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 3,
+    "level": 4,
+    "common_mech": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "uncommon_mech": {
+      "credits": 5000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_mech": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 625,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_4": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "common_weapon_6": {
+      "credits": 1500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_weapon_2": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_4": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_6": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_weapon_8": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "uncommon_weapon_10": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "uncommon_weapon_12": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "rare_weapon_4": {
+      "credits": 4250,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_6": {
+      "credits": 5500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_8": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_10": {
+      "credits": 7250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_weapon_12": {
+      "credits": 7750,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_weapon_14": {
+      "credits": 8250,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_16": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 3,
+    "level": 5,
+    "common_mech": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_mech": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "rare_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 23500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 850,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "common_weapon_4": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "common_weapon_6": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "uncommon_weapon_2": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_4": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "uncommon_weapon_6": {
+      "credits": 4250,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "uncommon_weapon_8": {
+      "credits": 5000,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "uncommon_weapon_10": {
+      "credits": 5500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "uncommon_weapon_12": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "rare_weapon_4": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_6": {
+      "credits": 7750,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_weapon_8": {
+      "credits": 8750,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_10": {
+      "credits": 9750,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_12": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_weapon_14": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 3,
+    "level": 6,
+    "common_mech": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "uncommon_mech": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "rare_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_2": {
+      "credits": 925,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "common_weapon_4": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "common_weapon_6": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "uncommon_weapon_2": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_weapon_4": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "uncommon_weapon_6": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "uncommon_weapon_8": {
+      "credits": 5500,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "uncommon_weapon_10": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "uncommon_weapon_12": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "rare_weapon_4": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_weapon_6": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_weapon_8": {
+      "credits": 9750,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "rare_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "rare_weapon_14": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "rare_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_12": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 3,
+    "level": 7,
+    "common_mech": {
+      "credits": 0,
+      "acoins": 190,
+      "blueprints": 0
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 380,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 660,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 940,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 0,
+      "acoins": 1875,
+      "blueprints": 0
+    },
+    "common_weapon_2": {
+      "credits": 0,
+      "acoins": 30,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 0,
+      "acoins": 60,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 0,
+      "acoins": 80,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 60,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 130,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 160,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 190,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 210,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 320,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 220,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 280,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 330,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 360,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 390,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 420,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 440,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 0,
+      "acoins": 950,
+      "blueprints": 0
+    },
+    "legendary_weapon_8": {
+      "credits": 0,
+      "acoins": 1250,
+      "blueprints": 0
+    },
+    "legendary_weapon_10": {
+      "credits": 0,
+      "acoins": 775,
+      "blueprints": 0
+    },
+    "legendary_weapon_12": {
+      "credits": 0,
+      "acoins": 950,
+      "blueprints": 0
+    },
+    "legendary_weapon_16": {
+      "credits": 0,
+      "acoins": 1250,
+      "blueprints": 0
+    }
+  },
+  {
+    "star": 4,
+    "level": 1,
+    "common_mech": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "uncommon_mech": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "rare_mech": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_a_mech": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_mech": {
+      "credits": 9750,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_mech": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_mech": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 475,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_4": {
+      "credits": 975,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "common_weapon_6": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_2": {
+      "credits": 975,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "uncommon_weapon_4": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_weapon_6": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_8": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "uncommon_weapon_10": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_weapon_12": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_weapon_4": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "rare_weapon_6": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_8": {
+      "credits": 5000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_10": {
+      "credits": 5500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_12": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_14": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_16": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_a_weapon_6": {
+      "credits": 45000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_6": {
+      "credits": 6250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_c_weapon_6": {
+      "credits": 8250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_a_weapon_8": {
+      "credits": 5000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_8": {
+      "credits": 7250,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_8": {
+      "credits": 9500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_a_weapon_10": {
+      "credits": 5500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_10": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_a_weapon_12": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_12": {
+      "credits": 8750,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_a_weapon_14": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_a_weapon_16": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_16": {
+      "credits": 9750,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_6": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 4,
+    "level": 2,
+    "common_mech": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "uncommon_mech": {
+      "credits": 5000,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "rare_mech": {
+      "credits": 9000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_mech": {
+      "credits": 9000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_mech": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 650,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_4": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "common_weapon_6": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_weapon_2": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "uncommon_weapon_4": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_6": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_weapon_8": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "uncommon_weapon_10": {
+      "credits": 4250,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "uncommon_weapon_12": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "rare_weapon_4": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "rare_weapon_6": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_8": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_weapon_10": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_weapon_12": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_14": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_16": {
+      "credits": 9000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_weapon_6": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_6": {
+      "credits": 8250,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_6": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_a_weapon_8": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_8": {
+      "credits": 9500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_a_weapon_10": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_10": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_a_weapon_12": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_12": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_14": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_a_weapon_16": {
+      "credits": 9000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_16": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_6": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 4,
+    "level": 3,
+    "common_mech": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "uncommon_mech": {
+      "credits": 7000,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "rare_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_a_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "legendary_mech": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "common_weapon_2": {
+      "credits": 875,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "common_weapon_4": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "common_weapon_6": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "uncommon_weapon_2": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "uncommon_weapon_4": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "uncommon_weapon_6": {
+      "credits": 4500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "uncommon_weapon_8": {
+      "credits": 5250,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "uncommon_weapon_10": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_12": {
+      "credits": 6250,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "rare_weapon_4": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "rare_weapon_6": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_8": {
+      "credits": 9250,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_weapon_12": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_weapon_14": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "rare_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_a_weapon_6": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_6": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_c_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_8": {
+      "credits": 9250,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_10": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_12": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_12": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_14": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_a_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_16": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "legendary_weapon_6": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_8": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_10": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_12": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "legendary_weapon_16": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 1
+    }
+  },
+  {
+    "star": 4,
+    "level": 4,
+    "common_mech": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "uncommon_mech": {
+      "credits": 9500,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "rare_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_a_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_mech": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_mech": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_2": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "common_weapon_4": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "common_weapon_6": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_2": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_4": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "uncommon_weapon_6": {
+      "credits": 6250,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_8": {
+      "credits": 7000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "uncommon_weapon_10": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "uncommon_weapon_12": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "rare_weapon_4": {
+      "credits": 8250,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_6": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "rare_weapon_10": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "rare_weapon_12": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "rare_weapon_14": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "rare_weapon_16": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_a_weapon_6": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_6": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_8": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_10": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_10": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_12": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_12": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_12": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_14": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_16": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_16": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_6": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_8": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_10": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_12": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_16": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    }
+  },
+  {
+    "star": 4,
+    "level": 5,
+    "common_mech": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "uncommon_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "rare_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "epic_a_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_mech": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_mech": {
+      "credits": 42500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "legendary_mech": {
+      "credits": 65000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_2": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "common_weapon_4": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "common_weapon_6": {
+      "credits": 4250,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "uncommon_weapon_2": {
+      "credits": 3250,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "uncommon_weapon_4": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_6": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "uncommon_weapon_8": {
+      "credits": 9750,
+      "acoins": 0,
+      "blueprints": 22
+    },
+    "uncommon_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "uncommon_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 26
+    },
+    "rare_weapon_4": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "rare_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "rare_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "rare_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "rare_weapon_14": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "rare_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "epic_a_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_6": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_6": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_8": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_8": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_10": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_10": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_a_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_12": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_12": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_weapon_14": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_16": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_16": {
+      "credits": 42500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "legendary_weapon_6": {
+      "credits": 65000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_8": {
+      "credits": 65000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_10": {
+      "credits": 65000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_12": {
+      "credits": 65000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_16": {
+      "credits": 65000,
+      "acoins": 0,
+      "blueprints": 2
+    }
+  },
+  {
+    "star": 4,
+    "level": 6,
+    "common_mech": {
+      "credits": 7250,
+      "acoins": 0,
+      "blueprints": 41
+    },
+    "uncommon_mech": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 41
+    },
+    "rare_mech": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "epic_a_mech": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_b_mech": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_c_mech": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "legendary_mech": {
+      "credits": 72500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_2": {
+      "credits": 1750,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "common_weapon_4": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "common_weapon_6": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "uncommon_weapon_2": {
+      "credits": 3500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "uncommon_weapon_4": {
+      "credits": 7250,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "uncommon_weapon_6": {
+      "credits": 9500,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "uncommon_weapon_8": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "uncommon_weapon_10": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 34
+    },
+    "uncommon_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 37
+    },
+    "rare_weapon_4": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "rare_weapon_6": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "rare_weapon_8": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "rare_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "rare_weapon_12": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 22
+    },
+    "rare_weapon_14": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 23
+    },
+    "rare_weapon_16": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "epic_a_weapon_6": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_6": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_6": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_weapon_8": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_8": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_8": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_a_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_10": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_c_weapon_10": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_a_weapon_12": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_b_weapon_12": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_c_weapon_12": {
+      "credits": 42500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_a_weapon_14": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_16": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_b_weapon_16": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_c_weapon_16": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "legendary_weapon_6": {
+      "credits": 72500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_8": {
+      "credits": 72500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_10": {
+      "credits": 72500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_12": {
+      "credits": 72500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_16": {
+      "credits": 72500,
+      "acoins": 0,
+      "blueprints": 3
+    }
+  },
+  {
+    "star": 4,
+    "level": 7,
+    "common_mech": {
+      "credits": 0,
+      "acoins": 280,
+      "blueprints": 0
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 560,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 980,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 980,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 1410,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 1830,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 0,
+      "acoins": 2825,
+      "blueprints": 0
+    },
+    "common_weapon_2": {
+      "credits": 0,
+      "acoins": 60,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 0,
+      "acoins": 130,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 0,
+      "acoins": 160,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 130,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 250,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 330,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 380,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 420,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 450,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 440,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 570,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 660,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 730,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 790,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 830,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 880,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 570,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 810,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 1055,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 655,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 940,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 1220,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 725,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 1040,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 1350,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 790,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 1130,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 1465,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 830,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 875,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 1250,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 1625,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 0,
+      "acoins": 1875,
+      "blueprints": 0
+    },
+    "legendary_weapon_8": {
+      "credits": 0,
+      "acoins": 2500,
+      "blueprints": 0
+    },
+    "legendary_weapon_10": {
+      "credits": 0,
+      "acoins": 1575,
+      "blueprints": 0
+    },
+    "legendary_weapon_12": {
+      "credits": 0,
+      "acoins": 1875,
+      "blueprints": 0
+    },
+    "legendary_weapon_16": {
+      "credits": 0,
+      "acoins": 2500,
+      "blueprints": 0
+    }
+  },
+  {
+    "star": 5,
+    "level": 1,
+    "common_mech": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "uncommon_mech": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "rare_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "epic_a_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_mech": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_mech": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "legendary_mech": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_2": {
+      "credits": 950,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "common_weapon_4": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "common_weapon_6": {
+      "credits": 2500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "uncommon_weapon_2": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "uncommon_weapon_4": {
+      "credits": 3750,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "uncommon_weapon_6": {
+      "credits": 5000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "uncommon_weapon_8": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "uncommon_weapon_10": {
+      "credits": 6250,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "uncommon_weapon_12": {
+      "credits": 6750,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "rare_weapon_4": {
+      "credits": 6500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "rare_weapon_6": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_8": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "rare_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "rare_weapon_14": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "rare_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "epic_a_weapon_6": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 1
+    },
+    "epic_b_weapon_6": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_8": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_8": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_10": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_12": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_12": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_12": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_14": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_a_weapon_16": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_16": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_16": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "legendary_weapon_6": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_8": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_10": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_12": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_16": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 2
+    }
+  },
+  {
+    "star": 5,
+    "level": 2,
+    "common_mech": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "uncommon_mech": {
+      "credits": 9500,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "rare_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_a_mech": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_mech": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_mech": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "common_weapon_2": {
+      "credits": 1250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "common_weapon_4": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "common_weapon_6": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_2": {
+      "credits": 2250,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "uncommon_weapon_4": {
+      "credits": 4750,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "uncommon_weapon_6": {
+      "credits": 6250,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_8": {
+      "credits": 7000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "uncommon_weapon_10": {
+      "credits": 7750,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "uncommon_weapon_12": {
+      "credits": 8500,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "rare_weapon_4": {
+      "credits": 8250,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "rare_weapon_6": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "rare_weapon_10": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "rare_weapon_12": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "rare_weapon_14": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "rare_weapon_16": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_a_weapon_6": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_c_weapon_6": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_8": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_10": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_10": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_12": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_12": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_14": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_a_weapon_16": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_16": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_6": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_8": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_10": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_12": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "legendary_weapon_16": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 2
+    }
+  },
+  {
+    "star": 5,
+    "level": 3,
+    "common_mech": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "uncommon_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "rare_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "epic_a_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_mech": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_mech": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "legendary_mech": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_2": {
+      "credits": 1500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "common_weapon_4": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "common_weapon_6": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "uncommon_weapon_2": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_weapon_4": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_6": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "uncommon_weapon_8": {
+      "credits": 9250,
+      "acoins": 0,
+      "blueprints": 23
+    },
+    "uncommon_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 25
+    },
+    "uncommon_weapon_12": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 28
+    },
+    "rare_weapon_4": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "rare_weapon_8": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "rare_weapon_10": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "rare_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "rare_weapon_14": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "rare_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "epic_a_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_6": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_6": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_8": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_8": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_8": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_a_weapon_10": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_10": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_10": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_a_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_12": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_12": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_weapon_14": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_16": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_16": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "legendary_weapon_6": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_8": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_10": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_12": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_16": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    }
+  },
+  {
+    "star": 5,
+    "level": 4,
+    "common_mech": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 40
+    },
+    "uncommon_mech": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 40
+    },
+    "rare_mech": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 23
+    },
+    "epic_a_mech": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_b_mech": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_c_mech": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "legendary_mech": {
+      "credits": 80000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_2": {
+      "credits": 2000,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "common_weapon_4": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "common_weapon_6": {
+      "credits": 5250,
+      "acoins": 0,
+      "blueprints": 26
+    },
+    "uncommon_weapon_2": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "uncommon_weapon_4": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "uncommon_weapon_6": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 26
+    },
+    "uncommon_weapon_8": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 30
+    },
+    "uncommon_weapon_10": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 33
+    },
+    "uncommon_weapon_12": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 36
+    },
+    "rare_weapon_4": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "rare_weapon_6": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "rare_weapon_8": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "rare_weapon_10": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "rare_weapon_12": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "rare_weapon_14": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 22
+    },
+    "rare_weapon_16": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 23
+    },
+    "epic_a_weapon_6": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_6": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_6": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_weapon_8": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_8": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_8": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_a_weapon_10": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_10": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_c_weapon_10": {
+      "credits": 42500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_a_weapon_12": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_b_weapon_12": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_c_weapon_12": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_a_weapon_14": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_16": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_b_weapon_16": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_c_weapon_16": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "legendary_weapon_6": {
+      "credits": 80000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_8": {
+      "credits": 80000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_10": {
+      "credits": 80000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_12": {
+      "credits": 80000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_16": {
+      "credits": 80000,
+      "acoins": 0,
+      "blueprints": 3
+    }
+  },
+  {
+    "star": 5,
+    "level": 5,
+    "common_mech": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 48
+    },
+    "uncommon_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 48
+    },
+    "rare_mech": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 28
+    },
+    "epic_a_mech": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_b_mech": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_c_mech": {
+      "credits": 70000,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "legendary_mech": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_2": {
+      "credits": 2750,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "common_weapon_4": {
+      "credits": 5250,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "common_weapon_6": {
+      "credits": 7000,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "uncommon_weapon_2": {
+      "credits": 5250,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "uncommon_weapon_4": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "uncommon_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "uncommon_weapon_8": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 36
+    },
+    "uncommon_weapon_10": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 40
+    },
+    "uncommon_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 43
+    },
+    "rare_weapon_4": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "rare_weapon_6": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "rare_weapon_8": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "rare_weapon_10": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 23
+    },
+    "rare_weapon_12": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 25
+    },
+    "rare_weapon_14": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 26
+    },
+    "rare_weapon_16": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 28
+    },
+    "epic_a_weapon_6": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_6": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_6": {
+      "credits": 45000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_a_weapon_8": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_b_weapon_8": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_c_weapon_8": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_a_weapon_10": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_b_weapon_10": {
+      "credits": 45000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_c_weapon_10": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_a_weapon_12": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_b_weapon_12": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_c_weapon_12": {
+      "credits": 62500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "epic_a_weapon_14": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_a_weapon_16": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_b_weapon_16": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_c_weapon_16": {
+      "credits": 70000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "legendary_weapon_6": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_8": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_10": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_12": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_16": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 3
+    }
+  },
+  {
+    "star": 5,
+    "level": 6,
+    "common_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 67
+    },
+    "uncommon_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 67
+    },
+    "rare_mech": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 39
+    },
+    "epic_a_mech": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_b_mech": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_c_mech": {
+      "credits": 75000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "legendary_mech": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "common_weapon_2": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "common_weapon_4": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 33
+    },
+    "common_weapon_6": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 43
+    },
+    "uncommon_weapon_2": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "uncommon_weapon_4": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 30
+    },
+    "uncommon_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 43
+    },
+    "uncommon_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 50
+    },
+    "uncommon_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 55
+    },
+    "uncommon_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 60
+    },
+    "rare_weapon_4": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "rare_weapon_6": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 25
+    },
+    "rare_weapon_8": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "rare_weapon_10": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 32
+    },
+    "rare_weapon_12": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 35
+    },
+    "rare_weapon_14": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 37
+    },
+    "rare_weapon_16": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 39
+    },
+    "epic_a_weapon_6": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_b_weapon_6": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_c_weapon_6": {
+      "credits": 50000,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "epic_a_weapon_8": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_b_weapon_8": {
+      "credits": 42500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_c_weapon_8": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "epic_a_weapon_10": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_b_weapon_10": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "epic_c_weapon_10": {
+      "credits": 62500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_a_weapon_12": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_b_weapon_12": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "epic_c_weapon_12": {
+      "credits": 67500,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "epic_a_weapon_14": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_a_weapon_16": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_b_weapon_16": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_c_weapon_16": {
+      "credits": 75000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "legendary_weapon_6": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_8": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_10": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_12": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_16": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    }
+  },
+  {
+    "star": 5,
+    "level": 7,
+    "common_mech": {
+      "credits": 0,
+      "acoins": 280,
+      "blueprints": 0
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 560,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 980,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 980,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 1410,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 1830,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 0,
+      "acoins": 2825,
+      "blueprints": 0
+    },
+    "common_weapon_2": {
+      "credits": 0,
+      "acoins": 60,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 0,
+      "acoins": 130,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 0,
+      "acoins": 160,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 130,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 250,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 330,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 380,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 420,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 450,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 440,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 570,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 660,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 730,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 790,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 830,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 880,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 570,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 810,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 1055,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 665,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 940,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 1220,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 725,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 1040,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 1350,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 790,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 1130,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 1465,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 830,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 875,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 1250,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 1625,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 0,
+      "acoins": 1875,
+      "blueprints": 0
+    },
+    "legendary_weapon_8": {
+      "credits": 0,
+      "acoins": 2500,
+      "blueprints": 0
+    },
+    "legendary_weapon_10": {
+      "credits": 0,
+      "acoins": 1575,
+      "blueprints": 0
+    },
+    "legendary_weapon_12": {
+      "credits": 0,
+      "acoins": 1875,
+      "blueprints": 0
+    },
+    "legendary_weapon_16": {
+      "credits": 0,
+      "acoins": 2500,
+      "blueprints": 0
+    }
+  },
+  {
+    "star": 6,
+    "level": 1,
+    "common_mech": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "uncommon_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "rare_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "epic_a_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_mech": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_mech": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "legendary_mech": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "common_weapon_2": {
+      "credits": 1500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "common_weapon_4": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "common_weapon_6": {
+      "credits": 4000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "uncommon_weapon_2": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "uncommon_weapon_4": {
+      "credits": 6000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_6": {
+      "credits": 8000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "uncommon_weapon_8": {
+      "credits": 9250,
+      "acoins": 0,
+      "blueprints": 23
+    },
+    "uncommon_weapon_10": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 25
+    },
+    "uncommon_weapon_12": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "rare_weapon_4": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "rare_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "rare_weapon_8": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "rare_weapon_10": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "rare_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "rare_weapon_14": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "rare_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "epic_a_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 2
+    },
+    "epic_b_weapon_6": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_c_weapon_6": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_a_weapon_8": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_8": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_8": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_a_weapon_10": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "epic_b_weapon_10": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_c_weapon_10": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_a_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_12": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_12": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_a_weapon_14": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_a_weapon_16": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 4
+    },
+    "epic_b_weapon_16": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_c_weapon_16": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "legendary_weapon_6": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_8": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_10": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_12": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    },
+    "legendary_weapon_16": {
+      "credits": 60000,
+      "acoins": 0,
+      "blueprints": 3
+    }
+  },
+  {
+    "star": 6,
+    "level": 2,
+    "common_mech": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 59
+    },
+    "uncommon_mech": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 59
+    },
+    "rare_mech": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 34
+    },
+    "epic_a_mech": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_b_mech": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "epic_c_mech": {
+      "credits": 77500,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "legendary_mech": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "common_weapon_2": {
+      "credits": 3000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "common_weapon_4": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "common_weapon_6": {
+      "credits": 7750,
+      "acoins": 0,
+      "blueprints": 38
+    },
+    "uncommon_weapon_2": {
+      "credits": 5750,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "uncommon_weapon_4": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "uncommon_weapon_6": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 38
+    },
+    "uncommon_weapon_8": {
+      "credits": 17500,
+      "acoins": 0,
+      "blueprints": 44
+    },
+    "uncommon_weapon_10": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 49
+    },
+    "uncommon_weapon_12": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 53
+    },
+    "rare_weapon_4": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "rare_weapon_6": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 22
+    },
+    "rare_weapon_8": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 26
+    },
+    "rare_weapon_10": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 28
+    },
+    "rare_weapon_12": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "rare_weapon_14": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 33
+    },
+    "rare_weapon_16": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 34
+    },
+    "epic_a_weapon_6": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 5
+    },
+    "epic_b_weapon_6": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_c_weapon_6": {
+      "credits": 50000,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_a_weapon_8": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "epic_b_weapon_8": {
+      "credits": 45000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_c_weapon_8": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "epic_a_weapon_10": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_b_weapon_10": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 10
+    },
+    "epic_c_weapon_10": {
+      "credits": 62500,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "epic_a_weapon_12": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 7
+    },
+    "epic_b_weapon_12": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "epic_c_weapon_12": {
+      "credits": 67500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_a_weapon_14": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_a_weapon_16": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 8
+    },
+    "epic_b_weapon_16": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "epic_c_weapon_16": {
+      "credits": 77500,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "legendary_weapon_6": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_8": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_10": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_12": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    },
+    "legendary_weapon_16": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 6
+    }
+  },
+  {
+    "star": 6,
+    "level": 3,
+    "common_mech": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 101
+    },
+    "uncommon_mech": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 101
+    },
+    "rare_mech": {
+      "credits": 70000,
+      "acoins": 0,
+      "blueprints": 59
+    },
+    "epic_a_mech": {
+      "credits": 70000,
+      "acoins": 0,
+      "blueprints": 15
+    },
+    "epic_b_mech": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "epic_c_mech": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "legendary_mech": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "common_weapon_2": {
+      "credits": 5000,
+      "acoins": 0,
+      "blueprints": 25
+    },
+    "common_weapon_4": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 50
+    },
+    "common_weapon_6": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 66
+    },
+    "uncommon_weapon_2": {
+      "credits": 10000,
+      "acoins": 0,
+      "blueprints": 25
+    },
+    "uncommon_weapon_4": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 50
+    },
+    "uncommon_weapon_6": {
+      "credits": 25000,
+      "acoins": 0,
+      "blueprints": 66
+    },
+    "uncommon_weapon_8": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 76
+    },
+    "uncommon_weapon_10": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 84
+    },
+    "uncommon_weapon_12": {
+      "credits": 37500,
+      "acoins": 0,
+      "blueprints": 91
+    },
+    "rare_weapon_4": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "rare_weapon_6": {
+      "credits": 45000,
+      "acoins": 0,
+      "blueprints": 38
+    },
+    "rare_weapon_8": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 44
+    },
+    "rare_weapon_10": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 49
+    },
+    "rare_weapon_12": {
+      "credits": 62500,
+      "acoins": 0,
+      "blueprints": 53
+    },
+    "rare_weapon_14": {
+      "credits": 67500,
+      "acoins": 0,
+      "blueprints": 56
+    },
+    "rare_weapon_16": {
+      "credits": 70000,
+      "acoins": 0,
+      "blueprints": 59
+    },
+    "epic_a_weapon_6": {
+      "credits": 45000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "epic_b_weapon_6": {
+      "credits": 65000,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_c_weapon_6": {
+      "credits": 85000,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "epic_a_weapon_8": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 11
+    },
+    "epic_b_weapon_8": {
+      "credits": 75000,
+      "acoins": 0,
+      "blueprints": 16
+    },
+    "epic_c_weapon_8": {
+      "credits": 97500,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "epic_a_weapon_10": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "epic_b_weapon_10": {
+      "credits": 82500,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "epic_c_weapon_10": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 22
+    },
+    "epic_a_weapon_12": {
+      "credits": 62500,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "epic_b_weapon_12": {
+      "credits": 90000,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "epic_c_weapon_12": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 24
+    },
+    "epic_a_weapon_14": {
+      "credits": 67500,
+      "acoins": 0,
+      "blueprints": 13
+    },
+    "epic_a_weapon_16": {
+      "credits": 70000,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_b_weapon_16": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "epic_c_weapon_16": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "legendary_weapon_6": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "legendary_weapon_8": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "legendary_weapon_10": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "legendary_weapon_12": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 9
+    },
+    "legendary_weapon_16": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 9
+    }
+  },
+  {
+    "star": 6,
+    "level": 4,
+    "common_mech": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 157
+    },
+    "uncommon_mech": {
+      "credits": 62500,
+      "acoins": 0,
+      "blueprints": 157
+    },
+    "rare_mech": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 92
+    },
+    "epic_a_mech": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 23
+    },
+    "epic_b_mech": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 33
+    },
+    "epic_c_mech": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 43
+    },
+    "legendary_mech": {
+      "credits": 325000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "common_weapon_2": {
+      "credits": 7500,
+      "acoins": 0,
+      "blueprints": 39
+    },
+    "common_weapon_4": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 89
+    },
+    "common_weapon_6": {
+      "credits": 20000,
+      "acoins": 0,
+      "blueprints": 102
+    },
+    "uncommon_weapon_2": {
+      "credits": 15000,
+      "acoins": 0,
+      "blueprints": 39
+    },
+    "uncommon_weapon_4": {
+      "credits": 32500,
+      "acoins": 0,
+      "blueprints": 79
+    },
+    "uncommon_weapon_6": {
+      "credits": 40000,
+      "acoins": 0,
+      "blueprints": 102
+    },
+    "uncommon_weapon_8": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 118
+    },
+    "uncommon_weapon_10": {
+      "credits": 52500,
+      "acoins": 0,
+      "blueprints": 130
+    },
+    "uncommon_weapon_12": {
+      "credits": 57500,
+      "acoins": 0,
+      "blueprints": 141
+    },
+    "rare_weapon_4": {
+      "credits": 55000,
+      "acoins": 0,
+      "blueprints": 46
+    },
+    "rare_weapon_6": {
+      "credits": 72500,
+      "acoins": 0,
+      "blueprints": 60
+    },
+    "rare_weapon_8": {
+      "credits": 82500,
+      "acoins": 0,
+      "blueprints": 69
+    },
+    "rare_weapon_10": {
+      "credits": 92500,
+      "acoins": 0,
+      "blueprints": 76
+    },
+    "rare_weapon_12": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 82
+    },
+    "rare_weapon_14": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 87
+    },
+    "rare_weapon_16": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 92
+    },
+    "epic_a_weapon_6": {
+      "credits": 72500,
+      "acoins": 0,
+      "blueprints": 14
+    },
+    "epic_b_weapon_6": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "epic_c_weapon_6": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "epic_a_weapon_8": {
+      "credits": 82500,
+      "acoins": 0,
+      "blueprints": 17
+    },
+    "epic_b_weapon_8": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 25
+    },
+    "epic_c_weapon_8": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "epic_a_weapon_10": {
+      "credits": 92500,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "epic_b_weapon_10": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "epic_c_weapon_10": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 35
+    },
+    "epic_a_weapon_12": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 20
+    },
+    "epic_b_weapon_12": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "epic_c_weapon_12": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 38
+    },
+    "epic_a_weapon_14": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 21
+    },
+    "epic_a_weapon_16": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 22
+    },
+    "epic_b_weapon_16": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 33
+    },
+    "epic_c_weapon_16": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 42
+    },
+    "legendary_weapon_6": {
+      "credits": 325000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "legendary_weapon_8": {
+      "credits": 325000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "legendary_weapon_10": {
+      "credits": 325000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "legendary_weapon_12": {
+      "credits": 325000,
+      "acoins": 0,
+      "blueprints": 12
+    },
+    "legendary_weapon_16": {
+      "credits": 325000,
+      "acoins": 0,
+      "blueprints": 12
+    }
+  },
+  {
+    "star": 6,
+    "level": 5,
+    "common_mech": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 210
+    },
+    "uncommon_mech": {
+      "credits": 95000,
+      "acoins": 0,
+      "blueprints": 210
+    },
+    "rare_mech": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 122
+    },
+    "epic_a_mech": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 31
+    },
+    "epic_b_mech": {
+      "credits": 225000,
+      "acoins": 0,
+      "blueprints": 44
+    },
+    "epic_c_mech": {
+      "credits": 300000,
+      "acoins": 0,
+      "blueprints": 57
+    },
+    "legendary_mech": {
+      "credits": 475000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "common_weapon_2": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 52
+    },
+    "common_weapon_4": {
+      "credits": 225000,
+      "acoins": 0,
+      "blueprints": 105
+    },
+    "common_weapon_6": {
+      "credits": 30000,
+      "acoins": 0,
+      "blueprints": 136
+    },
+    "uncommon_weapon_2": {
+      "credits": 22500,
+      "acoins": 0,
+      "blueprints": 52
+    },
+    "uncommon_weapon_4": {
+      "credits": 47500,
+      "acoins": 0,
+      "blueprints": 105
+    },
+    "uncommon_weapon_6": {
+      "credits": 62500,
+      "acoins": 0,
+      "blueprints": 136
+    },
+    "uncommon_weapon_8": {
+      "credits": 70000,
+      "acoins": 0,
+      "blueprints": 157
+    },
+    "uncommon_weapon_10": {
+      "credits": 77500,
+      "acoins": 0,
+      "blueprints": 174
+    },
+    "uncommon_weapon_12": {
+      "credits": 85000,
+      "acoins": 0,
+      "blueprints": 189
+    },
+    "rare_weapon_4": {
+      "credits": 82500,
+      "acoins": 0,
+      "blueprints": 61
+    },
+    "rare_weapon_6": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 80
+    },
+    "rare_weapon_8": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 92
+    },
+    "rare_weapon_10": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 102
+    },
+    "rare_weapon_12": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 110
+    },
+    "rare_weapon_14": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 116
+    },
+    "rare_weapon_16": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 122
+    },
+    "epic_a_weapon_6": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 19
+    },
+    "epic_b_weapon_6": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 28
+    },
+    "epic_c_weapon_6": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 36
+    },
+    "epic_a_weapon_8": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 22
+    },
+    "epic_b_weapon_8": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 33
+    },
+    "epic_c_weapon_8": {
+      "credits": 225000,
+      "acoins": 0,
+      "blueprints": 42
+    },
+    "epic_a_weapon_10": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 25
+    },
+    "epic_b_weapon_10": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 36
+    },
+    "epic_c_weapon_10": {
+      "credits": 250000,
+      "acoins": 0,
+      "blueprints": 47
+    },
+    "epic_a_weapon_12": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "epic_b_weapon_12": {
+      "credits": 225000,
+      "acoins": 0,
+      "blueprints": 39
+    },
+    "epic_c_weapon_12": {
+      "credits": 275000,
+      "acoins": 0,
+      "blueprints": 51
+    },
+    "epic_a_weapon_14": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "epic_a_weapon_16": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 30
+    },
+    "epic_b_weapon_16": {
+      "credits": 225000,
+      "acoins": 0,
+      "blueprints": 44
+    },
+    "epic_c_weapon_16": {
+      "credits": 300000,
+      "acoins": 0,
+      "blueprints": 56
+    },
+    "legendary_weapon_6": {
+      "credits": 475000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "legendary_weapon_8": {
+      "credits": 475000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "legendary_weapon_10": {
+      "credits": 475000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "legendary_weapon_12": {
+      "credits": 475000,
+      "acoins": 0,
+      "blueprints": 18
+    },
+    "legendary_weapon_16": {
+      "credits": 475000,
+      "acoins": 0,
+      "blueprints": 18
+    }
+  },
+  {
+    "star": 6,
+    "level": 6,
+    "common_mech": {
+      "credits": 55000,
+      "acoins": 0,
+      "blueprints": 309
+    },
+    "uncommon_mech": {
+      "credits": 100000,
+      "acoins": 0,
+      "blueprints": 309
+    },
+    "rare_mech": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 181
+    },
+    "epic_a_mech": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 45
+    },
+    "epic_b_mech": {
+      "credits": 275000,
+      "acoins": 0,
+      "blueprints": 64
+    },
+    "epic_c_mech": {
+      "credits": 350000,
+      "acoins": 0,
+      "blueprints": 84
+    },
+    "legendary_mech": {
+      "credits": 550000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "common_weapon_2": {
+      "credits": 12500,
+      "acoins": 0,
+      "blueprints": 77
+    },
+    "common_weapon_4": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 155
+    },
+    "common_weapon_6": {
+      "credits": 35000,
+      "acoins": 0,
+      "blueprints": 201
+    },
+    "uncommon_weapon_2": {
+      "credits": 27500,
+      "acoins": 0,
+      "blueprints": 77
+    },
+    "uncommon_weapon_4": {
+      "credits": 55000,
+      "acoins": 0,
+      "blueprints": 155
+    },
+    "uncommon_weapon_6": {
+      "credits": 70000,
+      "acoins": 0,
+      "blueprints": 201
+    },
+    "uncommon_weapon_8": {
+      "credits": 80000,
+      "acoins": 0,
+      "blueprints": 232
+    },
+    "uncommon_weapon_10": {
+      "credits": 90000,
+      "acoins": 0,
+      "blueprints": 257
+    },
+    "uncommon_weapon_12": {
+      "credits": 97500,
+      "acoins": 0,
+      "blueprints": 279
+    },
+    "rare_weapon_4": {
+      "credits": 95000,
+      "acoins": 0,
+      "blueprints": 90
+    },
+    "rare_weapon_6": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 117
+    },
+    "rare_weapon_8": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 135
+    },
+    "rare_weapon_10": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 150
+    },
+    "rare_weapon_12": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 160
+    },
+    "rare_weapon_14": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 171
+    },
+    "rare_weapon_16": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 181
+    },
+    "epic_a_weapon_6": {
+      "credits": 125000,
+      "acoins": 0,
+      "blueprints": 29
+    },
+    "epic_b_weapon_6": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 42
+    },
+    "epic_c_weapon_6": {
+      "credits": 225000,
+      "acoins": 0,
+      "blueprints": 54
+    },
+    "epic_a_weapon_8": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 33
+    },
+    "epic_b_weapon_8": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 48
+    },
+    "epic_c_weapon_8": {
+      "credits": 275000,
+      "acoins": 0,
+      "blueprints": 62
+    },
+    "epic_a_weapon_10": {
+      "credits": 150000,
+      "acoins": 0,
+      "blueprints": 37
+    },
+    "epic_b_weapon_10": {
+      "credits": 225000,
+      "acoins": 0,
+      "blueprints": 54
+    },
+    "epic_c_weapon_10": {
+      "credits": 300000,
+      "acoins": 0,
+      "blueprints": 69
+    },
+    "epic_a_weapon_12": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 40
+    },
+    "epic_b_weapon_12": {
+      "credits": 250000,
+      "acoins": 0,
+      "blueprints": 58
+    },
+    "epic_c_weapon_12": {
+      "credits": 325000,
+      "acoins": 0,
+      "blueprints": 75
+    },
+    "epic_a_weapon_14": {
+      "credits": 175000,
+      "acoins": 0,
+      "blueprints": 42
+    },
+    "epic_a_weapon_16": {
+      "credits": 200000,
+      "acoins": 0,
+      "blueprints": 45
+    },
+    "epic_b_weapon_16": {
+      "credits": 275000,
+      "acoins": 0,
+      "blueprints": 64
+    },
+    "epic_c_weapon_16": {
+      "credits": 350000,
+      "acoins": 0,
+      "blueprints": 83
+    },
+    "legendary_weapon_6": {
+      "credits": 550000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "legendary_weapon_8": {
+      "credits": 550000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "legendary_weapon_10": {
+      "credits": 550000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "legendary_weapon_12": {
+      "credits": 550000,
+      "acoins": 0,
+      "blueprints": 27
+    },
+    "legendary_weapon_16": {
+      "credits": 550000,
+      "acoins": 0,
+      "blueprints": 27
+    }
+  },
+  {
+    "star": 6,
+    "level": 7,
+    "common_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_mech": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "common_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_2": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "uncommon_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_4": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "rare_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_14": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_a_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_b_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "epic_c_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_6": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_8": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_10": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_12": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    },
+    "legendary_weapon_16": {
+      "credits": 0,
+      "acoins": 0,
+      "blueprints": 0
+    }
+  }
+]

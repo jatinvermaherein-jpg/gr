@@ -1,0 +1,2369 @@
+[
+ {
+  "name": "Parasite",
+  "type": "mech",
+  "start": "2025-10-20",
+  "end": "2025-10-22",
+  "items": 20,
+  "cps": "300 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Oracle 6",
+  "type": "weapon",
+  "start": "2025-10-20",
+  "end": "2025-10-22",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Hornet 16",
+  "type": "weapon",
+  "start": "2025-10-23",
+  "end": "2025-10-26",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Strike Rocket 10",
+  "type": "weapon",
+  "start": "2025-10-23",
+  "end": "2025-10-26",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Brickhouse",
+  "type": "mech",
+  "start": "2025-10-27",
+  "end": "2025-10-29",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Suppressor 8",
+  "type": "weapon",
+  "start": "2025-10-27",
+  "end": "2025-10-29",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Asami",
+  "type": "pilot",
+  "start": "2025-10-30",
+  "end": "2025-11-02",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Gemini 12",
+  "type": "weapon",
+  "start": "2025-10-30",
+  "end": "2025-11-02",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Mimicker",
+  "type": "mech",
+  "start": "2025-11-03",
+  "end": "2025-11-05",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Savant 6",
+  "type": "weapon",
+  "start": "2025-11-03",
+  "end": "2025-11-05",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Disk Launcher 16",
+  "type": "weapon",
+  "start": "2025-11-06",
+  "end": "2025-11-09",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Oracle 10",
+  "type": "weapon",
+  "start": "2025-11-06",
+  "end": "2025-11-09",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Eclipse",
+  "type": "mech",
+  "start": "2025-11-10",
+  "end": "2025-11-12",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Hornet 8",
+  "type": "weapon",
+  "start": "2025-11-10",
+  "end": "2025-11-12",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Myna",
+  "type": "pilot",
+  "start": "2025-11-13",
+  "end": "2025-11-16",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Berserker 12",
+  "type": "weapon",
+  "start": "2025-11-13",
+  "end": "2025-11-16",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Silverthorn",
+  "type": "mech",
+  "start": "2025-11-17",
+  "end": "2025-11-19",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Continuum 6",
+  "type": "weapon",
+  "start": "2025-11-17",
+  "end": "2025-11-19",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Chain Gun 16",
+  "type": "weapon",
+  "start": "2025-11-20",
+  "end": "2025-11-23",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Overdriver 10",
+  "type": "weapon",
+  "start": "2025-11-20",
+  "end": "2025-11-23",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Nomad",
+  "type": "mech",
+  "start": "2025-11-24",
+  "end": "2025-11-26",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Disruptor 8",
+  "type": "weapon",
+  "start": "2025-11-24",
+  "end": "2025-11-26",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Lodestar",
+  "type": "pilot",
+  "start": "2025-11-27",
+  "end": "2025-11-30",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Howler 12",
+  "type": "weapon",
+  "start": "2025-11-27",
+  "end": "2025-11-30",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Surge",
+  "type": "mech",
+  "start": "2025-12-01",
+  "end": "2025-12-03",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Revoker 6",
+  "type": "weapon",
+  "start": "2025-12-01",
+  "end": "2025-12-03",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Continuum 16",
+  "type": "weapon",
+  "start": "2025-12-04",
+  "end": "2025-12-07",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Reaver 10",
+  "type": "weapon",
+  "start": "2025-12-04",
+  "end": "2025-12-07",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Dreadnought",
+  "type": "mech",
+  "start": "2025-12-08",
+  "end": "2025-12-10",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Disk Launcher 8",
+  "type": "weapon",
+  "start": "2025-12-08",
+  "end": "2025-12-10",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Baron",
+  "type": "pilot",
+  "start": "2025-12-11",
+  "end": "2025-12-14",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "EM Rifle 12",
+  "type": "weapon",
+  "start": "2025-12-11",
+  "end": "2025-12-14",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Gatecrasher",
+  "type": "mech",
+  "start": "2025-12-15",
+  "end": "2025-12-17",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Hornet 6",
+  "type": "weapon",
+  "start": "2025-12-15",
+  "end": "2025-12-17",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Berserker 16",
+  "type": "weapon",
+  "start": "2025-12-18",
+  "end": "2025-12-21",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Tetra Rifle 10",
+  "type": "weapon",
+  "start": "2025-12-18",
+  "end": "2025-12-21",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Lacewing",
+  "type": "mech",
+  "start": "2025-12-22",
+  "end": "2025-12-24",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Berserker 8",
+  "type": "weapon",
+  "start": "2025-12-22",
+  "end": "2025-12-24",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Sunny",
+  "type": "pilot",
+  "start": "2025-12-25",
+  "end": "2025-12-28",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Suppressor 12",
+  "type": "weapon",
+  "start": "2025-12-25",
+  "end": "2025-12-28",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Seeker",
+  "type": "mech",
+  "start": "2025-12-29",
+  "end": "2025-12-31",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Gemini 6",
+  "type": "weapon",
+  "start": "2025-12-29",
+  "end": "2025-12-31",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Reaver 16",
+  "type": "weapon",
+  "start": "2026-01-01",
+  "end": "2026-01-04",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Quasher 10",
+  "type": "weapon",
+  "start": "2026-01-01",
+  "end": "2026-01-04",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Solis",
+  "type": "mech",
+  "start": "2026-01-05",
+  "end": "2026-01-07",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Pod Gun 8",
+  "type": "weapon",
+  "start": "2026-01-05",
+  "end": "2026-01-07",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Archangel",
+  "type": "pilot",
+  "start": "2026-01-08",
+  "end": "2026-01-11",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Quasher 12",
+  "type": "weapon",
+  "start": "2026-01-08",
+  "end": "2026-01-11",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Blockhorn",
+  "type": "mech",
+  "start": "2026-01-12",
+  "end": "2026-01-14",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Quasher 6",
+  "type": "weapon",
+  "start": "2026-01-12",
+  "end": "2026-01-14",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Howler 16",
+  "type": "weapon",
+  "start": "2026-01-15",
+  "end": "2026-01-18",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Blast RPG 10",
+  "type": "weapon",
+  "start": "2026-01-15",
+  "end": "2026-01-18",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Deathwalker",
+  "type": "mech",
+  "start": "2026-01-19",
+  "end": "2026-01-21",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Revoker 8",
+  "type": "weapon",
+  "start": "2026-01-19",
+  "end": "2026-01-21",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Chimera",
+  "type": "pilot",
+  "start": "2026-01-22",
+  "end": "2026-01-25",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Burrow Beam 12",
+  "type": "weapon",
+  "start": "2026-01-22",
+  "end": "2026-01-25",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Scorpius",
+  "type": "mech",
+  "start": "2026-01-26",
+  "end": "2026-01-28",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Dreadshot 6",
+  "type": "weapon",
+  "start": "2026-01-26",
+  "end": "2026-01-28",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Viper 16",
+  "type": "weapon",
+  "start": "2026-01-29",
+  "end": "2026-02-01",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Continuum 12",
+  "type": "weapon",
+  "start": "2026-01-29",
+  "end": "2026-02-01",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Outlaw",
+  "type": "mech",
+  "start": "2026-02-02",
+  "end": "2026-02-04",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Burrow Beam 8",
+  "type": "weapon",
+  "start": "2026-02-02",
+  "end": "2026-02-04",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "500,000 Credits",
+  "type": "resource",
+  "start": "2026-02-04",
+  "end": "2026-02-04",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Morpho",
+  "type": "pilot",
+  "start": "2026-02-05",
+  "end": "2026-02-08",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Pod Gun 12",
+  "type": "weapon",
+  "start": "2026-02-05",
+  "end": "2026-02-08",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Parasite",
+  "type": "mech",
+  "start": "2026-02-09",
+  "end": "2026-02-11",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Viper 6",
+  "type": "weapon",
+  "start": "2026-02-09",
+  "end": "2026-02-11",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Val",
+  "type": "pilot",
+  "start": "2026-02-12",
+  "end": "2026-02-15",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Disruptor 16",
+  "type": "weapon",
+  "start": "2026-02-12",
+  "end": "2026-02-15",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Blizzfrost",
+  "type": "mech",
+  "start": "2026-02-16",
+  "end": "2026-02-18",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "EM Rifle 8",
+  "type": "weapon",
+  "start": "2026-02-16",
+  "end": "2026-02-18",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Major",
+  "type": "pilot",
+  "start": "2026-02-19",
+  "end": "2026-02-22",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Overdriver 12",
+  "type": "weapon",
+  "start": "2026-02-19",
+  "end": "2026-02-22",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Nomad",
+  "type": "mech",
+  "start": "2026-02-23",
+  "end": "2026-02-25",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Storm Rack 6",
+  "type": "weapon",
+  "start": "2026-02-23",
+  "end": "2026-02-25",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Suppressor 16",
+  "type": "weapon",
+  "start": "2026-02-26",
+  "end": "2026-03-01",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Disruptor 10",
+  "type": "weapon",
+  "start": "2026-02-26",
+  "end": "2026-03-01",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Dreadnought",
+  "type": "mech",
+  "start": "2026-03-02",
+  "end": "2026-03-04",
+  "items": 20,
+  "cps": "1000 ac",
+  "rank": 4,
+  "skewed": true,
+  "chances": "2.56 %"
+ },
+ {
+  "name": "Deathwalker",
+  "type": "mech",
+  "start": "2026-03-02",
+  "end": "2026-03-04",
+  "items": 20,
+  "cps": "1000 ac",
+  "rank": 4,
+  "skewed": true,
+  "chances": "2.56 %"
+ },
+ {
+  "name": "Gatecrasher",
+  "type": "mech",
+  "start": "2026-03-02",
+  "end": "2026-03-04",
+  "items": 20,
+  "cps": "1000 ac",
+  "rank": 4,
+  "skewed": true,
+  "chances": "2.56 %"
+ },
+ {
+  "name": "Eclipse",
+  "type": "mech",
+  "start": "2026-03-02",
+  "end": "2026-03-04",
+  "items": 20,
+  "cps": "1000 ac",
+  "rank": 4,
+  "skewed": true,
+  "chances": "2.56 %"
+ },
+ {
+  "name": "Seeker",
+  "type": "mech",
+  "start": "2026-03-02",
+  "end": "2026-03-04",
+  "items": 20,
+  "cps": "1000 ac",
+  "rank": 4,
+  "skewed": true,
+  "chances": "2.56 %"
+ },
+ {
+  "name": "Quasher 8",
+  "type": "weapon",
+  "start": "2026-03-02",
+  "end": "2026-03-04",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "500,000 Credits",
+  "type": "resource",
+  "start": "2026-03-04",
+  "end": "2026-03-04",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Salvor",
+  "type": "mech",
+  "start": "2026-03-09",
+  "end": "2026-03-11",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "EM Rifle 6",
+  "type": "weapon",
+  "start": "2026-03-09",
+  "end": "2026-03-11",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Railgun 16",
+  "type": "weapon",
+  "start": "2026-03-12",
+  "end": "2026-03-15",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Minigun 10",
+  "type": "weapon",
+  "start": "2026-03-12",
+  "end": "2026-03-15",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Silverthorn",
+  "type": "mech",
+  "start": "2026-03-16",
+  "end": "2026-03-18",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Savant 8",
+  "type": "weapon",
+  "start": "2026-03-16",
+  "end": "2026-03-18",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "1000 A-coins",
+  "type": "resource",
+  "start": "2026-03-21",
+  "end": "2026-03-21",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Ingrid",
+  "type": "pilot",
+  "start": "2026-03-19",
+  "end": "2026-03-22",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Tetra Rifle 12",
+  "type": "weapon",
+  "start": "2026-03-19",
+  "end": "2026-03-22",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Volti",
+  "type": "mech",
+  "start": "2026-03-23",
+  "end": "2026-03-25",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Revoker 6",
+  "type": "weapon",
+  "start": "2026-03-23",
+  "end": "2026-03-25",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Oracle 16",
+  "type": "weapon",
+  "start": "2026-03-26",
+  "end": "2026-03-29",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Gemini 10",
+  "type": "weapon",
+  "start": "2026-03-26",
+  "end": "2026-03-29",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Mimicker",
+  "type": "mech",
+  "start": "2026-03-30",
+  "end": "2026-04-01",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Repeater 8",
+  "type": "weapon",
+  "start": "2026-03-30",
+  "end": "2026-04-01",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "500,000 Credits",
+  "type": "resource",
+  "start": "2026-04-04",
+  "end": "2026-04-04",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Asmodeus",
+  "type": "pilot",
+  "start": "2026-04-02",
+  "end": "2026-04-05",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Savant 12",
+  "type": "weapon",
+  "start": "2026-04-02",
+  "end": "2026-04-05",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Lacewing",
+  "type": "mech",
+  "start": "2026-04-06",
+  "end": "2026-04-08",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Pod Gun 6",
+  "type": "weapon",
+  "start": "2026-04-06",
+  "end": "2026-04-08",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Revoker 16",
+  "type": "weapon",
+  "start": "2026-04-09",
+  "end": "2026-04-12",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Howler 10",
+  "type": "weapon",
+  "start": "2026-04-09",
+  "end": "2026-04-12",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Gatecrasher",
+  "type": "mech",
+  "start": "2026-04-13",
+  "end": "2026-04-15",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Hornet 8",
+  "type": "weapon",
+  "start": "2026-04-13",
+  "end": "2026-04-15",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Asami",
+  "type": "pilot",
+  "start": "2026-04-16",
+  "end": "2026-04-19",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Oracle 12",
+  "type": "weapon",
+  "start": "2026-04-16",
+  "end": "2026-04-19",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "1000 A-coins",
+  "type": "resource",
+  "start": "2026-04-21",
+  "end": "2026-04-21",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Surge",
+  "type": "mech",
+  "start": "2026-04-20",
+  "end": "2026-04-22",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Burrow Beam 6",
+  "type": "weapon",
+  "start": "2026-04-20",
+  "end": "2026-04-22",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Charge Rocket 16",
+  "type": "weapon",
+  "start": "2026-04-23",
+  "end": "2026-04-26",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Hornet 10",
+  "type": "weapon",
+  "start": "2026-04-23",
+  "end": "2026-04-26",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Dreadnought",
+  "type": "mech",
+  "start": "2026-04-27",
+  "end": "2026-04-29",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Charge Rocket 8",
+  "type": "weapon",
+  "start": "2026-04-27",
+  "end": "2026-04-29",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Targe",
+  "type": "pilot",
+  "start": "2026-04-30",
+  "end": "2026-05-03",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Storm Rack 12",
+  "type": "weapon",
+  "start": "2026-04-30",
+  "end": "2026-05-03",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "500,000 Credits",
+  "type": "resource",
+  "start": "2026-05-04",
+  "end": "2026-05-04",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Seeker",
+  "type": "mech",
+  "start": "2026-05-04",
+  "end": "2026-05-06",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Minigun 6",
+  "type": "weapon",
+  "start": "2026-05-04",
+  "end": "2026-05-06",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Suppressor 10",
+  "type": "weapon",
+  "start": "2026-05-07",
+  "end": "2026-05-10",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Pod Gun 16",
+  "type": "weapon",
+  "start": "2026-05-07",
+  "end": "2026-05-10",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Parasite",
+  "type": "mech",
+  "start": "2026-05-11",
+  "end": "2026-05-13",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Quasher 8",
+  "type": "weapon",
+  "start": "2026-05-11",
+  "end": "2026-05-13",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Myna",
+  "type": "pilot",
+  "start": "2026-05-14",
+  "end": "2026-05-17",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Particle Beam 12",
+  "type": "weapon",
+  "start": "2026-05-14",
+  "end": "2026-05-17",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Outlaw",
+  "type": "mech",
+  "start": "2026-05-18",
+  "end": "2026-05-20",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Continuum 6",
+  "type": "weapon",
+  "start": "2026-05-18",
+  "end": "2026-05-20",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "1000 A-coins",
+  "type": "resource",
+  "start": "2026-05-21",
+  "end": "2026-05-21",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Charge Rocket 10",
+  "type": "weapon",
+  "start": "2026-05-21",
+  "end": "2026-05-24",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Overdriver 16",
+  "type": "weapon",
+  "start": "2026-05-21",
+  "end": "2026-05-24",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Blizzfrost",
+  "type": "mech",
+  "start": "2026-05-25",
+  "end": "2026-05-27",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Tetra Rifle 8",
+  "type": "weapon",
+  "start": "2026-05-25",
+  "end": "2026-05-27",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Diesel",
+  "type": "pilot",
+  "start": "2026-05-28",
+  "end": "2026-05-31",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Gemini 12",
+  "type": "weapon",
+  "start": "2026-05-28",
+  "end": "2026-05-31",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Citadel",
+  "type": "mech",
+  "start": "2026-06-01",
+  "end": "2026-06-04",
+  "items": "inf",
+  "cps": "100 ac",
+  "rank": 3,
+  "skewed": true,
+  "chances": "1 %"
+ },
+ {
+  "name": "500,000 Credits",
+  "type": "resource",
+  "start": "2026-06-04",
+  "end": "2026-06-04",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Hemlock",
+  "type": "mech",
+  "start": "2026-06-08",
+  "end": "2026-06-10",
+  "items": 20,
+  "cps": "40000 cr",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Minigun 10",
+  "type": "weapon",
+  "start": "2026-06-08",
+  "end": "2026-06-10",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Sunny",
+  "type": "pilot",
+  "start": "2026-06-11",
+  "end": "2026-06-14",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Howler 12",
+  "type": "weapon",
+  "start": "2026-06-11",
+  "end": "2026-06-14",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Salvor",
+  "type": "mech",
+  "start": "2026-06-15",
+  "end": "2026-06-17",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Revoker 8",
+  "type": "weapon",
+  "start": "2026-06-15",
+  "end": "2026-06-17",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Gemini 16",
+  "type": "weapon",
+  "start": "2026-06-18",
+  "end": "2026-06-21",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Repeater 10",
+  "type": "weapon",
+  "start": "2026-06-18",
+  "end": "2026-06-21",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "1000 A-coins",
+  "type": "resource",
+  "start": "2026-06-21",
+  "end": "2026-06-21",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Solis",
+  "type": "mech",
+  "start": "2026-06-22",
+  "end": "2026-06-24",
+  "items": 20,
+  "cps": "40000 cr",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Gemini 10",
+  "type": "weapon",
+  "start": "2026-06-22",
+  "end": "2026-06-24",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Baron",
+  "type": "pilot",
+  "start": "2026-06-25",
+  "end": "2026-06-28",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Overdriver 12",
+  "type": "weapon",
+  "start": "2026-06-25",
+  "end": "2026-06-28",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Eclipse",
+  "type": "mech",
+  "start": "2026-06-29",
+  "end": "2026-07-01",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Tetra Rifle 6",
+  "type": "weapon",
+  "start": "2026-06-29",
+  "end": "2026-07-01",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "500,000 Credits",
+  "type": "resource",
+  "start": "2026-07-04",
+  "end": "2026-07-04",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Savant 16",
+  "type": "weapon",
+  "start": "2026-07-02",
+  "end": "2026-07-05",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Revoker 10",
+  "type": "weapon",
+  "start": "2026-07-02",
+  "end": "2026-07-05",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Brickhouse",
+  "type": "mech",
+  "start": "2026-07-06",
+  "end": "2026-07-08",
+  "items": 20,
+  "cps": "40000 cr",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Howler 10",
+  "type": "weapon",
+  "start": "2026-07-06",
+  "end": "2026-07-08",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Major",
+  "type": "pilot",
+  "start": "2026-07-09",
+  "end": "2026-07-12",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Railgun 12",
+  "type": "weapon",
+  "start": "2026-07-09",
+  "end": "2026-07-12",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Volti",
+  "type": "mech",
+  "start": "2026-07-13",
+  "end": "2026-07-15",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Overdriver 8",
+  "type": "weapon",
+  "start": "2026-07-13",
+  "end": "2026-07-15",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Revoker 16",
+  "type": "weapon",
+  "start": "2026-07-16",
+  "end": "2026-07-19",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Suppressor 10",
+  "type": "weapon",
+  "start": "2026-07-16",
+  "end": "2026-07-19",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "1000 A-coins",
+  "type": "resource",
+  "start": "2026-07-21",
+  "end": "2026-07-21",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Onyx",
+  "type": "mech",
+  "start": "2026-07-20",
+  "end": "2026-07-22",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Storm Rack 10",
+  "type": "weapon",
+  "start": "2026-07-20",
+  "end": "2026-07-22",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Archangel",
+  "type": "pilot",
+  "start": "2026-07-23",
+  "end": "2026-07-26",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Burrow Beam 12",
+  "type": "weapon",
+  "start": "2026-07-23",
+  "end": "2026-07-26",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Deathwalker",
+  "type": "mech",
+  "start": "2026-07-27",
+  "end": "2026-07-29",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Pod Gun 8",
+  "type": "weapon",
+  "start": "2026-07-27",
+  "end": "2026-07-29",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Howler 16",
+  "type": "weapon",
+  "start": "2026-07-30",
+  "end": "2026-08-02",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Charge Rocket 10",
+  "type": "weapon",
+  "start": "2026-07-30",
+  "end": "2026-08-02",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "500,000 Credits",
+  "type": "resource",
+  "start": "2026-08-04",
+  "end": "2026-08-04",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Mimicker",
+  "type": "mech",
+  "start": "2026-08-03",
+  "end": "2026-08-05",
+  "items": 20,
+  "cps": "40000 cr",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Reaver 10",
+  "type": "weapon",
+  "start": "2026-08-03",
+  "end": "2026-08-05",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Ingrid",
+  "type": "pilot",
+  "start": "2026-08-06",
+  "end": "2026-08-09",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Compound Beam 12",
+  "type": "weapon",
+  "start": "2026-08-06",
+  "end": "2026-08-09",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Lacewing",
+  "type": "mech",
+  "start": "2026-08-10",
+  "end": "2026-08-12",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Overdriver 6",
+  "type": "weapon",
+  "start": "2026-08-10",
+  "end": "2026-08-12",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Citadel",
+  "type": "mech",
+  "start": "2026-08-14",
+  "end": "2026-08-15",
+  "items": 20,
+  "cps": "40000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "500 Elite Mod Part",
+  "type": "resource",
+  "start": "2026-08-15",
+  "end": "2026-08-15",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Berserker 16",
+  "type": "weapon",
+  "start": "2026-08-13",
+  "end": "2026-08-16",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Compound Beam 10",
+  "type": "weapon",
+  "start": "2026-08-13",
+  "end": "2026-08-16",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Hemlock",
+  "type": "mech",
+  "start": "2026-08-17",
+  "end": "2026-08-19",
+  "items": 20,
+  "cps": "40000 cr",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Hornet 10",
+  "type": "weapon",
+  "start": "2026-08-17",
+  "end": "2026-08-19",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "1000 A-coins",
+  "type": "resource",
+  "start": "2026-08-21",
+  "end": "2026-08-21",
+  "items": "inf",
+  "cps": "$1",
+  "skewed": true,
+  "chances": "1%",
+  "rank": "N/A"
+ },
+ {
+  "name": "Asmodeus",
+  "type": "pilot",
+  "start": "2026-08-20",
+  "end": "2026-08-23",
+  "items": 20,
+  "cps": "200 ac",
+  "rank": 1,
+  "skewed": false
+ },
+ {
+  "name": "Oracle 12",
+  "type": "weapon",
+  "start": "2026-08-20",
+  "end": "2026-08-23",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Parasite",
+  "type": "mech",
+  "start": "2026-08-24",
+  "end": "2026-08-26",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 4,
+  "skewed": false
+ },
+ {
+  "name": "Burrow Beam 8",
+  "type": "weapon",
+  "start": "2026-08-24",
+  "end": "2026-08-26",
+  "items": 20,
+  "cps": "30000 cr",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Suppressor 16",
+  "type": "weapon",
+  "start": "2026-08-27",
+  "end": "2026-08-30",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Overdriver 10",
+  "type": "weapon",
+  "start": "2026-08-27",
+  "end": "2026-08-30",
+  "items": 20,
+  "cps": "350 ac",
+  "rank": 5,
+  "skewed": false
+ },
+ {
+  "name": "Tailsting",
+  "type": "mech",
+  "start": "2026-08-31",
+  "end": "2026-09-03",
+  "items": "inf",
+  "cps": "100 ac",
+  "rank": 3,
+  "skewed": true,
+  "chances": "1 %"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-09-03",
+  "end": "2026-09-06"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-03",
+  "end": "2026-09-06"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-09-07",
+  "end": "2026-09-09"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-07",
+  "end": "2026-09-09"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-10",
+  "end": "2026-09-13"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-10",
+  "end": "2026-09-13"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-09-14",
+  "end": "2026-09-16"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-14",
+  "end": "2026-09-16"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-09-17",
+  "end": "2026-09-20"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-17",
+  "end": "2026-09-20"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-09-21",
+  "end": "2026-09-23"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-21",
+  "end": "2026-09-23"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-24",
+  "end": "2026-09-27"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-24",
+  "end": "2026-09-27"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-09-28",
+  "end": "2026-09-30"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-09-28",
+  "end": "2026-09-30"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-10-01",
+  "end": "2026-10-04"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-01",
+  "end": "2026-10-04"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-10-05",
+  "end": "2026-10-07"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-05",
+  "end": "2026-10-07"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-08",
+  "end": "2026-10-11"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-08",
+  "end": "2026-10-11"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-10-12",
+  "end": "2026-10-14"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-12",
+  "end": "2026-10-14"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-10-15",
+  "end": "2026-10-18"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-15",
+  "end": "2026-10-18"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-10-19",
+  "end": "2026-10-21"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-18",
+  "end": "2026-10-21"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-22",
+  "end": "2026-10-25"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-22",
+  "end": "2026-10-25"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-10-26",
+  "end": "2026-10-28"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-26",
+  "end": "2026-10-28"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-10-29",
+  "end": "2026-11-1"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-10-29",
+  "end": "2026-11-1"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-11-9",
+  "end": "2026-11-11"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-9",
+  "end": "2026-11-11"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-11-12",
+  "end": "2026-11-15"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-12",
+  "end": "2026-11-15"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-11-16",
+  "end": "2026-11-18"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-16",
+  "end": "2026-11-18"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-19",
+  "end": "2026-11-22"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-19",
+  "end": "2026-11-22"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-11-23",
+  "end": "2026-11-25"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-23",
+  "end": "2026-11-25"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-11-26",
+  "end": "2026-11-29"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-26",
+  "end": "2026-11-29"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-11-2",
+  "end": "2026-11-4"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-2",
+  "end": "2026-11-4"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-5",
+  "end": "2026-11-8"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-11-5",
+  "end": "2026-11-8"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-12-10",
+  "end": "2026-12-13"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-10",
+  "end": "2026-12-13"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-12-14",
+  "end": "2026-12-16"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-14",
+  "end": "2026-12-16"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-11-30",
+  "end": "2026-12-2"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-30",
+  "end": "2026-12-2"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-17",
+  "end": "2026-12-20"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-17",
+  "end": "2026-12-20"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-12-21",
+  "end": "2026-12-23"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-21",
+  "end": "2026-12-23"
+ },
+ {
+  "name": "?",
+  "type": "pilot",
+  "start": "2026-12-24",
+  "end": "2026-12-27"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-24",
+  "end": "2026-12-27"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-3",
+  "end": "2026-12-6"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-3",
+  "end": "2026-12-6"
+ },
+ {
+  "name": "?",
+  "type": "mech",
+  "start": "2026-12-7",
+  "end": "2026-12-9"
+ },
+ {
+  "name": "?",
+  "type": "weapon",
+  "start": "2026-12-7",
+  "end": "2026-12-9"
+ }
+]

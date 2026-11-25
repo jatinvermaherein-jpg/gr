@@ -1,0 +1,205 @@
+"""Tests for the curated ECR / promo digests and the currency-emoji asset fix.
+
+These pin the four behaviours that were broken:
+
+1. ``codes_in`` extracted nothing from the archived code post, because the post writes a
+   bare code on one line and its rewards on the next, with no "promo code" keyword.
+2. The ECR reply reported "no ECR guide post in the saved announcements" even though 261
+   rows of history ship with the bot.
+3. ``voice.EMOJI_SET`` asked for filenames that are not in ``data/``, so the understanding
+   pipeline silently used plain glyphs.
+4. Rotations the tracker logged without item names must never be given invented names.
+"""
+
+import json
+import os
+import sqlite3
+import sys
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from mechbot import ecr_digest as digest
+from mechbot import voice
+from mechbot import bot as bot_module
+
+ROOT = Path(__file__).resolve().parent.parent
+ECR_ROWS = json.loads((ROOT / 'data' / 'advisor' / 'ecr_history_261.json').read_text(encoding='utf-8'))
+
+# The archived post's real shape: bare code, then the rewards on the following line.
+ARCHIVED_POST = """New Players:
+GRASSHOPPER
+- Grants you a rank3 mech Lacewing, 200 A-Coins, 100K Credits and a Prodigy Crate
+CHILLBOT
+- grants you 200 A-Coins, 100K Credits, a Prodigy Crate and a Rank 3 Blizzfrost
+────────────────────────────────────
+For Returning Players:
+IMBACKBABY
+- Grants Rank 3 Blockhorn, 200 A-Coins, and 1 Prodigy Crate
+────────────────────────────────────
+Everyone:
+MIDGAMECHANNEL4ALL
+(available till 1st Dec) - Grants you 100k credits, 1 gold crate, 1 amateur crate
+SPOOKYSHOT - Grants you five epic skins (Sanguine Army for Ares, Tengu)
+"""
+
+
+class CodeExtractionTests(unittest.TestCase):
+    def test_wrapped_code_and_rewards_are_rejoined(self):
+        """The bug: a bare code on its own line produced no match at all."""
+        codes = digest.extract_codes(ARCHIVED_POST)
+        self.assertTrue(codes, 'the archived post shape must yield codes')
+        self.assertEqual([c['code'] for c in codes],
+                         ['GRASSHOPPER', 'CHILLBOT', 'IMBACKBABY', 'MIDGAMECHANNEL4ALL', 'SPOOKYSHOT'])
+
+    def test_audience_headings_are_attributed(self):
+        by_code = {c['code']: c['audience'] for c in digest.extract_codes(ARCHIVED_POST)}
+        self.assertEqual(by_code['GRASSHOPPER'], 'New Players')
+        self.assertEqual(by_code['IMBACKBABY'], 'Returning Players')
+        self.assertEqual(by_code['SPOOKYSHOT'], 'Everyone')
+
+    def test_availability_window_survives_the_wrap(self):
+        codes = {c['code']: c for c in digest.extract_codes(ARCHIVED_POST)}
+        self.assertEqual(codes['MIDGAMECHANNEL4ALL']['availability'], '1st Dec')
+        self.assertNotIn('available till', codes['MIDGAMECHANNEL4ALL']['rewards'])
+
+    def test_prose_is_not_mistaken_for_a_code(self):
+        codes = digest.extract_codes('NOTE - this list changes\nSOURCES: see the thread\n')
+        self.assertEqual(codes, [])
+
+    def test_lowercase_tokens_are_ignored(self):
+        """A code is shouted; a sentence is not."""
+        self.assertEqual(digest.extract_codes('Grasshopper - grants a mech'), [])
+
+
+class PromoDigestTests(unittest.TestCase):
+    def _snapshot(self):
+        from mechbot.catalog import initialize_snapshot
+        dest = Path(os.environ['SNAPSHOT_PATH'])
+        if not dest.is_file():
+            initialize_snapshot()
+        return dest
+
+    def test_digest_reads_the_confirmable_posts(self):
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': '/tmp/mechbot_test_ecr_digest.sqlite3'}):
+            dest = self._snapshot()
+        rows = digest._promo_documents(db_path=str(dest))
+        self.assertTrue(rows, 'the promo posts must be reachable in the runtime snapshot')
+        self.assertTrue(all(r['review_status'] == 'verified' for r in rows))
+
+    def test_no_script_or_site_source_leaks_in(self):
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': '/tmp/mechbot_test_ecr_digest.sqlite3'}):
+            dest = self._snapshot()
+        for row in digest._promo_documents(db_path=str(dest)):
+            self.assertEqual(row['source'], 'plarium_forum')
+            self.assertNotIn(row['category'], ('script', 'client_source', 'sitemap'))
+
+    def test_digest_groups_by_audience_and_states_trust(self):
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': '/tmp/mechbot_test_ecr_digest.sqlite3'}):
+            dest = self._snapshot()
+        text = digest.promo_digest(db_path=str(dest))
+        self.assertIn('New Players', text)
+        self.assertIn('Returning Players', text)
+        self.assertIn('Everyone', text)
+        self.assertIn('GRASSHOPPER', text)
+        self.assertIn(digest.PROMO_TRUST, text)
+        self.assertIn('Plarium has not confirmed', text)
+
+    def test_missing_data_returns_none_rather_than_inventing(self):
+        self.assertIsNone(digest.promo_digest(db_path='/tmp/does-not-exist.sqlite3'))
+
+
+class RotationTests(unittest.TestCase):
+    def test_rotations_group_the_flat_history(self):
+        grouped = digest.rotations(ECR_ROWS)
+        self.assertEqual(len(grouped), 139)
+        self.assertEqual(sum(len(r['rows']) for r in grouped), len(ECR_ROWS))
+
+    def test_digest_says_how_stale_the_newest_named_rotation_is(self):
+        text = digest.rotation_digest(ECR_ROWS)
+        self.assertIn('by name', text)
+        self.assertIn('83 days ago', text)
+        self.assertIn('cannot tell you what is live right now', text)
+
+    def test_unnamed_rotations_are_never_given_names(self):
+        """35 rotations carry name '?'; they must be described, not filled in."""
+        text = digest.rotation_digest(ECR_ROWS)
+        self.assertIn('the names stop', text)
+        self.assertIn('I will not invent them', text)
+        self.assertNotIn('None (', text)
+
+    def test_unpriced_rotations_do_not_claim_a_price(self):
+        text = digest.rotation_digest(ECR_ROWS)
+        for line in text.splitlines():
+            if 'Nothing named' in line:
+                self.assertNotIn('A-Coins', line)
+                self.assertNotIn('Credits', line)
+
+    def test_cadence_excludes_recording_gaps(self):
+        rhythm = digest.cadence(ECR_ROWS)
+        self.assertIsNotNone(rhythm)
+        self.assertLessEqual(rhythm['longest'], 60, 'gaps over 60 days are tracker holes, not schedule')
+
+
+class ItemHistoryTests(unittest.TestCase):
+    def test_price_trend_is_reported_from_observed_values(self):
+        text = digest.item_history('Parasite', ECR_ROWS)
+        self.assertIn('4 recorded Crate Rushes', text)
+        self.assertIn('300 A-Coins/spin in 2025-10-20', text)
+        self.assertIn('350 A-Coins/spin in 2026-08-24', text)
+
+    def test_future_appearance_is_not_promised(self):
+        self.assertIn('cannot say when it comes back', digest.item_history('Parasite', ECR_ROWS))
+
+    def test_unknown_item_returns_none(self):
+        self.assertIsNone(digest.item_history('Not A Real Mech', ECR_ROWS))
+
+    def test_resolve_item_prefers_the_longest_name(self):
+        self.assertEqual(digest.resolve_item('is oracle 6 in the ecr', ECR_ROWS), 'Oracle 6')
+
+    def test_resolve_item_needs_a_whole_token(self):
+        self.assertIsNone(digest.resolve_item('parasitic behaviour', ECR_ROWS))
+
+    def test_named_item_routes_to_its_history(self):
+        self.assertIn('Parasite', digest.ecr_answer('was parasite ever in the ecr', ECR_ROWS))
+
+    def test_general_question_routes_to_the_rotation_view(self):
+        self.assertIn('history on record', digest.ecr_answer('what is the current ecr', ECR_ROWS))
+
+
+class CurrencyEmojiTests(unittest.TestCase):
+    def test_every_emoji_file_exists(self):
+        """The bug: EMOJI_SET named acoin.png / credits.png / blueprint.png, none shipped."""
+        for name, filename, fallback in voice.EMOJI_SET:
+            self.assertTrue((ROOT / 'data' / filename).is_file(),
+                            f'{filename} is referenced by voice.EMOJI_SET but not shipped')
+            self.assertTrue(fallback, f'{name} needs a plain-text fallback')
+
+    def test_both_uploaders_use_the_same_files(self):
+        voice_files = [filename for _, filename, _ in voice.EMOJI_SET]
+        bot_files = [filename for _, _, filename in bot_module.APPLICATION_CURRENCY_EMOJIS]
+        self.assertEqual(voice_files, bot_files)
+
+    def test_application_emoji_names_are_unchanged(self):
+        """Renaming these would re-upload duplicates on an existing deployment."""
+        self.assertEqual([n for _, n, _ in bot_module.APPLICATION_CURRENCY_EMOJIS],
+                         ['archangle_a_coins_v2', 'archangle_credits_v2', 'archangle_blueprints_v2'])
+
+    def test_attachment_fallbacks_point_at_real_files(self):
+        for label, filename in bot_module.CURRENCY_ASSETS:
+            self.assertTrue((ROOT / 'data' / filename).is_file(), f'{label} asset {filename} missing')
+
+    def test_emoji_book_degrades_to_glyphs_without_a_token(self):
+        book = voice.EmojiBook(application_id=123)
+        with patch.dict(os.environ, {'DISCORD_TOKEN': ''}, clear=False):
+            import asyncio
+            self.assertEqual(asyncio.run(book.ensure()), {})
+        mapping = book.currency_map()
+        self.assertEqual(set(mapping), {'acoins', 'credits', 'blueprints'})
+        self.assertTrue(all(mapping.values()), 'a plain fallback must always be available')
+
+
+if __name__ == '__main__':
+    unittest.main()

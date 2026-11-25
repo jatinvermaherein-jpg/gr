@@ -1,0 +1,362 @@
+[
+ {
+  "name": "Acantha",
+  "skill": "Assault",
+  "cost": {
+   "amount": 0,
+   "currency": "Paid"
+  },
+  "image_url": "/pilot_images/Acantha.png",
+  "rarity": "epic"
+ },
+ {
+  "name": "Archangel",
+  "skill": "Sniper",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Archangel.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Asami",
+  "skill": "Beam",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Asami.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Asmodeus",
+  "skill": "Heavy duty",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Asmodeus.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Baron",
+  "skill": "Sniper",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Baron.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Boar",
+  "skill": "Artillery",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Boar.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Case",
+  "skill": "Heavy duty",
+  "cost": {
+   "amount": 1040,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Case.png",
+  "rarity": "epic"
+ },
+ {
+  "name": "Chimera",
+  "skill": "Heavy duty",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Chimera.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Crow",
+  "skill": "Guided",
+  "cost": {
+   "amount": 40000,
+   "currency": "Credits"
+  },
+  "image_url": "/pilot_images/Crow.png",
+  "rarity": "rare"
+ },
+ {
+  "name": "Diesel",
+  "skill": "Missile",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Diesel.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Fei",
+  "skill": "Artillery",
+  "cost": {
+   "amount": 1040,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Fei.png",
+  "rarity": "epic"
+ },
+ {
+  "name": "Galvan",
+  "skill": "Close quarters",
+  "cost": {
+   "amount": "$",
+   "currency": "Paid"
+  },
+  "image_url": "/pilot_images/Galvan.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "G Lock",
+  "skill": "Close quarters",
+  "cost": {
+   "amount": 1040,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/G Lock.png",
+  "rarity": "epic"
+ },
+ {
+  "name": "Impulse",
+  "skill": "Barrage",
+  "cost": {
+   "amount": 1040,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Impulse.png",
+  "rarity": "epic"
+ },
+ {
+  "name": "Ingrid",
+  "skill": "Beam",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Ingrid.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Jester",
+  "skill": "Close quarters",
+  "cost": {
+   "amount": 40000,
+   "currency": "Credits"
+  },
+  "image_url": "/pilot_images/Jester.png",
+  "rarity": "rare"
+ },
+ {
+  "name": "Lodestar",
+  "skill": "Barrage",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Lodestar.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Major",
+  "skill": "Assault",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Major.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Mako",
+  "skill": "Beam",
+  "cost": {
+   "amount": 40000,
+   "currency": "Credits"
+  },
+  "image_url": "/pilot_images/Mako.png",
+  "rarity": "rare"
+ },
+ {
+  "name": "Maverick",
+  "skill": "Sniper",
+  "cost": {
+   "amount": 1040,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Maverick.png",
+  "rarity": "epic"
+ },
+ {
+  "name": "Morpho",
+  "skill": "Sniper",
+  "cost": {
+   "amount": "$",
+   "currency": "Paid"
+  },
+  "image_url": "/pilot_images/Morpho.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Myna",
+  "skill": "Close quarters",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Myna.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Neev",
+  "skill": "Close quarters",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Neev.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Nicklas",
+  "skill": "Missile",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Nicklas.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Nova",
+  "skill": "Missile",
+  "cost": {
+   "amount": 1040,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Nova.png",
+  "rarity": "epic"
+ },
+ {
+  "name": "Red",
+  "skill": "Assault",
+  "cost": {
+   "amount": 40000,
+   "currency": "Credits"
+  },
+  "image_url": "/pilot_images/Red.png",
+  "rarity": "rare"
+ },
+ {
+  "name": "Rosa",
+  "skill": "Guided",
+  "cost": {
+   "amount": 1040,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Rosa.png",
+  "rarity": "epic"
+ },
+ {
+  "name": "Samson",
+  "skill": "Missile",
+  "cost": {
+   "amount": 40000,
+   "currency": "Credits"
+  },
+  "image_url": "/pilot_images/Samson.png",
+  "rarity": "rare"
+ },
+ {
+  "name": "Spark",
+  "skill": "Artillery",
+  "cost": {
+   "amount": 40000,
+   "currency": "Credits"
+  },
+  "image_url": "/pilot_images/Spark.png",
+  "rarity": "rare"
+ },
+ {
+  "name": "Stefania",
+  "skill": "Guided",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Stefania.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Sunny",
+  "skill": "Assault",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Sunny.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Targe",
+  "skill": "Artillery",
+  "cost": {
+   "amount": "$",
+   "currency": "Paid"
+  },
+  "image_url": "/pilot_images/Targe.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Torchlight",
+  "skill": "Sniper",
+  "cost": {
+   "amount": 40000,
+   "currency": "Credits"
+  },
+  "image_url": "/pilot_images/Torchlight.png",
+  "rarity": "rare"
+ },
+ {
+  "name": "Val",
+  "skill": "Barrage",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Val.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Vox",
+  "skill": "Guided",
+  "cost": {
+   "amount": 3840,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Vox.png",
+  "rarity": "legendary"
+ },
+ {
+  "name": "Yeti",
+  "skill": "Beam",
+  "cost": {
+   "amount": 1040,
+   "currency": "A coins"
+  },
+  "image_url": "/pilot_images/Yeti.png",
+  "rarity": "epic"
+ }
+]

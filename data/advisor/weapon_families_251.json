@@ -1,0 +1,2261 @@
+[
+ {
+  "id": 1,
+  "name": "Arc Torrent 6",
+  "family": "Arc Torrent",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 2,
+  "name": "Arc Torrent 10",
+  "family": "Arc Torrent",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 3,
+  "name": "Arc Torrent 12",
+  "family": "Arc Torrent",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 4,
+  "name": "Autocannon 2",
+  "family": "Autocannon",
+  "variant_number": 2,
+  "calculator_energy_field": "2",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 5,
+  "name": "Autocannon 4",
+  "family": "Autocannon",
+  "variant_number": 4,
+  "calculator_energy_field": "4",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 6,
+  "name": "Berserker 6",
+  "family": "Berserker",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 7,
+  "name": "Berserker 8",
+  "family": "Berserker",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 8,
+  "name": "Berserker 10",
+  "family": "Berserker",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 9,
+  "name": "Berserker 12",
+  "family": "Berserker",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 10,
+  "name": "Berserker 16",
+  "family": "Berserker",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 11,
+  "name": "Blast RPG 6",
+  "family": "Blast RPG",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 12,
+  "name": "Blast RPG 8",
+  "family": "Blast RPG",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 13,
+  "name": "Blast RPG 10",
+  "family": "Blast RPG",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 14,
+  "name": "Blast RPG 12",
+  "family": "Blast RPG",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 15,
+  "name": "Blast RPG 16",
+  "family": "Blast RPG",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 16,
+  "name": "Bouncecritter 6",
+  "family": "Bouncecritter",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 17,
+  "name": "Bouncecritter 8",
+  "family": "Bouncecritter",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 18,
+  "name": "Bouncecritter 10",
+  "family": "Bouncecritter",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 19,
+  "name": "Bouncecritter 12",
+  "family": "Bouncecritter",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 20,
+  "name": "Bouncecritter 16",
+  "family": "Bouncecritter",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 21,
+  "name": "Burrow beam 6",
+  "family": "Burrow beam",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 22,
+  "name": "Burrow beam 8",
+  "family": "Burrow beam",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 23,
+  "name": "Burrow beam 10",
+  "family": "Burrow beam",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 24,
+  "name": "Burrow beam 12",
+  "family": "Burrow beam",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 25,
+  "name": "Burrow beam 16",
+  "family": "Burrow beam",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 26,
+  "name": "Carbine 8",
+  "family": "Carbine",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 27,
+  "name": "Carbine 10",
+  "family": "Carbine",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 28,
+  "name": "Carbine 12",
+  "family": "Carbine",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 29,
+  "name": "Chain Gun 6",
+  "family": "Chain Gun",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 30,
+  "name": "Chain Gun 8",
+  "family": "Chain Gun",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 31,
+  "name": "Chain Gun 10",
+  "family": "Chain Gun",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 32,
+  "name": "Chain Gun 12",
+  "family": "Chain Gun",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 33,
+  "name": "Chain Gun 16",
+  "family": "Chain Gun",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 34,
+  "name": "Charge Rocket 6",
+  "family": "Charge Rocket",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 35,
+  "name": "Charge Rocket 8",
+  "family": "Charge Rocket",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 36,
+  "name": "Charge Rocket 10",
+  "family": "Charge Rocket",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 37,
+  "name": "Charge Rocket 12",
+  "family": "Charge Rocket",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 38,
+  "name": "Charge Rocket 16",
+  "family": "Charge Rocket",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 39,
+  "name": "Compound beam 6",
+  "family": "Compound beam",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 40,
+  "name": "Compound beam 8",
+  "family": "Compound beam",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 41,
+  "name": "Compound beam 10",
+  "family": "Compound beam",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 42,
+  "name": "Compound beam 12",
+  "family": "Compound beam",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 43,
+  "name": "Compound beam 16",
+  "family": "Compound beam",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 44,
+  "name": "Continuum 6",
+  "family": "Continuum",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 45,
+  "name": "Continuum 8",
+  "family": "Continuum",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 46,
+  "name": "Continuum 10",
+  "family": "Continuum",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 47,
+  "name": "Continuum 12",
+  "family": "Continuum",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 48,
+  "name": "Continuum 16",
+  "family": "Continuum",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 49,
+  "name": "Cryo Javelin 6",
+  "family": "Cryo Javelin",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 50,
+  "name": "Cryo Javelin 12",
+  "family": "Cryo Javelin",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 51,
+  "name": "Cryo Launcher 6",
+  "family": "Cryo Launcher",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 52,
+  "name": "Cryo Launcher 8",
+  "family": "Cryo Launcher",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 53,
+  "name": "Cryo Launcher 10",
+  "family": "Cryo Launcher",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 54,
+  "name": "Cryo Launcher 12",
+  "family": "Cryo Launcher",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 55,
+  "name": "Cryo Launcher 16",
+  "family": "Cryo Launcher",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 56,
+  "name": "Disc Launcher 8",
+  "family": "Disc Launcher",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 57,
+  "name": "Disc Launcher 12",
+  "family": "Disc Launcher",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 58,
+  "name": "Disc Launcher 16",
+  "family": "Disc Launcher",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 59,
+  "name": "Disruptor 6",
+  "family": "Disruptor",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 60,
+  "name": "Disruptor 8",
+  "family": "Disruptor",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 61,
+  "name": "Disruptor 10",
+  "family": "Disruptor",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 62,
+  "name": "Disruptor 12",
+  "family": "Disruptor",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 63,
+  "name": "Disruptor 16",
+  "family": "Disruptor",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 64,
+  "name": "Dreadshot 6",
+  "family": "Dreadshot",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 65,
+  "name": "Dreadshot 8",
+  "family": "Dreadshot",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "heavy",
+  "identity_status": "user_confirmed"
+ },
+ {
+  "id": 66,
+  "name": "Dreadshot 10",
+  "family": "Dreadshot",
+  "variant_number": 10,
+  "calculator_energy_field": "8",
+  "database_category": "heavy",
+  "identity_status": "user_confirmed"
+ },
+ {
+  "id": 67,
+  "name": "Dreadshot 12",
+  "family": "Dreadshot",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 68,
+  "name": "Dreadshot 16",
+  "family": "Dreadshot",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 69,
+  "name": "EM Rifle 6",
+  "family": "EM Rifle",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 70,
+  "name": "EM Rifle 8",
+  "family": "EM Rifle",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 71,
+  "name": "EM Rifle 10",
+  "family": "EM Rifle",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 72,
+  "name": "EM Rifle 12",
+  "family": "EM Rifle",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 73,
+  "name": "EM Rifle 16",
+  "family": "EM Rifle",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 74,
+  "name": "Ember Gun 6",
+  "family": "Ember Gun",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 75,
+  "name": "Ember Gun 8",
+  "family": "Ember Gun",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 76,
+  "name": "Ember Gun 10",
+  "family": "Ember Gun",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 77,
+  "name": "Ember Gun 12",
+  "family": "Ember Gun",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 78,
+  "name": "Ember Gun 16",
+  "family": "Ember Gun",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 79,
+  "name": "Fragment Gun 6",
+  "family": "Fragment Gun",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 80,
+  "name": "Fragment Gun 8",
+  "family": "Fragment Gun",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 81,
+  "name": "Fragment Gun 10",
+  "family": "Fragment Gun",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 82,
+  "name": "Fragment Gun 12",
+  "family": "Fragment Gun",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 83,
+  "name": "Fragment Gun 14",
+  "family": "Fragment Gun",
+  "variant_number": 14,
+  "calculator_energy_field": "14",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 84,
+  "name": "Fuse Mortar 8",
+  "family": "Fuse Mortar",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "artillery",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 85,
+  "name": "Fuse Mortar 10",
+  "family": "Fuse Mortar",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "artillery",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 86,
+  "name": "Fuse Mortar 12",
+  "family": "Fuse Mortar",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "artillery",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 87,
+  "name": "Fusion Cannon 6",
+  "family": "Fusion Cannon",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 88,
+  "name": "Fusion Cannon 8",
+  "family": "Fusion Cannon",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 89,
+  "name": "Fusion Cannon 10",
+  "family": "Fusion Cannon",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 90,
+  "name": "Fusion Cannon 12",
+  "family": "Fusion Cannon",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 91,
+  "name": "Fusion Cannon 16",
+  "family": "Fusion Cannon",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 92,
+  "name": "Gauss Rifle 4",
+  "family": "Gauss Rifle",
+  "variant_number": 4,
+  "calculator_energy_field": "4",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 93,
+  "name": "Gauss Rifle 6",
+  "family": "Gauss Rifle",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 94,
+  "name": "Gauss Rifle 10",
+  "family": "Gauss Rifle",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 95,
+  "name": "Gemini 6",
+  "family": "Gemini",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 96,
+  "name": "Gemini 8",
+  "family": "Gemini",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 97,
+  "name": "Gemini 10",
+  "family": "Gemini",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 98,
+  "name": "Gemini 12",
+  "family": "Gemini",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 99,
+  "name": "Gemini 16",
+  "family": "Gemini",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 100,
+  "name": "Graviton Beam 10",
+  "family": "Graviton Beam",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 101,
+  "name": "Graviton Beam 12",
+  "family": "Graviton Beam",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 102,
+  "name": "Graviton Beam 16",
+  "family": "Graviton Beam",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 103,
+  "name": "Helix Rack 6",
+  "family": "Helix Rack",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 104,
+  "name": "Helix Rack 8",
+  "family": "Helix Rack",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 105,
+  "name": "Helix Rack 10",
+  "family": "Helix Rack",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 106,
+  "name": "Helix Rack 12",
+  "family": "Helix Rack",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 107,
+  "name": "Helix Rack 16",
+  "family": "Helix Rack",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 108,
+  "name": "Hellfire 6",
+  "family": "Hellfire",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 109,
+  "name": "Hellfire 8",
+  "family": "Hellfire",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 110,
+  "name": "Hellfire 10",
+  "family": "Hellfire",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 111,
+  "name": "Hellfire 12",
+  "family": "Hellfire",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 112,
+  "name": "Hellfire 16",
+  "family": "Hellfire",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 113,
+  "name": "Hornet 6",
+  "family": "Hornet",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 114,
+  "name": "Hornet 8",
+  "family": "Hornet",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 115,
+  "name": "Hornet 10",
+  "family": "Hornet",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 116,
+  "name": "Hornet 12",
+  "family": "Hornet",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 117,
+  "name": "Hornet 16",
+  "family": "Hornet",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 118,
+  "name": "Howler 6",
+  "family": "Howler",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 119,
+  "name": "Howler 8",
+  "family": "Howler",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 120,
+  "name": "Howler 10",
+  "family": "Howler",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 121,
+  "name": "Howler 12",
+  "family": "Howler",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 122,
+  "name": "Howler 16",
+  "family": "Howler",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 123,
+  "name": "Javelin Rack 4",
+  "family": "Javelin Rack",
+  "variant_number": 4,
+  "calculator_energy_field": "4",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 124,
+  "name": "Javelin Rack 6",
+  "family": "Javelin Rack",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 125,
+  "name": "Javelin Rack 8",
+  "family": "Javelin Rack",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 126,
+  "name": "Javelin Rack 12",
+  "family": "Javelin Rack",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 127,
+  "name": "Javelin Rack 16",
+  "family": "Javelin Rack",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 128,
+  "name": "Longarm 8",
+  "family": "Longarm",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 129,
+  "name": "Longarm 10",
+  "family": "Longarm",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 130,
+  "name": "Longarm 12",
+  "family": "Longarm",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 131,
+  "name": "Minigun 6",
+  "family": "Minigun",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 132,
+  "name": "Minigun 8",
+  "family": "Minigun",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 133,
+  "name": "Minigun 10",
+  "family": "Minigun",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 134,
+  "name": "Minigun 12",
+  "family": "Minigun",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 135,
+  "name": "Minigun 16",
+  "family": "Minigun",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 136,
+  "name": "Missile Rack 6",
+  "family": "Missile Rack",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 137,
+  "name": "Missile Rack 8",
+  "family": "Missile Rack",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 138,
+  "name": "Missile Rack 12",
+  "family": "Missile Rack",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 139,
+  "name": "Missile Rack 16",
+  "family": "Missile Rack",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 140,
+  "name": "Nade Launcher 6",
+  "family": "Nade Launcher",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 141,
+  "name": "Nade Launcher 8",
+  "family": "Nade Launcher",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 142,
+  "name": "Nade Launcher 10",
+  "family": "Nade Launcher",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 143,
+  "name": "Nade Launcher 12",
+  "family": "Nade Launcher",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 144,
+  "name": "Nade Launcher 16",
+  "family": "Nade Launcher",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 145,
+  "name": "Oracle 6",
+  "family": "Oracle",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 146,
+  "name": "Oracle 8",
+  "family": "Oracle",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 147,
+  "name": "Oracle 10",
+  "family": "Oracle",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 148,
+  "name": "Oracle 12",
+  "family": "Oracle",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 149,
+  "name": "Oracle 16",
+  "family": "Oracle",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 150,
+  "name": "Overdriver 6",
+  "family": "Overdriver",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 151,
+  "name": "Overdriver 8",
+  "family": "Overdriver",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 152,
+  "name": "Overdriver 10",
+  "family": "Overdriver",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 153,
+  "name": "Overdriver 12",
+  "family": "Overdriver",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 154,
+  "name": "Overdriver 16",
+  "family": "Overdriver",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 155,
+  "name": "Particle Beam 6",
+  "family": "Particle Beam",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 156,
+  "name": "Particle Beam 8",
+  "family": "Particle Beam",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 157,
+  "name": "Particle Beam 10",
+  "family": "Particle Beam",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 158,
+  "name": "Particle Beam 12",
+  "family": "Particle Beam",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 159,
+  "name": "Particle Beam 16",
+  "family": "Particle Beam",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 160,
+  "name": "Plasma Cannon 2",
+  "family": "Plasma Cannon",
+  "variant_number": 2,
+  "calculator_energy_field": "2",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 161,
+  "name": "Plasma Cannon 4",
+  "family": "Plasma Cannon",
+  "variant_number": 4,
+  "calculator_energy_field": "4",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 162,
+  "name": "Plasma Cannon 6",
+  "family": "Plasma Cannon",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 163,
+  "name": "Pod Gun 6",
+  "family": "Pod Gun",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 164,
+  "name": "Pod Gun 8",
+  "family": "Pod Gun",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 165,
+  "name": "Pod Gun 10",
+  "family": "Pod Gun",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 166,
+  "name": "Pod Gun 12",
+  "family": "Pod Gun",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 167,
+  "name": "Pod Gun 16",
+  "family": "Pod Gun",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "barrage",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 168,
+  "name": "Pulse Cannon 4",
+  "family": "Pulse Cannon",
+  "variant_number": 4,
+  "calculator_energy_field": "4",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 169,
+  "name": "Pulse Cannon 6",
+  "family": "Pulse Cannon",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 170,
+  "name": "Pulse Cannon 8",
+  "family": "Pulse Cannon",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 171,
+  "name": "Quantum Gun 6",
+  "family": "Quantum Gun",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 172,
+  "name": "Quantum Gun 8",
+  "family": "Quantum Gun",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 173,
+  "name": "Quantum Gun 10",
+  "family": "Quantum Gun",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 174,
+  "name": "Quantum Gun 12",
+  "family": "Quantum Gun",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 175,
+  "name": "Quantum Gun 16",
+  "family": "Quantum Gun",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 176,
+  "name": "Quasher 6",
+  "family": "Quasher",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 177,
+  "name": "Quasher 8",
+  "family": "Quasher",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 178,
+  "name": "Quasher 10",
+  "family": "Quasher",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 179,
+  "name": "Quasher 12",
+  "family": "Quasher",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 180,
+  "name": "Quasher 16",
+  "family": "Quasher",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 181,
+  "name": "Railgun 8",
+  "family": "Railgun",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 182,
+  "name": "Railgun 12",
+  "family": "Railgun",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 183,
+  "name": "Railgun 16",
+  "family": "Railgun",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 184,
+  "name": "Reaver 6",
+  "family": "Reaver",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 185,
+  "name": "Reaver 8",
+  "family": "Reaver",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 186,
+  "name": "Reaver 10",
+  "family": "Reaver",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 187,
+  "name": "Reaver 12",
+  "family": "Reaver",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 188,
+  "name": "Reaver 16",
+  "family": "Reaver",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 189,
+  "name": "Repeater 6",
+  "family": "Repeater",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 190,
+  "name": "Repeater 8",
+  "family": "Repeater",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 191,
+  "name": "Repeater 10",
+  "family": "Repeater",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 192,
+  "name": "Repeater 12",
+  "family": "Repeater",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 193,
+  "name": "Repeater 16",
+  "family": "Repeater",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 194,
+  "name": "Revoker 6",
+  "family": "Revoker",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 195,
+  "name": "Revoker 8",
+  "family": "Revoker",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 196,
+  "name": "Revoker 10",
+  "family": "Revoker",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 197,
+  "name": "Revoker 12",
+  "family": "Revoker",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 198,
+  "name": "Revoker 16",
+  "family": "Revoker",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 199,
+  "name": "Rocket Mortar 8",
+  "family": "Rocket Mortar",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "artillery",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 200,
+  "name": "Rocket Mortar 10",
+  "family": "Rocket Mortar",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "artillery",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 201,
+  "name": "Rocket Mortar 12",
+  "family": "Rocket Mortar",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "artillery",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 202,
+  "name": "RPG 2",
+  "family": "RPG",
+  "variant_number": 2,
+  "calculator_energy_field": "2",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 203,
+  "name": "RPG 4",
+  "family": "RPG",
+  "variant_number": 4,
+  "calculator_energy_field": "4",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 204,
+  "name": "RPG 6",
+  "family": "RPG",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 205,
+  "name": "Savant 6",
+  "family": "Savant",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 206,
+  "name": "Savant 8",
+  "family": "Savant",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 207,
+  "name": "Savant 10",
+  "family": "Savant",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 208,
+  "name": "Savant 12",
+  "family": "Savant",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 209,
+  "name": "Savant 16",
+  "family": "Savant",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 210,
+  "name": "Shotgun 2",
+  "family": "Shotgun",
+  "variant_number": 2,
+  "calculator_energy_field": "2",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 211,
+  "name": "Shotgun 4",
+  "family": "Shotgun",
+  "variant_number": 4,
+  "calculator_energy_field": "4",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 212,
+  "name": "Shotgun 8",
+  "family": "Shotgun",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "cq",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 213,
+  "name": "Stasis Beam 8",
+  "family": "Stasis Beam",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 214,
+  "name": "Stasis Beam 12",
+  "family": "Stasis Beam",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 215,
+  "name": "Stasis Beam 16",
+  "family": "Stasis Beam",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 216,
+  "name": "Storm Rack 6",
+  "family": "Storm Rack",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 217,
+  "name": "Storm Rack 8",
+  "family": "Storm Rack",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 218,
+  "name": "Storm Rack 10",
+  "family": "Storm Rack",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 219,
+  "name": "Storm Rack 12",
+  "family": "Storm Rack",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 220,
+  "name": "Storm Rack 16",
+  "family": "Storm Rack",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 221,
+  "name": "Strike Rocket 6",
+  "family": "Strike Rocket",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 222,
+  "name": "Strike Rocket 8",
+  "family": "Strike Rocket",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 223,
+  "name": "Strike Rocket 10",
+  "family": "Strike Rocket",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 224,
+  "name": "Strike Rocket 12",
+  "family": "Strike Rocket",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 225,
+  "name": "Strike Rocket 16",
+  "family": "Strike Rocket",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "guided",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 226,
+  "name": "Suppressor 6",
+  "family": "Suppressor",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 227,
+  "name": "Suppressor 8",
+  "family": "Suppressor",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 228,
+  "name": "Suppressor 10",
+  "family": "Suppressor",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 229,
+  "name": "Suppressor 12",
+  "family": "Suppressor",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 230,
+  "name": "Suppressor 16",
+  "family": "Suppressor",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 231,
+  "name": "Tetra Rifle 6",
+  "family": "Tetra Rifle",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 232,
+  "name": "Tetra Rifle 8",
+  "family": "Tetra Rifle",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 233,
+  "name": "Tetra Rifle 10",
+  "family": "Tetra Rifle",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 234,
+  "name": "Tetra Rifle 12",
+  "family": "Tetra Rifle",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 235,
+  "name": "Tetra Rifle 16",
+  "family": "Tetra Rifle",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "sniper",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 236,
+  "name": "Thermal lance 2",
+  "family": "Thermal lance",
+  "variant_number": 2,
+  "calculator_energy_field": "2",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 237,
+  "name": "Thermal lance 4",
+  "family": "Thermal lance",
+  "variant_number": 4,
+  "calculator_energy_field": "4",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 238,
+  "name": "Thermal Lance 6",
+  "family": "Thermal Lance",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "beam",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 239,
+  "name": "Versa 6",
+  "family": "Versa",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 240,
+  "name": "Versa 8",
+  "family": "Versa",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 241,
+  "name": "Versa 10",
+  "family": "Versa",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 242,
+  "name": "Versa 12",
+  "family": "Versa",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 243,
+  "name": "Versa 16",
+  "family": "Versa",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "heavy",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 244,
+  "name": "Viper 6",
+  "family": "Viper",
+  "variant_number": 6,
+  "calculator_energy_field": "6",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 245,
+  "name": "Viper 8",
+  "family": "Viper",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 246,
+  "name": "Viper 10",
+  "family": "Viper",
+  "variant_number": 10,
+  "calculator_energy_field": "10",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 247,
+  "name": "Viper 12",
+  "family": "Viper",
+  "variant_number": 12,
+  "calculator_energy_field": "12",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 248,
+  "name": "Viper 16",
+  "family": "Viper",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "assault",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 249,
+  "name": "Voltaic RPG 8",
+  "family": "Voltaic RPG",
+  "variant_number": 8,
+  "calculator_energy_field": "8",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 250,
+  "name": "Voltaic RPG 14",
+  "family": "Voltaic RPG",
+  "variant_number": 14,
+  "calculator_energy_field": "14",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ },
+ {
+  "id": 251,
+  "name": "Voltaic RPG 16",
+  "family": "Voltaic RPG",
+  "variant_number": 16,
+  "calculator_energy_field": "16",
+  "database_category": "missile",
+  "identity_status": "source_reported"
+ }
+]
