@@ -655,8 +655,13 @@ def main():
         log(f"-- listing round {rounds} --")
         scan_round(rounds)
         if listing_failures:
-            details='; '.join(listing_failures[:5])
-            sys.exit(f"Incomplete forum crawl; leaving any previous snapshot untouched. {details}")
+            # One empty listing page is not a reason to throw away a whole crawl. The forum
+            # served a page with no topic cards - a container page, a rate-limited response or a
+            # restyle - and the old behaviour exited, leaving the archive frozen for as long as
+            # that page kept coming back empty. The failure is recorded and the crawl continues;
+            # the stop condition below is what decides whether the snapshot is provable, and it
+            # already treats an unfetched boundary as a reason to keep going.
+            log(f"  !! incomplete listing pages: {'; '.join(listing_failures[:5])}")
         if len(cands) >= target:
             # fetch OPs until the provable stop condition holds
             while True:

@@ -310,6 +310,45 @@ class ForumArchiveTests(unittest.TestCase):
         self.assertIn('Recent saved forum highlights',response)
         self.assertIn('live event schedule',response)
 
+    def test_every_thread_is_judged_live_or_outdated_from_its_own_date(self):
+        """A saved thread is a statement about the game on the day it was written, not now."""
+        import tempfile
+        from datetime import datetime, timedelta, timezone
+        today = datetime.now(timezone.utc)
+        def stamp(days):
+            return f'{(today - timedelta(days=days)).strftime("%b")} {(today - timedelta(days=days)).day}, {(today - timedelta(days=days)).year}, 10:00'
+        def thread(title, topic, body, days):
+            row = self._thread(title, f'https://forum.plarium.com/mech-arena/702_game-discussion/{topic}/',
+                               'Game Discussion', body, stamp(days))
+            row['created']['iso'] = (today - timedelta(days=days)).strftime('%Y-%m-%d %H:%M')
+            return row
+        rows = [thread('Fresh thread', 1, 'Voidghost is broken right now.', 2),
+                thread('Older thread', 2, 'Voidghost is broken.', 200)]
+        with tempfile.TemporaryDirectory() as folder:
+            archive = Path(folder) / 'archive.json'
+            archive.write_text(json.dumps({'metadata': {}, 'threads': rows}), encoding='utf-8')
+            reply = format_forum_request('latest forum posts', path=archive)
+        self.assertIn('**Status:** Live discussion', reply)
+        self.assertIn('**Status:** Outdated', reply)
+        self.assertIn('**LIVE OR OUTDATED**', reply)
+        self.assertIn('1 of 2 threads still speaks for the current build', reply)
+
+    def test_an_old_thread_is_never_described_as_current_opinion(self):
+        import tempfile
+        from datetime import datetime, timedelta, timezone
+        today = datetime.now(timezone.utc)
+        old = today - timedelta(days=400)
+        row = self._thread('A year-old tier list', 'https://forum.plarium.com/mech-arena/702_game-discussion/3/',
+                           'Game Discussion', 'Voidghost is the best mech.', f'{old.strftime("%b")} {old.day}, {old.year}, 10:00')
+        row['created']['iso'] = old.strftime('%Y-%m-%d %H:%M')
+        rows = [row]
+        with tempfile.TemporaryDirectory() as folder:
+            archive = Path(folder) / 'archive.json'
+            archive.write_text(json.dumps({'metadata': {}, 'threads': rows}), encoding='utf-8')
+            reply = format_forum_request('forum', path=archive)
+        self.assertIn('Outdated', reply)
+        self.assertIn('months ago', reply)   # 400 days reads as months, never as 'recent'
+
     def test_forum_lookup_detection_is_explicit_and_ambient_safe(self):
         for query in ('latest forum posts','What is the forum saying about Skystrike?',
                       'what are players saying about Surge?','forum build guides'):
@@ -2374,7 +2413,7 @@ class AnnouncementFactTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('window has passed',closed)
         bundle=fact_layer.facts_prompt_bundle(facts,now=self.now)
         self.assertEqual(bundle[0]['status'],'ended')                      # the model sees the live status
-        self.assertIn('one-day window it announced has passed',
+        self.assertIn('Outdated',
                       fact_layer.format_fact_list(facts,'🎁 ECR',now=self.now) or '')
 
     def test_a_stale_rotation_is_history_not_current_state(self):
@@ -2440,7 +2479,7 @@ class AnnouncementFactTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn('SEASONAL ECR',plain.split('are saved but hidden')[0])
         expanded=fact_layer.format_ecr_reply(facts,now=self.now,include_older=True)
         self.assertIn('**Other ECR posts in the saved announcements**',expanded)
-        self.assertIn('also current',expanded)
+        self.assertIn('**live**',expanded)
         self.assertLessEqual(len(plain),1900)
         self.assertFalse(fact_layer.wants_older_ecr('what is the current ecr?'))
         self.assertTrue(fact_layer.wants_older_ecr('which ecrs ran last month?'))

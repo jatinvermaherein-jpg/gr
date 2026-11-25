@@ -916,8 +916,13 @@ class MechBot(commands.Bot):
         return result
 
     def forum_response(self,query=None):
-        """Search or list the stored Plarium Forum crawl, separate from event scheduling."""
-        return format_forum_request(query)
+        """Search or list the stored Plarium Forum crawl, separate from event scheduling.
+
+        One clock for the answer, exactly as the ECR answer uses one: every thread's age and
+        its live/outdated standing is read against the same `now`, so a snapshot refreshed this
+        morning cannot describe itself as weeks old in one line and live in the next.
+        """
+        return format_forum_request(query,now=int(time.time()))
 
     async def compound_announcement_reply(self,text):
         """Answer a two-part announcement question in full, or return None.

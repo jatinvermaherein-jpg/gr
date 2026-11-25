@@ -7,7 +7,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from urllib.parse import urlparse
 
 from ftfy import fix_text
@@ -269,44 +269,224 @@ def _forum_summary(post,query=''):
     return summarize_source_text(cleaned or content,query_terms=terms,max_chars=290,max_sentences=2)
 
 
-def format_forum_search(query,limit=5,path=None):
+# A thread is about a moment in the game. A "worst mech" list from last year, or a bug report
+# against a version four patches old, is not a statement about now - and the reply used to print
+# every saved thread with no age on it at all, so an eleven-month-old thread read as today's
+# community opinion. The bands are the ones a player would use out loud.
+_FRESH_DAYS = 21
+_AGING_DAYS = 90
+
+
+def _thread_age_days(post,now=None):
+    """Days since the thread was created, or None when the snapshot has no readable date."""
+    created=post.get('created_iso')
+    if not created:
+        # The raw archive row nests the date; the flattened thread dict does not. Both reach here.
+        created=(post.get('created') or {}).get('iso') if isinstance(post.get('created'),dict) else post.get('created')
+    created=str(created or '').strip()
+    match=re.match(r'^(20\d{2})-(\d{1,2})-(\d{1,2})',created)
+    if not match:
+        return None
+    try:
+        stamp=date(*map(int,match.groups()))
+    except ValueError:
+        return None
+    today=(now or datetime.now(timezone.utc)).date() if not isinstance(now,date) else now
+    return max(0,(today-stamp).days)
+
+
+def _is_live(post,now=None):
+    """True while the thread still speaks for the game as it is now."""
+    age=_thread_age_days(post,now)
+    return age is not None and age<=_FRESH_DAYS
+
+
+def _freshness(post,now=None):
+    """(label, is_live) for one thread: how the reply should describe its age."""
+    age=_thread_age_days(post,now)
+    if age is None:
+        return 'date not recorded', False
+    if age==0:
+        return 'today', True
+    if age==1:
+        return 'yesterday', True
+    if age<=_FRESH_DAYS:
+        return f'{age} days ago', True
+    if age<=_AGING_DAYS:
+        return f'{age} days ago', False
+    months=age//30
+    if months<24:
+        return f'{months} month{"s" if months>1 else ""} ago', False
+    years=age//365
+    return f'{years} year{"s" if years>1 else ""} ago', False
+
+
+def _outdated_note(post,now=None):
+    """What the reply says about a thread that no longer describes the live game."""
+    label,_live=_freshness(post,now)
+    if label in ('today','yesterday','date not recorded'):
+        return ''
+    age=_thread_age_days(post,now)
+    if age is None:
+        return ''
+    if age<=_AGING_DAYS:
+        return f'Saved post, {label} — still recent, but a later patch may have changed it.'
+    return (f'Saved post, {label} — treat it as an archived discussion, not as current '
+            f'state of the game.')
+
+
+def _author_name(post):
+    """The author's name only: the reply never prints roles or links back to the forum."""
+    author=post.get('author') or {}
+    return fix_text(str(author.get('name') or '')).strip()
+
+
+def _poster(post):
+    author=post.get('author') or {}
+    name=fix_text(str(author.get('name') or '')).strip()
+    role=fix_text(str(author.get('role') or '')).strip()
+    if role and role.casefold() not in ('member',''):
+        return f'{name} ({role})' if name else role
+    return name or 'unknown author'
+
+
+def _thread_meta(post):
+    """Written by, and what the thread got: the two facts that say how much weight it carries."""
+    stats=post.get('stats') or {}
+    parts=[f'**Posted by:** {_poster(post)}']
+    if isinstance(stats,dict) and stats.get('replies') is not None:
+        parts.append(f'{int(stats["replies"])} repl{"y" if int(stats["replies"])==1 else "ies"}')
+    return parts
+
+
+def _thread_block(number,post,query='',now=None):
+    """One saved thread as its own numbered block: the post, who wrote it, and whether it is live.
+
+    The forum answer used to be one bullet per thread with the summary, the date and the
+    category run together on a single line - the reader had to parse the line to find out
+    whether they were looking at last week's discussion or last year's.
+    """
+    title=_link_title(post.get('title')) or 'Forum discussion'
+    summary=_forum_summary(post,query)
+    category=fix_text(str(post.get('category') or '')).strip()
+    label,live=_freshness(post,now)
+    lines=[f'{number}. **{title}**']
+    written=' · '.join(part for part in (
+        f'Posted by {_author_name(post)}' if _author_name(post) else '',
+        category,
+        f'**Post date:** {_post_date_label(post)} ({label})',
+    ) if part)
+    if written:
+        lines.append(written)
+    if summary:
+        lines.append(f'\u2022 {summary}')
+    note=_outdated_note(post,now)
+    stakes=_stakes(post)
+    if stakes:
+        lines.append(f'**Status:** {stakes}')
+    elif note:
+        lines.append(f'**Status:** {note}')
+    elif live:
+        lines.append('**Status:** Current discussion — posted inside the last '
+                     f'{_FRESH_DAYS} days.')
+    return '\n'.join(lines), live
+
+
+# Sentences that make a post a report about the game as it is right now, rather than an opinion.
+_LIVE_CLAIM=re.compile(r'\b(?:is|are)\s+(?:currently|now)\b|\bcurrently\b|\bright\s+now\b|'
+                       r'\b(?:today|this\s+week|this\s+patch|this\s+update)\b|\bjust\s+(?:got|bought|tried)\b|'
+                       r'\b(?:after|since)\s+the\s+(?:latest|new|last)\s+(?:patch|update|rebalance)\b',re.I)
+# Sentences that tie a post to a moment in the past, which is what makes it a dated archive.
+_DATED_CLAIM=re.compile(r'\b(?:back\s+when|used\s+to|last\s+(?:year|season)|old\s+version|'
+                        r'before\s+the\s+(?:nerf|buff|rebalance)|no\s+longer)\b',re.I)
+
+
+def _states_current_claim(post):
+    """Does the thread make a claim about the live game, in its own words?"""
+    body=_safe_post_text((post.get('content') or post.get('excerpt') or ''))
+    return bool(_LIVE_CLAIM.search(body or '')) and not bool(_DATED_CLAIM.search(body or ''))
+
+
+def _stakes(post,now=None):
+    """A one-line judgement of whether the thread still describes the live game."""
+    age=_thread_age_days(post,now)
+    if age is None:
+        return 'Date not recorded in the saved snapshot, so its age cannot be vouched for.'
+    if age<=7:
+        return f'Live discussion — posted {_freshness(post,now)[0]}.'
+    if age<=_FRESH_DAYS:
+        return (f'Live discussion — posted {age} days ago, inside the window a patch usually '
+                f'replaces.')
+    if _states_current_claim(post):
+        return (f'Outdated — posted {_freshness(post,now)[0]}, and it argues about the game as '
+                f'it stood then. Later patches are not reflected in it.')
+    return (f'Outdated — posted {_freshness(post,now)[0]}, so it is an archived discussion '
+            f'rather than a statement about the current build.')
+
+
+def _snapshot_state(rows,now=None):
+    """One line on how old the whole snapshot is, so the answer never implies it is live."""
+    newest=rows[0] if rows else {}
+    age=_thread_age_days(newest,now)
+    if age is None:
+        return 'The saved snapshot carries no readable thread dates.'
+    if age<=1:
+        return f'The snapshot was refreshed with threads from {_freshness(newest,now)[0]}.'
+    return (f'The newest saved thread is {_freshness(newest,now)[0]}; anything newer than that '
+            f'is not in the snapshot.')
+
+
+def format_forum_search(query,limit=5,path=None,now=None):
     posts=search_forum_threads(query,limit=limit,path=path)
-    if not posts:return 'I couldn’t find a matching discussion in the saved forum posts.'
-    lines=['**Saved forum discussion summary**']
-    footer='These are community discussions, not confirmed game guidance or a live event schedule.'
-    for post in posts:
-        title=_link_title(post.get('title')) or 'Forum discussion'
-        summary=_forum_summary(post,query)
-        line=f'• **{title}** — {summary or "The saved post has no readable details beyond its title."}'
-        line+=f' · **Post date:** {_post_date_label(post)}'
-        if len('\n'.join([*lines,line,footer]))>1880:
-            lines.append('• More matching discussions omitted.')
-            break
-        lines.append(line)
-    return '\n'.join([*lines,footer])
+    if not posts:
+        return 'I couldn’t find a matching discussion in the saved forum posts.'
+    return _forum_reply(posts,f'**Saved forum discussions matching “{_link_title(query)}”**',
+                        query=query,now=now,path=path)
 
 
-def format_recent_forum_threads(limit=5,path=None):
+def format_recent_forum_threads(limit=5,path=None,now=None):
     posts=recent_forum_threads(limit=limit,path=path)
-    if not posts:return 'The saved forum snapshot has no readable threads.'
-    lines=['**Recent saved forum highlights**']
-    footer='These are community discussions, not confirmed game guidance or a live event schedule.'
-    for post in posts:
-        title=_link_title(post.get('title')) or 'Forum discussion'
-        summary=_forum_summary(post)
-        line=f'• **{title}** — {summary or "No additional readable details were saved."}'
-        line+=f' · **Post date:** {_post_date_label(post)}'
-        if len('\n'.join([*lines,line,footer]))>1880:
-            lines.append('• More discussions omitted.')
+    if not posts:
+        return 'The saved forum snapshot has no readable threads.'
+    return _forum_reply(posts,'**Recent saved forum highlights**',query='',now=now,path=path)
+
+
+def _forum_reply(posts,heading,query='',now=None,path=None):
+    """Numbered per-thread blocks, then one roll-up line that separates live from outdated."""
+    blocks,flags=[],[]
+    for index,post in enumerate(posts,start=1):
+        text,live=_thread_block(index,post,query=query,now=now)
+        candidate='\n'.join([*blocks,text])
+        if len(candidate)>3400:
+            blocks.append('• More matching discussions omitted.')
             break
-        lines.append(line)
-    return '\n'.join([*lines,footer])
+        blocks.append(text)
+        flags.append((_link_title(post.get('title')) or f'Thread {index}',live))
+    lines=[heading,'\n\n'.join(blocks)]
+    if flags:
+        live=[title for title,live in flags if live]
+        stale=[title for title,live in flags if not live]
+        rollup=['**LIVE OR OUTDATED**','Thread | Standing']
+        rollup.extend(f'{title} | {"Live" if live else "Outdated"}' for title,live in flags)
+        lines.append('\n'.join(rollup))
+        if live and stale:
+            lines.append(f'{len(live)} of {len(flags)} threads '
+                         f'{"still speaks" if len(live)==1 else "still speak"} for the current '
+                         f'build; the rest are archive.')
+        elif not live:
+            lines.append('None of these threads is recent enough to describe the current build.')
+    rows=_read_archive(path)
+    if rows:
+        lines.append(_snapshot_state(rows,now=now))
+    lines.append('These are community discussions, not confirmed game guidance or a live event '
+                 'schedule.')
+    return '\n\n'.join(lines)
 
 
-def format_forum_request(query=None,limit=5,path=None):
+def format_forum_request(query=None,limit=5,path=None,now=None):
     """Search on substantive terms; generic requests return concise summaries of recent threads."""
-    if _tokens(query):return format_forum_search(query,limit=limit,path=path)
-    return format_recent_forum_threads(limit=limit,path=path)
+    if _tokens(query):return format_forum_search(query,limit=limit,path=path,now=now)
+    return format_recent_forum_threads(limit=limit,path=path,now=now)
 
 
 def format_recent_forum_announcements(limit=4):

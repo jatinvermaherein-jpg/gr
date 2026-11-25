@@ -744,6 +744,68 @@ class EcrItemSummaryTests(unittest.TestCase):
         self.assertIn('TAILSTING | Optional | Not stated', reply)   # "worth it if..." is conditional
 
 
+
+class EcrLiveOrOutdatedTests(unittest.TestCase):
+    """The bot must say whether a saved rotation is the live one or an archived one.
+
+    Every ECR answer is built from saved posts, so the same reply shape has to carry the
+    difference: a weekly guide posted yesterday is the rotation running now, and a guide the
+    channel stopped replacing a month ago is history however tidy it looks. Both signals come
+    from the data - the post's own date against the channel's measured rhythm, and any window
+    the post states - never from a page of the calendar.
+    """
+
+    NOW = 1795350000   # Nov 22, 2026
+    DAY = 86400
+
+    def _facts(self, *posts):
+        from mechbot import facts
+        rows = [{'channel_id': 1, 'message_id': f'p{index}', 'posted_at': age, 'edited_at': None,
+                 'channel_name': 'x', 'guild_name': 'Mech Arena', 'message_url': '', 'content': body}
+                for index, (age, body) in enumerate(posts)]
+        built, _ = facts.build_facts(rows, now=self.NOW)
+        return facts, built
+
+    WEEKLY_GUIDE = ('# Current Weekly ECR Guide\n## VORTEX (R4)\n### here\n'
+                    '\u2022 Max Credits - 800K\n\u2022 Worth the Credits.')
+
+    def test_the_rotation_running_now_is_reported_as_live(self):
+        facts, built = self._facts((self.NOW - 2 * self.DAY, self.WEEKLY_GUIDE))
+        reply = facts.format_ecr_reply(built, now=self.NOW)
+        self.assertIn('**Status:** Live', reply)
+
+    def test_a_rotation_the_channel_stopped_replacing_is_outdated(self):
+        # A weekly guide left in place for 40 days: the cadence in the saved set says this kind
+        # is announced about weekly, so it cannot still be the rotation running now.
+        older = (self.NOW - 47 * self.DAY, self.WEEKLY_GUIDE)
+        newer = (self.NOW - 40 * self.DAY, self.WEEKLY_GUIDE.replace('VORTEX', 'ORACLE 16'))
+        facts, built = self._facts(older, newer)
+        reply = facts.format_ecr_reply(built, now=self.NOW)
+        self.assertIn('**Status:** Outdated', reply)
+        self.assertIn('announced about', reply, 'the reason is the measured rhythm, said out loud')
+
+    def test_a_rotation_whose_stated_window_has_shut_is_outdated(self):
+        body = ('# Credits ECR is here!\nIt runs Nov 18 to Nov 19, then closes.\n'
+                '## ORACLE 16 (R4)\n\u2022 Just skip and save your A-coins.')
+        facts, built = self._facts((self.NOW - 4 * self.DAY, body))
+        reply = facts.format_ecr_reply(built, now=self.NOW)
+        self.assertIn('Outdated', reply)
+
+    def test_previous_ecrs_are_each_judged_not_just_listed(self):
+        facts, built = self._facts((self.NOW - 2 * self.DAY, self.WEEKLY_GUIDE),
+                                   (self.NOW - 60 * self.DAY, self.WEEKLY_GUIDE.replace('VORTEX', 'SAVANT 10')))
+        reply = facts.format_ecr_reply(built, now=self.NOW, include_older=True)
+        other = reply.split('**Other ECR posts in the saved announcements**')[1]
+        self.assertIn('**outdated**', other)
+        self.assertNotIn('**live**', other)
+
+    def test_other_announcements_carry_a_standing_too(self):
+        facts, built = self._facts((self.NOW - 200 * self.DAY,
+                                    '# Patch notes\nRebalance: Voidghost nerfed.'))
+        listing = facts.format_fact_list(built, 'Patches', now=self.NOW)
+        self.assertIn('**Status:** Outdated as a live statement', listing)
+
+
 class SavedEcrListingTests(unittest.TestCase):
     """The listing path (format_fact_list) was worse than the reply: one post read as three."""
 

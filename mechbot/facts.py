@@ -1011,6 +1011,45 @@ def _final_verdict(rows):
     return '\n'.join(table)
 
 
+_ECR_KIND_WORDS = {'weekly': 'weekly rotation', 'one_day': 'one-day ECR',
+                   'seasonal': 'seasonal ECR', 'special': 'special ECR'}
+
+
+def _ecr_state(fact, now=None, facts=None):
+    """('live'|'outdated'|'unknown', why) for one rotation, from its own dates and the archive.
+
+    Two independent signals decide it, and both come from the data rather than from the calendar
+    page: when the post was made against how often that kind of rotation is announced, and
+    whether the post itself states a window that has shut. A weekly guide left in place for a
+    month is history; a currency rush announced this morning is live; a rotation the post says
+    ended is over whatever the cadence says.
+    """
+    now = _now_epoch(now)
+    kind = fact.get('ecr_kind') or 'unknown'
+    posted = int(fact.get('posted_at') or 0)
+    age_days = max(0.0, (now - posted) / 86400)
+    words = _ECR_KIND_WORDS.get(kind, 'ECR')
+    if fact.get('status') in ('ended', 'superseded'):
+        return 'outdated', f'this {words} has already been replaced or has closed'
+    window = _first_stated_window(fact)
+    if window and window[1] and window[1] < now:
+        ended = _date_label(window[1])
+        return 'outdated', f'the post states it ran to {ended}, and that date has passed'
+    horizon = ecr_cadence_days(facts or [fact], kind)[0]
+    if age_days > horizon:
+        return 'outdated', (f'it was posted {age_label(posted, now)}, while this kind of '
+                            f'rotation is announced about every {int(round(horizon))} days')
+    return 'live', f'posted {age_label(posted, now)}, inside the window this rotation runs'
+
+
+def _ecr_standing(fact, now=None, facts=None):
+    """The one line the answer prints under the rotation: live, or outdated and why."""
+    state, why = _ecr_state(fact, now=now, facts=facts)
+    if state == 'live':
+        return f'Live — {why}.'
+    return f'Outdated — {why}.'
+
+
 def format_ecr_reply(facts, now=None, include_older=False):
     """Report the current ECR state; older rotations only when the user asks for them."""
     now = _now_epoch(now)
@@ -1031,6 +1070,12 @@ def format_ecr_reply(facts, now=None, include_older=False):
                       else 'Earlier' if stale else
                       'Current ECR' if fact is current[0] else 'Also running')
         block = [f"**{head_label}** \u00b7 {kind_label} \u00b7 {_date_label(fact['posted_at'])} ({fact.get('age', '')})"]
+        # Say which side of the line this rotation is on, in the words the answer uses
+        # everywhere else: it is the question a player is really asking - is this the one
+        # running now, or the one that has already been replaced?
+        standing = _ecr_standing(fact, now=now, facts=facts)
+        if standing:
+            block.append(f'**Status:** {standing}')
         items = [entry for entry in (details.get('entries') or []) if not entry.get('section')]
         rendered = [_ecr_item_block(index, entry) for index, entry in enumerate(items[:3], start=1)]
         item_blocks = [text for text, _ in rendered if text]
@@ -1083,8 +1128,12 @@ def format_ecr_reply(facts, now=None, include_older=False):
                 details = fact.get('details') or {}
                 labels = ', '.join(_label(entry.get('label'), 40)
                                    for entry in [e for e in (details.get('entries') or []) if not e.get('section')][:2])
-                tag = 'superseded' if fact['superseded'] else 'also current'
-                block.append(f"• {_date_label(fact['posted_at'])} · {fact.get('ecr_kind') or 'ecr'} · {tag}"
+                # Every archived post is judged the same way as the current one, so "previous
+                # ECRs" never lists an old rotation as though it were still running.
+                state, why = _ecr_state(fact, now=now, facts=facts)
+                standing = 'live' if state == 'live' else 'outdated'
+                block.append(f"• {_date_label(fact['posted_at'])} · {fact.get('ecr_kind') or 'ecr'} · "
+                             f"**{standing}** ({why})"
                              + (f" · {labels}" if labels else f" · {_label(fact.get('title'), 50)}"))
             lines.append('\n'.join(block))
         else:
@@ -1299,6 +1348,43 @@ def dedupe_facts(facts):
     return kept
 
 
+# How long a post of each kind still speaks for the live game. A rotation is replaced on a
+# schedule it announces itself; a patch note stays true until the next patch; a promo code has a
+# stated life; an event window is short by definition.
+_STANDING_DAYS = {'event': _EVENT_WINDOW_DAYS, 'balance_change': 120, 'promo_code': 45,
+                  'gear_hub': 30, 'store_offer': 30, 'community': 60}
+
+
+def _fact_standing(fact, now=None):
+    """'Live — ...' or 'Outdated — ...' for one saved post, in plain words, with the reason."""
+    now = _now_epoch(now)
+    posted = int(fact.get('posted_at') or 0)
+    age = age_label(posted, now) if posted else 'date not recorded'
+    category = fact.get('category') or 'other'
+    if category == 'ecr':
+        return _ecr_standing(fact, now=now, facts=[fact])
+    if fact.get('status') == 'superseded':
+        return 'Outdated — a newer post of the same kind replaces it.'
+    if fact.get('status') == 'ended':
+        return 'Outdated — the window it announced has passed.'
+    if category == 'event':
+        window = _first_stated_window(fact)
+        if window and window[1]:
+            if _window_state(fact, now) == 'over':
+                return f'Outdated — the post states the event ran to {_date_label(window[1])}, which has passed.'
+            return f'Live — the post states it runs to {_date_label(window[1])}.'
+        if _event_is_over(fact, now):
+            return f'Outdated — posted {age}, past the window an event post stays current.'
+        return f'Live — posted {age}, and the post states no end date.'
+    days = _STANDING_DAYS.get(category)
+    if days and posted and (now - posted) / 86400 > days:
+        return (f'Outdated as a live statement — posted {age}, and a {category.replace("_", " ")} '
+                f'post is only current for about {days} days.')
+    if posted:
+        return f'Live — posted {age}.'
+    return 'Live — the saved post carries no date, so its age cannot be checked.'
+
+
 def format_fact_list(facts, heading, limit=6, show_codes=False, note=None, now=None):
     """Plain answer block for a fact-backed lookup: headline, what the post said, source date."""
     shown = dedupe_facts(refresh_ecr_status(facts, now=now))[:max(1, int(limit))]
@@ -1311,10 +1397,11 @@ def format_fact_list(facts, heading, limit=6, show_codes=False, note=None, now=N
         when = _date_label(int(fact.get('posted_at') or 0))
         age = age_label(int(fact.get('posted_at') or 0), _now_epoch(None))
         line = f"• {title} · {when} ({age})"
-        if fact.get('status') == 'superseded':
-            line += ' *(a newer post replaces it)*'
-        elif fact.get('status') == 'ended':
-            line += ' *(the one-day window it announced has passed)*'
+        # One status word for every kind of announcement, so an event, a patch and a rotation are
+        # all judged the same way: is this still true of the game as it stands, or is it archive?
+        standing = _fact_standing(fact, now=now)
+        if standing:
+            line += f'\n  **Status:** {standing}'
         items = [entry for entry in (details.get('entries') or []) if not entry.get('section')]
         if fact.get('category') == 'ecr' and items:
             # Same one-line-per-item reading as the current-ECR reply. This listing used to
@@ -1337,8 +1424,6 @@ def format_fact_list(facts, heading, limit=6, show_codes=False, note=None, now=N
             codes = details.get('codes') or []
             if codes:
                 line += '\n  ' + ', '.join(f'`{code}`' for code in codes[:3]) + ' *(redemption not verified)*'
-        if _event_is_over(fact, now) and fact.get('category') == 'event':
-            line += ' *(this event window has passed)*'
         stated = details.get('stated_dates') or []
         if stated:
             # "Nov 24, Nov 27" is a window; say so, and do not append "(stated in post)" to a
