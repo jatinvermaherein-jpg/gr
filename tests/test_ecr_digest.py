@@ -806,6 +806,27 @@ class EcrLiveOrOutdatedTests(unittest.TestCase):
         self.assertIn('**Status:** Outdated as a live statement', listing)
 
 
+
+class PreviousEcrIsAQuestionTests(unittest.TestCase):
+    """Asking for the archive has to reach the archive.
+
+    "previous ecrs" matched nothing in the gate, because the reference pattern required a word
+    boundary after a bare "ecr" and the plural has none, so the question fell through to the
+    general model path and was answered with "General AI is not configured yet".
+    """
+
+    def test_the_archives_own_wording_reaches_the_ecr_answer(self):
+        from mechbot.announcements import wants_ecr_info
+        for text in ('ecr', 'previous ecrs', 'show all previous ECRs', 'older weekly ecrs',
+                     'which ecrs ran last month', 'ecrs that ran in october'):
+            with self.subTest(text=text):
+                self.assertTrue(wants_ecr_info(text))
+
+    def test_a_promo_code_request_is_still_not_an_ecr_question(self):
+        from mechbot.announcements import wants_ecr_info
+        self.assertFalse(wants_ecr_info('ecr promo codes'))
+
+
 class SavedEcrListingTests(unittest.TestCase):
     """The listing path (format_fact_list) was worse than the reply: one post read as three."""
 

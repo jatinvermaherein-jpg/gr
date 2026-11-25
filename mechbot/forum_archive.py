@@ -291,7 +291,16 @@ def _thread_age_days(post,now=None):
         stamp=date(*map(int,match.groups()))
     except ValueError:
         return None
-    today=(now or datetime.now(timezone.utc)).date() if not isinstance(now,date) else now
+    # `now` reaches this from the fact layer's clock (an epoch number), from a test (a date) or
+    # not at all; all three mean the same thing here.
+    if isinstance(now,date) and not isinstance(now,datetime):
+        today=now
+    elif isinstance(now,(int,float)):
+        today=datetime.fromtimestamp(now,timezone.utc).date()
+    elif isinstance(now,datetime):
+        today=now.date()
+    else:
+        today=datetime.now(timezone.utc).date()
     return max(0,(today-stamp).days)
 
 
@@ -339,24 +348,6 @@ def _author_name(post):
     """The author's name only: the reply never prints roles or links back to the forum."""
     author=post.get('author') or {}
     return fix_text(str(author.get('name') or '')).strip()
-
-
-def _poster(post):
-    author=post.get('author') or {}
-    name=fix_text(str(author.get('name') or '')).strip()
-    role=fix_text(str(author.get('role') or '')).strip()
-    if role and role.casefold() not in ('member',''):
-        return f'{name} ({role})' if name else role
-    return name or 'unknown author'
-
-
-def _thread_meta(post):
-    """Written by, and what the thread got: the two facts that say how much weight it carries."""
-    stats=post.get('stats') or {}
-    parts=[f'**Posted by:** {_poster(post)}']
-    if isinstance(stats,dict) and stats.get('replies') is not None:
-        parts.append(f'{int(stats["replies"])} repl{"y" if int(stats["replies"])==1 else "ies"}')
-    return parts
 
 
 def _thread_block(number,post,query='',now=None):

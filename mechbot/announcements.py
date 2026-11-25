@@ -34,7 +34,7 @@ _PROMO_CODE_LABEL = re.compile(
     r'\b(?:ecr\s+promo(?:tional)?(?:[\s_-]+codes?)?|ecr\s+codes?|'
     r'event\s+crate\s+rush\s+(?:promo(?:tional)?[\s_-]+)?codes?|'
     r'promo(?:tional)?(?:[\s_-]*codes?)?|redeem\s+codes?)\b', re.I)
-_ECR_REFERENCE = re.compile(r'\b(?:ecr|event\s+crate\s+rush)\b', re.I)
+_ECR_REFERENCE = re.compile(r'\b(?:ecrs?|event\s+crates?\s+rush(?:es)?)\b', re.I)
 _PROMO_CODE_TOKEN = re.compile(r'(?<![A-Za-z0-9])([A-Za-z0-9][A-Za-z0-9_-]{2,31})(?![A-Za-z0-9])')
 _PROMO_CODE_STOPWORDS = {'CODE','CODES','PROMO','PROMOS','ECR','REDEEM','USE','HERE','BELOW','ABOVE',
                          'AVAILABLE','VALID','EXPIRED','INVALID','NONE','NULL','TBA','NOW','PLEASE'}
@@ -103,6 +103,18 @@ def wants_ecr_info(text):
     compact=re.sub(r'\s+',' ',value).strip(' .!?').casefold()
     bare={'ecr','any ecr','latest ecr','current ecr','recent ecr','upcoming ecr','event crate rush'}
     if compact in bare:return True
+    # "previous ecrs" / "which ecrs ran last month" is a request for the archive, and the
+    # archive answer lives behind this same handler. Its wording matched nothing above once the
+    # plural was used, so the question fell through to the general model path.
+    if re.match(r'^(?:(?:show|list)\s+)?(?:all\s+)?(?:(?:previous|older|earlier|past|last|prior|'
+                r'failed|ended|other)\s+)+(?:weekly\s+)?ecrs?\b',compact):
+        return True
+    if re.search(r'\becrs?\s+(?:before|prior|history|archive|so far)\b',compact):
+        return True
+    # "which ecrs ran last month", "ecrs that ran in October": the archive again, asked as a
+    # question rather than as a noun phrase.
+    if re.search(r'\becrs?\b.*\b(?:ran|run|happened|were\s+there|did\s+we\s+have)\b',compact):
+        return True
     return bool('?' in value or re.search(
         r'\b(?:what|when|where|why|how|tell|show|latest|current|recent|upcoming|next|event|'
         r'schedule|details?|guides?|updates?|status|rewards?|live|open|active)\b',value,re.I))
