@@ -23,6 +23,7 @@ Usage: python3 scrape_mech_arena.py [--dry] [--out PREFIX]
 
 import argparse
 import json
+import os
 import re
 import sys
 import threading
@@ -58,7 +59,10 @@ CATEGORIES = [
     {"id": 709, "slug": "709_violations",         "name": "Forum Rules & Game Policies","style": "standard"},
     {"id": 700, "slug": "700_release-notes",      "name": "Release Notes",              "style": "standard"},
     {"id": 699, "slug": "699_announcements",      "name": "Announcements",              "style": "standard"},
-    {"id": 891, "slug": "891_archive",            "name": "Archive",                    "style": "standard"},
+    # `folder`: a container page that lists sub-sections rather than topics. It contains no
+    # topic cards, so the "no cards parsed" completeness check must not apply to it, and its
+    # two children (700_release-notes, 699_announcements) are scraped in their own right.
+    {"id": 891, "slug": "891_archive",            "name": "Archive",                    "style": "folder"},
 ]
 
 TARGET = 150
@@ -84,19 +88,37 @@ def sess():
     return s
 
 
-def fetch(url, tries=4):
+# The forum rate-limits a full 150-thread crawl, which needs ~500 page fetches. Without a
+# pause between requests a later round hits a 429/403 on one page and the whole crawl is
+# thrown away, because a partial listing is never written. A small gap plus a much longer
+# backoff on failure keeps a 10-minute run inside the limit.
+REQUEST_GAP = float(os.environ.get("FORUM_REQUEST_GAP", "0.35"))
+_last_request = [0.0]
+
+
+def fetch(url, tries=5):
     last = None
     for attempt in range(1, tries + 1):
+        gap = REQUEST_GAP - (time.time() - _last_request[0])
+        if gap > 0:
+            time.sleep(gap)
         try:
             r = sess().get(url, timeout=30)
+            _last_request[0] = time.time()
             if r.status_code == 200:
                 return r.text
             if r.status_code in (404, 410):
                 return None
             last = f"HTTP {r.status_code}"
+            if r.status_code in (429, 403, 503):
+                # Honour a Retry-After if one is offered, otherwise back off hard.
+                wait = r.headers.get("Retry-After")
+                time.sleep(float(wait) if wait and wait.isdigit() else 8.0 * attempt)
+                continue
         except Exception as e:  # noqa: BLE001
+            _last_request[0] = time.time()
             last = str(e)
-        time.sleep(1.2 * attempt)
+        time.sleep(2.0 * attempt)
     log(f"  !! failed {url}: {last}")
     return None
 
@@ -477,6 +499,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry", action="store_true", help="small test run")
     ap.add_argument("--out", default="mech_arena_last_150_threads")
+    ap.add_argument("--allow-unproven-stop", action="store_true",
+                    help="write the snapshot even when the 150th-newest boundary could not be "
+                         "proven, recording that fact in the metadata instead of dropping the crawl")
     args = ap.parse_args()
     target = 150 if not args.dry else 5
 
@@ -488,6 +513,9 @@ def main():
     listing_failures = []
     cat_state = {}      # slug -> {pages, last_page, last_date, first_date_next..., violations}
     for c in CATEGORIES:
+        if c["style"] == "folder":
+            log(f"  [cat] {c['name']:<32} folder container; its sub-sections are scraped directly")
+            continue
         cat_state[c["slug"]] = {"pages": 0, "last_page": None, "last_date": None,
                                 "violations": 0, "count": 0}
 
@@ -502,7 +530,9 @@ def main():
         """
         vals = []
         for c in CATEGORIES:
-            st = cat_state[c["slug"]]
+            st = cat_state.get(c["slug"])
+            if st is None:          # folder container: never a listing boundary
+                continue
             if (st["last_page"] is not None and st["pages"] < st["last_page"]
                     and st["last_date"]):
                 vals.append(st["last_date"])
@@ -510,7 +540,9 @@ def main():
 
     def scan_round(rnd):
         for cat in CATEGORIES:
-            st = cat_state[cat["slug"]]
+            st = cat_state.get(cat["slug"])
+            if st is None:          # folder container: no topic cards to page through
+                continue
             if st["last_page"] is not None and st["pages"] >= st["last_page"]:
                 continue
             url = f"{BASE}/mech-arena/{cat['slug']}/" if rnd == 1 else f"{BASE}/mech-arena/{cat['slug']}/{rnd}"
@@ -636,8 +668,9 @@ def main():
                     break
         if stop_condition_met():
             break
-        all_done = all(cat_state[c["slug"]]["last_page"] is not None
-                       and cat_state[c["slug"]]["pages"] >= cat_state[c["slug"]]["last_page"]
+        all_done = all(cat_state.get(c["slug"]) is None
+                       or (cat_state[c["slug"]]["last_page"] is not None
+                           and cat_state[c["slug"]]["pages"] >= cat_state[c["slug"]]["last_page"])
                        for c in CATEGORIES)
         if all_done and len(fetched) + len(failed) >= len(cands):
             log("  all categories exhausted and all candidates fetched")
@@ -661,9 +694,15 @@ def main():
     if threads_no_date:
         log(f"  note: {len(threads_no_date)} fetched topics had unparseable creation dates")
 
-    if len(top) < target or not complete:
-        sys.exit(f"Incomplete forum crawl ({len(top)}/{target} dated threads; stop condition not proven); "
+    if len(top) < target:
+        sys.exit(f"Incomplete forum crawl ({len(top)}/{target} dated threads); "
                  "no new snapshot was written.")
+    if not complete:
+        if not args.allow_unproven_stop:
+            sys.exit(f"Incomplete forum crawl ({len(top)}/{target} dated threads; stop condition "
+                     "not proven); no new snapshot was written. Re-run with --allow-unproven-stop "
+                     "to keep the crawl and record the gap.")
+        log("  !! stop condition not proven; writing the snapshot with that caveat recorded")
 
     # sanity output
     log("  newest:", top[0]["created_display"], "|", top[0]["title"][:60])
@@ -683,7 +722,8 @@ def main():
         "scraped_at_utc": scraped_at_utc.strftime("%Y-%m-%d %H:%M:%S UTC"),
         "target_threads": target,
         "crawl_complete": complete,
-        "listing_pages_scanned": {c["name"]: cat_state[c["slug"]]["pages"] for c in CATEGORIES},
+        "listing_pages_scanned": {c["name"]: (cat_state[c["slug"]]["pages"] if c["slug"] in cat_state else 0)
+                                  for c in CATEGORIES},
         "listing_pages_failed": len(listing_failures),
         "candidates_from_listings": len(cands),
         "topic_pages_fetched": len(fetched),
