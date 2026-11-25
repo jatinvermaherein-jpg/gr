@@ -379,3 +379,102 @@ class CostReplyShapeTests(unittest.IsolatedAsyncioTestCase):
             line = humanise_cost('Redox', 'rank 4 L1 \u2192 rank 5 L1', costs, em)
             self.assertEqual(line, 'For **Redox**, the rank 4 L1 \u2192 rank 5 L1 upgrade costs '
                                    '**A 2,825 A-Coins \u00b7 C 265,000 Credits \u00b7 B 10 Blueprints**.')
+
+
+class MechAnswerUsesTheDataTests(unittest.IsolatedAsyncioTestCase):
+    """Two mechs, one word each, from a live screenshot.
+
+    "voidghost" was answered with a weighted score, a rank-1 ladder and a filler line, while the
+    same question without a model configured got the ladder. "redox" got a stat list at one end
+    of the bot (32 energy, 227,300 HP, 22 speed, 948 power) and a review with a weird ordering at
+    the other. The catalog held every figure; the explain path never read it.
+    """
+
+    async def asyncSetUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        with patch.dict(os.environ, {'SNAPSHOT_PATH': str(Path(self.tmp.name) / 'r.sqlite3')}):
+            self.catalog = Catalog(initialize_snapshot())
+
+    async def asyncTearDown(self):
+        self.catalog.close()
+        self.tmp.cleanup()
+
+    def _understood(self, mech):
+        return {'intent': 'meta_advice', 'mechs': [mech], 'weapons': [], 'pilots': [], 'mods': [],
+                'from_rank': None, 'from_level': None, 'to_rank': None, 'to_level': None,
+                'question': mech.lower(), 'unclear': False}
+
+    async def _pipeline_reply(self, mech, formatter_text):
+        bot = MechBot(self.catalog, object())
+        bot._connection.user = SimpleNamespace(id=987654321098765432)
+        bot.conversation_history_for = AsyncMock(return_value=[])
+        bot.reply_message = AsyncMock()
+        bot.private_reply = AsyncMock()
+        understood = self._understood(mech)
+
+        async def fake_chat(base, key, model, system, user, **kwargs):
+            return json.dumps(understood) if 'ONE JSON object' in system else formatter_text
+        message = SimpleNamespace(author=SimpleNamespace(id=1, bot=False), channel=SimpleNamespace(id=44),
+                                  guild=None, mentions=[bot._connection.user], reference=None,
+                                  attachments=[], content=mech.lower())
+        with patch.dict(os.environ, {'AI_API_KEY': 'k', 'AI_MODEL': 'm'}), \
+                patch('mechbot.pipeline._chat', new=fake_chat):
+            await bot.on_message(message)
+        return bot.reply_message.await_args.args[1]
+
+    # ---------------------------------------------------------------- the reviewed mech
+    async def test_a_reviewed_mech_reports_its_own_figures(self):
+        reply = await self._pipeline_reply('Redox', 'Redox is a solid attacker.')
+        self.assertIn('227,300 HP', reply, 'HP is in the catalog and belongs in the answer')
+        self.assertIn('948 power', reply)
+        self.assertIn('22 speed', reply)
+        # the figures come before the review paragraph, not buried under it
+        self.assertLess(reply.index('227,300'), reply.index('Quick review'))
+
+    async def test_a_reviewed_mech_does_not_lead_with_energy_only(self):
+        from mechbot import advising, advisor
+        reply = advising.answer('redox', data=advisor.load())['reply']
+        self.assertIn('At rank 1: HP', reply)
+        self.assertNotIn('Redox: energy 32. Tier A', reply, 'energy alone was the whole opener')
+
+    def test_the_weighted_score_is_not_the_answer(self):
+        from mechbot import advising, advisor
+        for name in ('redox', 'killshot', 'voidghost'):
+            reply = advising.answer(name, data=advisor.load())['reply']
+            self.assertNotIn('balanced weights', reply, f'{name}: a score about our weights, not the mech')
+
+    def test_the_filler_line_is_gone(self):
+        from mechbot import advising, advisor
+        for name in ('redox', 'voidghost'):
+            reply = advising.answer(name, data=advisor.load())['reply']
+            self.assertNotIn('What would change this', reply)
+            self.assertNotIn('the mech you pilot and whether you fight at its range band', reply)
+
+    # ---------------------------------------------------------------- the mech with no stats
+    async def test_a_mech_with_no_stat_row_still_gets_its_prices(self):
+        reply = await self._pipeline_reply('Voidghost', 'Voidghost is a mech.')
+        self.assertIn('2,655,575 Credits', reply, 'the ladder is real data and the shrug hid it')
+        self.assertIn('8,175 A-coins', reply)
+
+    async def test_both_paths_give_the_same_answer(self):
+        """With a model and without one, one word about a mech must not mean two answers."""
+        with_model = await self._pipeline_reply('Voidghost', 'Voidghost is a mech.')
+        without = (await MechBot(self.catalog, object()).advisor_verdict('voidghost', force=True))['reply']
+        self.assertEqual(with_model, without)
+
+    async def test_the_missing_stats_are_admitted_not_filled(self):
+        reply = await self._pipeline_reply('Voidghost', 'Voidghost is a mech.')
+        self.assertIn('no HP, speed or power figures', reply)
+        self.assertNotIn('0 HP', reply)
+
+    def test_absent_tier_is_stated_once(self):
+        from mechbot import advising, advisor
+        reply = advising.answer('voidghost', data=advisor.load())['reply']
+        self.assertEqual(reply.casefold().count('no community tier'), 1, reply)
+
+    # ---------------------------------------------------------------- the sheet builder
+    def test_the_sheet_is_labels_and_values_only(self):
+        from mechbot import advisor
+        sheet = advisor.mech_stat_sheet(advisor.resolve('Redox', advisor.load())['item'])
+        self.assertEqual([row['label'] for row in sheet], ['HP', 'Speed', 'Power', 'Energy'])
+        self.assertTrue(all(row['value'] for row in sheet))

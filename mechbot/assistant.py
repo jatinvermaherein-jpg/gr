@@ -422,12 +422,16 @@ def mech_response(data,rank=None,all_ranks=False):
     descriptor=' '.join(safe_text(review.get(k),40) for k in ('rarity',) if review.get(k))+' mech'
     if review.get('tier'):descriptor+=f" · Tier {safe_text(review['tier'],12)}"
     result=[f"**{safe_text(item['name'])}** — {descriptor}."]
+    # The figures before the prose, and HP first. This used to open on a four-line review
+    # paragraph with the numbers in a line further down, so the two answers this bot gives about
+    # the same mech (this one and the advisor's) listed the same stats in a different order and
+    # neither looked like a stat sheet.
+    stats=[]
+    for key,label,unit in (('hp','HP',''),('speed','speed',''),('power','power',''),('energy','energy','')):
+        if review.get(key) is not None:stats.append(f"{safe_text(review[key],50)} {label}".strip())
+    if stats:result.append('**At a glance:** '+' · '.join(stats)+'.')
     summary=_short_sentences(review.get('reasoning'),220)
     if summary:result.append('**Quick review:** '+safe_text(summary,260))
-    stats=[]
-    for key,label in (('energy','energy'),('hp','HP'),('speed','speed'),('power','power')):
-        if review.get(key) is not None:stats.append(f"{safe_text(review[key],50)} {label}")
-    if stats:result.append('**At a glance:** '+' · '.join(stats)+'.')
     ability=review.get('ability')
     ability_name=review.get('abilityName')
     if ability:result.append('**Ability:** '+(safe_text(ability_name,60)+' — ' if ability_name else '')+safe_text(ability,240))

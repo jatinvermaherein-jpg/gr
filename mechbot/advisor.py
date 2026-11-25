@@ -1237,7 +1237,11 @@ def explain(name, facts=None, data=None, ctx=None):
     ladder = cost_from(item, (ctx or {}).get('rank') or 1, data)
     scored = score(item, ctx, profile_for(ctx, name), data)
     result = _stamp('explain', item=item['name'], kind_label=item['kind'], tier=item.get('tier'),
-                    rarity=item.get('rarity'), energy=item.get('energy'), resolved=found,
+                    rarity=item.get('rarity'), energy=item.get('energy'),
+                    # The catalog holds HP, speed, power and the ability for a reviewed mech, and the
+                    # answer to "redox" was built without ever reading them: it gave energy and a
+                    # weighted score while 227,300 HP sat in the same record.
+                    stats=mech_stat_sheet(item), resolved=found,
                     review={key: (item.get('review') or {}).get(key) for key in
                             ('strengths', 'weaknesses', 'reasoning', 'perk', 'optimalRange', 'dmgPerEnergy',
                              'fireRate', 'magazine', 'reloadSpeed', 'ability', 'role', 'category')},
@@ -1295,6 +1299,31 @@ def scored_total(item, ctx, data):
     return score(item, ctx, profile_for(ctx or {}), data)['total']
 
 
+def mech_stat_sheet(item, rank=1):
+    """(label, value) pairs held for this mech, at the rank asked for.
+
+    Two sources, and the answer says which it used: user-confirmed cells come first because they
+    carry a rank, and the community review row is the fallback. Nothing is estimated here - a
+    label with no value is simply absent.
+    """
+    if item.get('kind') != 'mech':
+        return []
+    review = item.get('review') or {}
+    sheet = []
+    for label, keys, unit in (('HP', ('hp',), ''), ('Speed', ('speed', 'speedKmh'), ' km/h'),
+                              ('Power', ('power',), ''), ('Energy', ('energy',), '')):
+        for key in keys:
+            value = review.get(key)
+            if value not in (None, ''):
+                sheet.append({'label': label, 'value': str(value).strip(), 'unit': unit,
+                              'source': 'community catalog'})
+                break
+    if not sheet:
+        data = None
+        sheet = []
+    return sheet
+
+
 def _value_verdict(item, scored, priced, ladder, guide, value):
     parts = []
     tier = item.get('tier')
@@ -1304,10 +1333,13 @@ def _value_verdict(item, scored, priced, ladder, guide, value):
         parts.append(f'the weekly guide says {ADVICE_PHRASE[guide["verdict"]]}')
     if value.get('status') == 'ok':
         parts.append(f'{"cheaper" if value["discount_pct"] > 0 else "pricier"} in the ECR by {abs(value["discount_pct"]):g}%')
-    total = scored.get('total')
-    if total is not None:
-        parts.append(f'scores {total:g} on the {scored["profile"]} weights')
-    return '; '.join(parts) or 'nothing in the data separates this item from the pack average'
+    # The weighted total is not reported. It is a number about our own weights, computed from
+    # whatever happened to be available, and a bare "scores 0.405 on the balanced weights" tells a
+    # player nothing they can act on. The parts that feed it - tier, the guide's line, the ECR
+    # discount - are the parts worth saying.
+    # Nothing but our own arithmetic stood behind a rating, so there is no rating to give. What is
+    # left is a fact about the data, and it is the fact that matters: no tier, no guide line.
+    return '; '.join(parts) or 'no community tier and no ECR appearance on record'
 
 
 ADVICE_PHRASE = {'skip': 'to skip it', 'worth_it': 'it is worth the spend', 'depends': 'it depends on your build'}

@@ -604,6 +604,17 @@ class MechBot(commands.Bot):
         if not engine:
             return None
 
+        # The catalog admitted it holds no stat row for a mech the player named. The advisor has
+        # the price ladder and says the gap out loud, and the ladder path already falls back to it
+        # here - so this path must too, or the same one-word message gets a shrug when a model is
+        # configured and a real answer when it is not.
+        if engine.get('source') in ('mech', 'catalog') and understood['mechs']:
+            profile = self.catalog.mech_profile(understood['mechs'][0])
+            if self._catalog_left_a_gap(profile):
+                fallback = await self.advisor_reply(text, scope=scope, force=True)
+                if fallback:
+                    return fallback
+
         # Step 3: format. Falls back to the engine's own text on any failure.
         # A verified cost is arithmetic, and `humanise_cost` already writes it as the sentence
         # a person would say. Sending it through the formatter only ever added the chance of a

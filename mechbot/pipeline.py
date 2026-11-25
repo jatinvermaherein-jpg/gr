@@ -356,6 +356,23 @@ def guard_figures(reply, engine_text):
     return (not invented), invented
 
 
+def guard_completeness(reply, engine_text):
+    """Refuse a formatted reply that dropped figures the engine gave.
+
+    The mirror of guard_figures, and it was missing. A model asked to "write the reply" will
+    happily compress a stat sheet into "Redox is a solid attacker." - no invented numbers, so
+    the invention guard passed it, and a player got one opinion instead of HP, speed, power and
+    the price. Layout is the model's job; deciding which verified figures the player needs is
+    not. Returns (complete, dropped_numbers).
+    """
+    def numbers(text):
+        found = re.findall(r'\b\d[\d,]*\b', str(text or ''))
+        return {value.replace(',', '') for value in found if len(value.replace(',', '')) >= 2}
+
+    dropped = numbers(engine_text) - numbers(reply)
+    return (not dropped), dropped
+
+
 async def format_reply(base, key, model, understanding, engine_text, history=None, session=None):
     """Step 3. Returns a laid-out Discord reply, or None to keep the engine's own."""
     if not key or not model or not engine_text:
@@ -388,6 +405,10 @@ async def format_reply(base, key, model, understanding, engine_text, history=Non
     ok, invented = guard_figures(text, engine_text)
     if not ok:
         log.warning('Formatted reply introduced %s figure(s); keeping the engine text.', len(invented))
+        return None
+    ok, dropped = guard_completeness(text, engine_text)
+    if not ok:
+        log.warning('Formatted reply dropped %s verified figure(s); keeping the engine text.', len(dropped))
         return None
     return text
 

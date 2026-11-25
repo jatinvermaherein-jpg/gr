@@ -634,6 +634,7 @@ def _say_explain(engine, question=''):
         return _say_failed(engine)
     name = engine.get('item') or 'It'
     review = engine.get('review') or {}
+    sheet = engine.get('stats') or []
     bits = []
     if engine.get('tier'):
         bits.append(f'tier {engine["tier"]} in the community list')
@@ -641,14 +642,27 @@ def _say_explain(engine, question=''):
         kind_word = str(review.get('category') or review.get('role'))
         article = 'an' if kind_word[:1].lower() in 'aeiou' else 'a'
         bits.append(f'{article} {kind_word}')
-    if engine.get('energy'):
+    # Only mention energy here when it is not already in the stat line, or the answer says 32 twice.
+    if engine.get('energy') and not any(row.get('label') == 'Energy' for row in sheet):
         bits.append(f'energy {int(engine["energy"])}')
     opener = f'{name}: ' + ', '.join(bits) if bits else name
+    # The figures, not a score. "Scores 0.405 on the balanced weights" is a number about our own
+    # weights; HP, speed and power are numbers about the mech. When the sheet is missing, say so
+    # plainly instead of substituting the score, and drop the standalone "no community tier" line
+    # because the verdict already carries the tier.
+    if sheet:
+        text = opener + '. At rank 1: ' + ' · '.join(
+            f'{row["label"]} {row["value"]}{row.get("unit") or ""}'.strip() for row in sheet) + '.'
+    else:
+        text = opener + '. I have no HP, speed or power figures for it in the catalog.'
     verdict = (engine.get('verdict') or '').strip()
+    if sheet:
+        # The score only belongs in the answer when there are figures it was computed from.
+        verdict = ''
     if verdict:
         verdict = verdict.rstrip('.') + '.'
         verdict = verdict[0].upper() + verdict[1:]
-    text = opener + ('. ' + verdict if verdict else '.')
+        text += ' ' + verdict
     strong = (review.get('strengths') or '').strip()
     weak = (review.get('weaknesses') or '').strip()
     if strong:
@@ -683,6 +697,10 @@ def _say_explain(engine, question=''):
         text += '.'
     for note in (engine.get('notes') or [])[:1]:
         if note and 'with the rest of the sentence ignored' not in note:
+            # The tier verdict already says there is no community tier; printing the flag as well
+            # made the same absence the first and last line of the answer.
+            if 'no community tier' in str(note).casefold() and 'tier' in text.casefold():
+                continue
             text += ' ' + _upcase_first(_closed(note))
     rival = engine.get('alternative') or {}
     if rival.get('name'):
@@ -691,9 +709,10 @@ def _say_explain(engine, question=''):
     gaps = engine.get('data_gaps') or []
     if gaps:
         text += ' What is missing: ' + _closed(gaps[0])
-    change = engine.get('what_would_change')
-    if change:
-        text += f' What would change this: {change}.'
+    # "What would change this: the mech you pilot and whether you fight at its range band" reads as
+    # advice and carries nothing: it was on every single item, including ones with no verdict, and
+    # it is the same sentence whether or not the player told us anything. Dropped rather than
+    # reworded, because there is no version of it that says something about this mech.
     return text
 
 
